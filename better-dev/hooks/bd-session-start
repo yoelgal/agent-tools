@@ -515,6 +515,13 @@ if [ "${1:-}" = "selftest" ]; then
   printf '%s' "$out" | grep -q "wired at 0.5.1; 0.6.0 changed the repo surface" || fail "missing reonboard nudge behind a reonboard release"
   printf '%s' "$out" | grep -q "run /update" || fail "reonboard nudge must name /update"
 
+  # Reonboard retry: a plugin root with skills/ but no release ledger must fall
+  # back to the symlink-resolved clone that has one (mirror of copyroot above).
+  norelroot="$tmp/norelroot"; mkdir -p "$norelroot/skills"
+  rhome="$tmp/rhome"; mkdir -p "$rhome/.claude/skills"; ln -s "$rclone/skills/onboard" "$rhome/.claude/skills/onboard"
+  out="$(cd "$tmp/proj" && HOME="$rhome" CLAUDE_PLUGIN_ROOT="$norelroot" "$SELF")"
+  printf '%s' "$out" | grep -q "changed the repo surface" || fail "no reonboard nudge when the plugin root lacks the release ledger"
+
   # Stamp already at the flagged version -> silent (strictly-greater only).
   printf '0.6.0\n' > "$tmp/proj/.better-dev/wired-version"
   out="$(cd "$tmp/proj" && HOME="$home3" CLAUDE_PLUGIN_ROOT="$rclone" "$SELF")"
