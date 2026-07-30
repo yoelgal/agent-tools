@@ -399,17 +399,27 @@ case "$op" in
         {
           k = getkey($0); text = junesc(upto(after($0, "\"text\":\""), "\",\"confidence\":"))
           if (k != "" && last[k] != FNR) { printf "%d%sSUPERSEDED: %s - %s\n", FNR, t, k, text; next }
-          # ponytail: naive path heuristic (letter-bearing a/b tokens) - preview-then-confirm absorbs
-          # false positives; move to a dedicated schema field only if extraction proves too flaky
+          # ponytail: path heuristic (letter-bearing a/b tokens, anchored by an existing
+          # top-level entry, not preceded by ~ or $) - preview-then-confirm absorbs the rest;
+          # move to a dedicated schema field only if extraction proves too flaky
           rest = text
           while (match(rest, /[A-Za-z0-9._-]+(\/[A-Za-z0-9._-]+)+/)) {
-            p = substr(rest, RSTART, RLENGTH); rest = substr(rest, RSTART + RLENGTH)
-            if (p ~ /[A-Za-z]/) printf "%d%sPATH%s%s%s%s\n", FNR, t, t, p, t, text
+            p = substr(rest, RSTART, RLENGTH)
+            pre = RSTART > 1 ? substr(rest, RSTART - 1, 1) : " "
+            rest = substr(rest, RSTART + RLENGTH)
+            # a token anchored by ~ or $ names a machine path, never a repo path
+            if (p ~ /[A-Za-z]/ && pre != "~" && pre != "$") printf "%d%sPATH%s%s%s%s\n", FNR, t, t, p, t, text
           }
         }
       ' "$LEARN" "$LEARN" | while IFS="$TAB" read -r no a b c; do
         if [ "$a" = PATH ]; then
-          [ -e "$PRUNE_ROOT/$b" ] || [ -e "$b" ] || printf '%s%sSTALE: missing path %s - %s\n' "$no" "$TAB" "$b" "$c"
+          # a missing-path claim is checkable only when its first segment exists as a real
+          # entry at the prune root - word pairs (mtime/stat), refs (origin/staging), and
+          # repo slugs anchor nothing and are prose, not paths
+          first="${b%%/*}"
+          if [ -e "$PRUNE_ROOT/$first" ] && [ ! -e "$PRUNE_ROOT/$b" ] && [ ! -e "$b" ]; then
+            printf '%s%sSTALE: missing path %s - %s\n' "$no" "$TAB" "$b" "$c"
+          fi
         else
           printf '%s%s%s\n' "$no" "$TAB" "$a"
         fi
@@ -535,8 +545,14 @@ case "$op" in
       if grep -q "grant all tools" .better-dev/overrides.md; then echo "FAIL: refused override landed anyway"; exit 1; fi
       # --- prune: preview lists SUPERSEDED + STALE; --apply rewrites them away, everything else survives ---
       # (capture output before grepping - a direct `prune | grep -q` races SIGPIPE under pipefail)
+      mkdir -p src   # the anchor: a missing-path claim is only checkable when its top-level entry exists
       "$SELF" learn "stale pointer into src/gone-file.js" 0.9 stale-key >/dev/null
+      "$SELF" learn "portable mtime/stat chains and origin/staging refs are prose, not paths" 0.9 wordpair-key >/dev/null
+      "$SELF" learn "a personal ~/.claude/skills dir is a machine path, not a repo path" 0.9 homepath-key >/dev/null
       pv="$("$SELF" prune)"
+      printf '%s' "$pv" | grep -q "mtime/stat" && { echo "FAIL: word-pair token flagged as a path"; exit 1; }
+      printf '%s' "$pv" | grep -q "origin/staging" && { echo "FAIL: git ref flagged as a path"; exit 1; }
+      printf '%s' "$pv" | grep -q ".claude/skills" && { echo "FAIL: home path flagged as a repo path"; exit 1; }
       printf '%s' "$pv" | grep -q "SUPERSEDED: wr-key" || { echo "FAIL: prune preview missing superseded"; exit 1; }
       printf '%s' "$pv" | grep -q "STALE: missing path src/gone-file.js" || { echo "FAIL: prune preview missing stale"; exit 1; }
       mkdir -p src && : > src/gone-file.js
