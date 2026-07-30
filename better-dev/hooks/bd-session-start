@@ -92,9 +92,12 @@ normalize_clone() {
 # only fast-forward, never clobber.
 update_nudge() {
   local overrides="$1" clone tobin behind
+  # Fall back on THIS nudge's usability predicate, not mere skills/ presence: a
+  # copy-fallback plugin root has skills/ but no git, and the linked clone must
+  # still get its pull nudge. The probe is git, not a .git dir - the clone may
+  # be a subdir of a monorepo checkout.
   clone="$(normalize_clone "${CLAUDE_PLUGIN_ROOT:-}")"
-  [ -n "$clone" ] || clone="$(normalize_clone "$(resolve_clone_via_symlink)")"
-  # the clone may be a subdir of a monorepo checkout, so probe git, not a .git dir
+  { [ -n "$clone" ] && git -C "$clone" rev-parse --git-dir >/dev/null 2>&1; } || clone="$(normalize_clone "$(resolve_clone_via_symlink)")"
   { [ -n "$clone" ] && git -C "$clone" rev-parse --git-dir >/dev/null 2>&1; } || return 0
   git -C "$clone" rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1 || return 0
 
@@ -170,8 +173,10 @@ link_nudge() {
 # stays silent, per the hook's best-effort contract.
 reonboard_nudge() {
   local root="$1" clone releases wired newest
+  # Same retry rule as update_nudge: fall back when the plugin root fails THIS
+  # nudge's predicate (no ledger file), not only when it lacks skills/.
   clone="$(normalize_clone "${CLAUDE_PLUGIN_ROOT:-}")"
-  [ -n "$clone" ] || clone="$(normalize_clone "$(resolve_clone_via_symlink)")"
+  [ -n "$clone" ] && [ -f "$clone/docs/RELEASES.md" ] || clone="$(normalize_clone "$(resolve_clone_via_symlink)")"
   [ -n "$clone" ] && [ -f "$clone/docs/RELEASES.md" ] || return 0
   releases="$clone/docs/RELEASES.md"
   wired="$(cat "$root/.better-dev/wired-version" 2>/dev/null | tr -d '[:space:]' || true)"
@@ -418,6 +423,7 @@ if [ "${1:-}" = "selftest" ]; then
   # Update nudge: clone that isn't a git repo -> silent. HOME points at an empty
   # dir so the fallback that a failed CLAUDE_PLUGIN_ROOT now triggers can't wander
   # into whatever real skill symlinks happen to exist on the machine running this.
+  mkdir -p "$tmp/notgit/skills"   # skills/ so the fixture reaches the git probe, not just normalize_clone
   out="$(cd "$tmp/proj" && HOME="$tmp" CLAUDE_PLUGIN_ROOT="$tmp/notgit" "$SELF")"
   printf '%s' "$out" | grep -q "update available" && fail "nudged when clone is not a git repo"
 
@@ -459,6 +465,13 @@ if [ "${1:-}" = "selftest" ]; then
   out="$(cd "$tmp/proj" && HOME="$stalehome" CLAUDE_PLUGIN_ROOT= "$SELF")"
   printf '%s' "$out" | grep -q "no link for this host" || fail "no link nudge when host links dangle at pre-monorepo paths"
   printf '%s' "$out" | grep -q "$mono/better-dev/install.sh" || fail "link nudge names the old installer path after the monorepo move"
+
+  # Update nudge: a copy-fallback plugin root (skills/ but no git) must NOT
+  # swallow the nudge - the fallback retries on the git probe and finds the
+  # linked, behind-origin clone.
+  copyroot="$tmp/copyroot"; mkdir -p "$copyroot/skills/onboard"; : > "$copyroot/skills/onboard/SKILL.md"
+  out="$(cd "$tmp/proj" && HOME="$fbhome" CLAUDE_PLUGIN_ROOT="$copyroot" "$SELF")"
+  printf '%s' "$out" | grep -q "update available" || fail "no update nudge when the plugin root is a non-git copy install"
 
   # Opt-in ff-only auto-update: with the override, the clone fast-forwards itself.
   printf 'better-dev auto-update: ff-only\n' >> "$tmp/proj/.better-dev/overrides.md"
