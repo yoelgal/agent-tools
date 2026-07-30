@@ -1,15 +1,18 @@
 ---
 name: gauntlet
-description: Use when the deliverable is a Gauntlet Loop prompt - "gauntlet this", "one-shot the whole thing", "write me a prompt that builds X in a fresh session against a real bar", or a front-end offered the gauntlet route on a greenfield ask and the user took it. A short grill settles the goal and the quality bar; the output is one handoff prompt for a fresh agentic session, and the build itself never runs here. For a feature in an existing codebase reach for /plan-grill; for an epic that needs a shared foundation and parallelizable work-items, /groundwork.
+description: Use when the deliverable is a Gauntlet Loop prompt - "gauntlet this", "one-shot the whole thing", "write me a prompt that builds X in a fresh session against a real bar", or a front-end offered the gauntlet route on a greenfield ask and the user took it. The output is one handoff prompt for a fresh agentic session; the build itself never runs here. For a feature in an existing codebase reach for /plan-grill; for an epic that needs a shared foundation and parallelizable work-items, /groundwork.
+allowed-tools:
+  - Bash
+  - Read
+  - Grep
+  - Glob
 ---
 
 # Gauntlet - grill the idea, hand off one loop prompt
 
-A Gauntlet Loop is a way to run one long autonomous build: a lead agent gets a goal and a real
-example of what great looks like, splits the goal into the smallest pieces that can be improved and
-judged separately, and gives each piece a builder plus a separate critic with fresh context. The
-critic compares the piece against the bar - blind A/B where possible - names the biggest remaining
-gap, and sends it back; there is no fixed final round. The method comes from Matt Shumer's
+A Gauntlet Loop is a way to run one long autonomous build: a lead agent, a goal, and a real
+example of what great looks like, driven by builder-critic loops until the human stops the run
+(step 3 owns the operative mechanics). The method comes from Matt Shumer's
 Claude-of-Duty run (credited in `NOTICE`); it generalizes past games to any software the loop can
 inspect: a web app, a CLI, a design system, an API.
 
@@ -34,7 +37,7 @@ is either filled or deliberately delegated to the run, not when the user stops a
 | Goal | The destination in one or two sentences - what exists when the run is over, for whom. |
 | Bar | A concrete reference the critic can hold the artifact against (step 2). |
 | House rules | The handful of always-true fences (stack constraints, "no hard-coded special cases", licensing) - an empty list is a valid, deliberate answer. |
-| Harness | Which agentic harness runs it, and whether subagents and looping are available there - the prompt leans on both. A plain chat window fails this slot: the run needs an agent that can open files, run code, render output, and spawn workers. |
+| Harness | Which agentic harness runs it, and whether subagents and looping are available there - the prompt leans on both. A plain chat window fails this slot - the run needs an agent that can open files, run code, render output, and spawn workers - so when the user has only a chat surface, name a harness they could run it in and hold the prompt until one is settled. |
 | Stop condition | Who stops the run and on what: a spend ceiling, a wall-clock bound, or "user stops it when satisfied". The loop never decides it is finished. |
 | Progress surface | Where the human watches without interrupting: a live HTML page or a running markdown doc the agent keeps updating with screenshots, drafts, and test results. |
 
@@ -49,13 +52,13 @@ user's. A bar passes one test: could a fresh critic, given only the bar and the 
 which is better without asking a question? Screenshots of the market leader, a set of reference
 sites, paragraphs at the clarity the writing should reach, a test suite plus a latency target - all
 pass. The bar may be unreachable on purpose: it exists to give the loop a direction and to keep it
-from stopping at "pretty good for AI", not to be met.
+from settling the moment the result is merely impressive for a machine, not to be met.
 
-When the user has no bar, offer the two honest moves: pick a comp together now, or delegate
-bar-finding into the prompt as the run's first task ("find a concrete comparison or measurement
-that plays the role reference screenshots would; explain why it is a useful bar, then judge every
-round against it"). Writing the prompt around an adjective because the user shrugged is the one
-failure this skill exists to prevent.
+When the user has no bar, offer the two honest moves: pick a comp together now, or open the
+prompt with a bar-finding task - the run locates a real-world reference its critic can inspect,
+states in one sentence why that reference deserves to be the bar, and holds every round against
+it. Writing the prompt around an adjective because the user shrugged is the one failure this
+skill exists to prevent.
 
 ## 3. Write the prompt - goal and bar, never the route
 
@@ -66,9 +69,9 @@ Every step you dictate replaces the run's judgment with this conversation's, and
 has not seen the artifact; a gauntlet prompt that has grown past roughly a dozen sentences is
 prescribing, so move the detail into a house rule or delete it.
 
-The mechanics the prompt must carry, in whatever words fit: split the goal into the smallest
-independently improvable pieces, chosen by the lead agent; a builder and a separate fresh-context
-critic per piece; the critic inspects the real artifact - rendered pixels, a running binary, actual
+The mechanics the prompt must carry, in whatever words fit: the lead agent carves the goal into
+the smallest units the loop can better and grade on their own; a builder and a separate
+fresh-context critic per unit; the critic inspects the real artifact - rendered pixels, a running binary, actual
 test output - never the builder's summary, compares it against the bar blind where possible, and
 names the biggest remaining gap; loop with no fixed round count; keep the progress surface updated;
 optionally, one fresh smoothing agent per major wave to make separately improved pieces feel like
@@ -83,8 +86,8 @@ One filled example - a non-game, mixed visual and mechanical bar:
 > separately: the UI must win a blind side-by-side against the attached Copilot Money screenshots,
 > and the importer must pass a test suite you write first that covers the five bank-export formats
 > in the samples/ folder, including the malformed ones. House rules: TypeScript, no cloud calls,
-> data stays in one local SQLite file. Split the work into the smallest pieces that can be improved
-> and judged separately - you choose the pieces. Give every important piece its own builder and a
+> data stays in one local SQLite file. Carve the work into the smallest units you can improve and
+> grade independently - the split is yours. Give every important piece its own builder and a
 > separate harsh critic with fresh context; the critic looks at the real rendered UI or the real
 > test run, compares against the bar side by side without being told which is which, names the
 > biggest gap, and sends it back. Keep looping - there is no final round; I stop the run. Maintain
