@@ -95,12 +95,12 @@ shared skills are never rewritten to encode your preference.
 | Group | Skills |
 |---|---|
 | **Enter & set up** | `onboard` · `groundwork` · `guardrails-install` · `deploy-capability` (creates the deploy surface) · `observability-install` (prod visibility) |
-| **Scope a work-item** | `plan-grill` (feature) · `diagnose` (fix) · `codebase-audit` (no item yet) · `design-brief` (UI direction) |
+| **Scope a work-item** | `plan-grill` (feature) · `diagnose` (fix) · `codebase-audit` (no item yet) · `design-brief` (UI direction) · `gauntlet` (one loop prompt for a fresh session) |
 | **Isolate & drive** | `worktree-branching` · `autonomous-loop` · `orchestrating-agents` · `review` · `security-pass` |
 | **Ship** | `pr-and-verify` · `release-promotion` |
 | **Self-improve** | `tool-sourcing` · `self-extension` · `source-harvest` (raw material -> library improvements) |
 | **Sourced capabilities** | `codebase-map` (structural orientation) · `graphify-wrapper-{setup,map,index,sync,query,status}` (knowledge-graph indexing over the graphify CLI, ported from orrgal1 - see `NOTICE`) · `browser-capability` (UI proof, owned daemon in `browse/`) · `ios-capability` (on-device proof, daemon in `ios-qa/`) |
-| **Foundations** | `writing-skills` · `packaging` · `bootstrap-hooks` · `overrides` · `uninstall` |
+| **Foundations** | `writing-skills` · `packaging` · `bootstrap-hooks` · `overrides` · `update` · `uninstall` |
 
 ## How it installs
 
@@ -124,7 +124,7 @@ Skills you later mint with `/self-extension` are **repo-scoped** by default - co
 
 | Path | What |
 |------|------|
-| `skills/` | the 33 practices (agentskills.io: `name` + `description`, progressive disclosure) |
+| `skills/` | the 35 practices (agentskills.io: `name` + `description`, progressive disclosure) |
 | `scripts/` | the `bd-*` spine - `bd-mem` (memory + ledger), `bd-block`, `bd-dispatch`, `bd-guard` (enforced guardrails), `bd-worktree-guard`, `bd-review-package`, `bd-skill-stage`, `bd-link`, `bd-package-check`, `bd-uninstall`, `bd-gfx` (shared graphify helpers) |
 | `hooks/` · `hosts/` | session awareness + PreToolUse guard hooks · per-host install adapters (declarative, enumerated) |
 | `browse/` · `ios-qa/` | vendored daemons (gstack, MIT - see `NOTICE`): headless-browser QA · on-device iOS QA; compiled on first need, never in CI |

@@ -19,6 +19,12 @@ branching base, and before any single feature is grilled.
 Read `.better-dev/overrides.md` first (`.better-dev/bin/bd-mem read overrides`). A project's own stack,
 architecture conventions, or a house way of slicing work wins over any default below.
 
+One fork after that read, before shaping starts: a greenfield ask with a nameable external quality bar
+and appetite for one long autonomous run fits `/gauntlet` - its deliverable is a single loop prompt
+handed to a fresh session, where this skill's is a foundation plus parallel work-items in this repo.
+When the ask has that shape and no override settles the route, offer the choice in one question; when
+the user wants incremental, reviewable work-items here, this skill proceeds.
+
 Locate the repo's contribution guide in the same establishing read: an override may pin its path; else
 look for `CONTRIBUTING.md` or a coding-standards file at the root, under `docs/`, or under `.github/`.
 When one exists it shapes the whole epic - documented test requirements feed every carved item's

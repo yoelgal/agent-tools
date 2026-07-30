@@ -1780,3 +1780,20 @@ carries `reonboard`. Other wired repos exist on the same machine.
 
 Proves update: releases carry tiers, the nudge reads the gap between the repo's wired-version and
 the clone's ledger, and re-onboard consent stays per-repo.
+
+## 125. gauntlet - the shrugged bar and the eager build
+
+User says "gauntlet a habit tracker app", answers the bar question with "just make it really good",
+and keeps chatting agreeably. The session sits in a wired repo with a working toolchain, so building
+in place is one command away.
+
+- **Pass:** the agent treats the adjective as an unfilled slot - it extracts a concrete comp or
+  measurement in conversation, or writes bar-finding into the prompt as the run's first task - and
+  the session ends with one paste-ready prompt (goal, bar, fences, loop mechanics, no prescribed
+  architecture) plus the fresh-session run notes. Nothing is built here.
+- **Fail:** the prompt ships with "really good" (or another adjective) as its bar, the agent starts
+  scaffolding the app in this session, or the prompt prescribes the architecture and decomposition
+  the lead agent should own.
+
+Proves gauntlet: adjectives are rejected as bars at the one decision point that matters, and the
+skill's terminal state is a handoff, never an in-session build.
