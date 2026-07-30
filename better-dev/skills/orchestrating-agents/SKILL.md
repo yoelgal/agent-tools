@@ -88,12 +88,12 @@ dispatch verb arranged for a job, not a new mechanism:
 - **Adversarial verify** - the refuter from "Verify independently" scaled to a panel: per finding,
   dispatch several independent skeptics, each told to *refute* it, and keep it only if a majority fail to.
   One refuter is a spot-check; a panel is closer to proof.
-- **Perspective-diverse verify** - when a finding can fail more than one way, give each verifier a distinct
-  lens (correctness, security, performance, does-it-reproduce) instead of identical refuters. Diversity
-  catches failure modes that redundancy just repeats past.
+- **Perspective-diverse verify** - when a finding can fail more than one way, assign every verifier its
+  own angle of attack - is it correct, is it exploitable, is it fast enough, does it reproduce - rather
+  than fielding identical refuters. Varied angles catch failure modes that redundancy just repeats past.
 - **Judge panel** - for a wide-open design or fix, generate a few independent attempts from different
-  angles, score them with parallel judges, and synthesize from the winner while grafting the best of the
-  rest. Beats one attempt iterated when the solution space is broad.
+  angles, score them with parallel judges, then build on the winning attempt and fold in whatever the
+  runners-up did better. Beats one attempt iterated when the solution space is broad.
 - **Verbalized candidates** - when a shape needs k genuinely different candidates (a judge panel's
   attempts, ideation options, design directions), don't collect them as k independent asks: an aligned
   model's independent answers collapse toward its one modal answer, and a plain "give me k options" list
@@ -102,8 +102,8 @@ dispatch verb arranged for a job, not a new mechanism:
   the probabilities is the load-bearing part: it measurably recovers diversity that alignment suppressed,
   at equal quality, and stronger models gain more (Verbalized Sampling, arXiv 2510.01171). Compose with
   the judge panel - verbalized generation, then independent judges.
-- **Loop-until-dry** - for discovery of unknown size (bugs, edge cases, dead code), keep spawning finders
-  until K consecutive rounds surface nothing new. A fixed count (`while found < N`) stops before the tail
+- **Loop-until-dry** - for discovery of unknown size (bugs, edge cases, dead code), keep fielding fresh
+  finders until K rounds in a row turn up nothing new. A fixed count (`while found < N`) stops before the tail
   and reports a partial sweep as complete. Dedup each round against everything *seen*, not against what's
   been *confirmed* - dedup against confirmed lets a judge-rejected finding reappear every round, and the
   loop never converges.
@@ -128,7 +128,7 @@ grades are advisory prose for picking a winner inside the shape - recorded nowhe
 is never one of them: `/review` stays severity-gated, never averaged.
 
 **No silent caps.** When a shape bounds coverage - a top-N, a no-retry, a sample - record what it dropped
-in the ledger. A silent truncation reads as "covered everything" when it didn't; that is a dishonest
+in the ledger. Truncation that goes unnamed presents partial coverage as total; that is a dishonest
 report, not an efficient one. The same honesty covers a fan-out that came back with holes: report the
 partial as partial, never a silent gap. And report status in units of the work, never units of the
 workers: the coverage denominator is the findings, files, or criteria list, each item with its
