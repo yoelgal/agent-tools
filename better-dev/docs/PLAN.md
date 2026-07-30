@@ -213,7 +213,7 @@ in-agent invocation proof (I validate structure + dry-run; live Claude-Code/Code
 
 ## 15. Environment
 
-Repo `github.com/yoelgal/better-dev` (private). `gh` authed as **yoelgal** with `delete_repo`+`repo`+`workflow`.
+Repo `github.com/yoelgal/agent-tools` (public monorepo; better-dev lives in `better-dev/`). `gh` authed as **yoelgal** with `delete_repo`+`repo`+`workflow`.
 Working dir `/Users/yoelgal/Developer/better-dev`. `raw/` is gitignored - **never commit it**. Memory dir:
 `~/.claude/projects/-Users-yoelgal-Developer-better-dev/memory/`. Toolchain verified: `yt-dlp`, `ffmpeg`,
 `whisper-cli`, `gh`, `jq`, `node`, Playwright (for agent-browser-style work: prefix with

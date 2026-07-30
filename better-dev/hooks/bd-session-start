@@ -80,8 +80,9 @@ resolve_clone_via_symlink() {
 # only fast-forward, never clobber.
 update_nudge() {
   local overrides="$1" clone="${CLAUDE_PLUGIN_ROOT:-}" tobin behind
-  [ -n "$clone" ] && [ -d "$clone/.git" ] || clone="$(resolve_clone_via_symlink)"
-  [ -n "$clone" ] && [ -d "$clone/.git" ] || return 0
+  # a clone may be a subdir of a monorepo checkout, so probe git, not a .git dir
+  { [ -n "$clone" ] && git -C "$clone" rev-parse --git-dir >/dev/null 2>&1; } || clone="$(resolve_clone_via_symlink)"
+  { [ -n "$clone" ] && git -C "$clone" rev-parse --git-dir >/dev/null 2>&1; } || return 0
   git -C "$clone" rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1 || return 0
 
   # Bound the fetch well inside the hook's own timeout (hooks.json: 5s) so a slow

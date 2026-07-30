@@ -14,10 +14,10 @@ jobs:
           git config --global user.name better-dev-ci
           git config --global init.defaultBranch main
       - name: package gate
-        run: scripts/bd-package-check
+        run: better-dev/scripts/bd-package-check
       - name: script and hook selftests
         run: |
-          for s in scripts/bd-* hooks/bd-*; do
+          for s in better-dev/scripts/bd-* better-dev/hooks/bd-*; do
             grep -q '"selftest"' "$s" || grep -q "selftest)" "$s" || continue
             echo "== $s selftest"; "$s" selftest
           done

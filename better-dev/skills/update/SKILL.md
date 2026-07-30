@@ -25,7 +25,7 @@ if [ -z "$clone" ]; then   # fall back to reading a host skill symlink back to t
     [ -L "$s" ] && clone="$(cd "$(dirname "$(readlink "$s")")/.." && pwd)" && break
   done
 fi
-if [ -n "$clone" ] && [ -d "$clone/.git" ]; then   # git -C "" acts on the cwd; pull only a resolved clone
+if [ -n "$clone" ] && git -C "$clone" rev-parse --git-dir >/dev/null 2>&1; then   # git -C "" acts on the cwd; pull only a resolved clone (which may be a subdir of the monorepo, so no .git dir of its own)
   old="$(git -C "$clone" rev-parse HEAD)"
   git -C "$clone" pull --ff-only
 else
