@@ -30,6 +30,11 @@ shippable before a release.
 - **Claude Code plugin (convenience).** `.claude-plugin/plugin.json` lets a Claude Code user install the
   same skills and `hooks/hooks.json` as a plugin. Skills are discovered from `skills/` and hooks from
   `hooks/hooks.json` by convention - no per-skill list to maintain in the manifest.
+- **Marketplace manifest (monorepo root).** The agent-tools monorepo root ships
+  `.claude-plugin/marketplace.json` listing each tool as a plugin (`"source": "./better-dev"`); a Claude
+  Code user adds the repo as a marketplace and installs from it. The plugin's own `plugin.json` stays the
+  single source for name, version, and description - the marketplace entry carries only name and source,
+  so the two manifests cannot drift.
 
 **Hook caveat.** The SessionStart/SubagentStart awareness hooks are wired only by the Claude Code plugin
 (via `hooks/hooks.json`). `install.sh` links skills, not hooks, so a clone install gets the practices but
@@ -48,7 +53,7 @@ there. Promoting one to the global tool is a separate, deliberate step.
 
 ## The release gate
 
-`.better-dev/bin/bd-package-check` (dev: `scripts/bd-package-check`) validates the whole package: every
+`.better-dev/bin/bd-package-check` (dev: `better-dev/scripts/bd-package-check`) validates the whole package: every
 skill lints (minimal frontmatter, `name` matches its folder, a "Use when" description, no `@`-links, calm
 voice), every helper and hook passes its `selftest`, the JSON manifests parse, and every backtick-wrapped
 `/skill` reference resolves to a shipped skill or a known host-optional builtin. It exits non-zero on any

@@ -142,7 +142,7 @@ the host's global skills dir, the practices can't load. Hand the operator the on
 let them run it - you can't change their machine globally on your own:
 
 ```bash
-git clone https://github.com/yoelgal/better-dev ~/better-dev && ~/better-dev/install.sh
+git clone https://github.com/yoelgal/agent-tools ~/agent-tools && ~/agent-tools/better-dev/install.sh
 ```
 
 On Claude Code, installing the plugin manifest (`.claude-plugin/plugin.json`, added as a plugin

@@ -7,4 +7,5 @@ Three tiers: **pull-only** (the default - `git pull` in the clone is the whole u
 (a repo surface changed - re-run `/onboard` once per wired repo). A version with no line here is
 pull-only; flags are never empty.
 
+0.7.0 install,reonboard - repo became the agent-tools monorepo: better-dev moved into better-dev/, GitHub repo renamed yoelgal/agent-tools; re-run the installer at its NEW path <clone>/better-dev/install.sh so host links follow, then /onboard per wired repo to refresh the .better-dev/bin bridge
 0.6.0 install,reonboard - /update verb and versioned update path (wired-version stamp, reonboard nudge); ADHD comms-style block at onboard

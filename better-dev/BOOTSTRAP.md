@@ -33,8 +33,8 @@ Otherwise install it. Two paths:
 - **Any host, including Claude** - clone once to a stable location and run its installer:
 
   ```sh
-  git clone https://github.com/yoelgal/better-dev ~/better-dev
-  ~/better-dev/install.sh
+  git clone https://github.com/yoelgal/agent-tools ~/agent-tools
+  ~/agent-tools/better-dev/install.sh
   ```
 
   The installer links each skill into the host's global skills directory one level deep
