@@ -432,7 +432,7 @@ Rejected-with-reasons (one row each):
 - batch-grill-me frontier-rounds interview - in-progress draft upstream; one-question-at-a-time with unblock-first ordering is the deliberate interactive discipline; revisit if it graduates and the round-batching survives their own use.
 - Per-host metadata sidecars (agents/openai.yaml beside every SKILL.md) - no second harness reads better-dev skills today; the agentskills.io format is the agnostic layer; revisit when a real Codex consumer exists (their "keep the two in sync" rule is the shape to copy then).
 - One-file-per-ticket local tracker - better-dev has no local ticket artifact; the ledger is the store; nothing to change.
-- Self-hosted single-plugin marketplace (.claude-plugin/marketplace.json) - distribution already ships via install.sh + the plugin manifest; a marketplace wrapper adds a surface with no second consumer.
+- Self-hosted single-plugin marketplace (.claude-plugin/marketplace.json) - REVERSED by D24 (2026-07-30): the agent-tools monorepo supplies the second consumer the rejection was predicated on; the marketplace manifest now ships at the monorepo root.
 
 Covered, not re-filed (so the next harvest does not re-litigate):
 - Spec-first-then-AFK-agent (the post's core preference) - is the plan-grill -> autonomous-loop architecture; validation, not a gap.
@@ -475,3 +475,16 @@ per source: **reimplement > adapt > verbatim**.
   *idea*, not by paraphrasing their file.
 - **Never redistribute** `karpathy:LOOPS.md` (personal-use) - reimplement, never quote.
 - **Never copy** superpowers' maximalist "MUST/STOP" tone - take the plumbing, write our own voice.
+
+## D24 - agent-tools monorepo layout (revises D0, reverses the marketplace rejection; 2026-07-30)
+
+The repo is now the `agent-tools` monorepo (github.com/yoelgal/agent-tools): each top-level dir is one
+independently installable tool, and better-dev's entire D0 tree - `skills/`, `scripts/`, `hosts/`,
+`hooks/`, `.claude-plugin/plugin.json`, `NOTICE README.md install.sh BOOTSTRAP.md`, plus `docs/` and the
+gitignored `raw/` archive - lives under `better-dev/`. D0's install model is unchanged; only the root
+moved. The monorepo root carries its own README, LICENSE, CLAUDE.md, shared CI, and
+`.claude-plugin/marketplace.json` listing each tool as a plugin - the multi-plugin marketplace is exactly
+the second-consumer case the earlier rejection named as its predicate, so that rejection is reversed, not
+overridden. Branch discipline stays repo-wide (feat/* off staging, promoted to main); version stamps and
+release ledgers stay per tool. Clone detection accepts both shapes (a pre-0.7.0 install resolves the old
+repo root; `normalize_clone` in bd-session-start and the /update snippet step down into `better-dev/`).

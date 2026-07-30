@@ -25,13 +25,21 @@ if [ -z "$clone" ]; then   # fall back to reading a host skill symlink back to t
     [ -L "$s" ] && clone="$(cd "$(dirname "$(readlink "$s")")/.." && pwd)" && break
   done
 fi
-if [ -n "$clone" ] && git -C "$clone" rev-parse --git-dir >/dev/null 2>&1; then   # git -C "" acts on the cwd; pull only a resolved clone (which may be a subdir of the monorepo, so no .git dir of its own)
+if [ -n "$clone" ] && [ ! -d "$clone/skills" ] && [ -d "$clone/better-dev/skills" ]; then
+  clone="$clone/better-dev"   # pre-0.7.0 install: the tool moved one level down in the monorepo
+fi
+if [ -n "$clone" ] && [ -d "$clone/skills" ] && git -C "$clone" rev-parse --git-dir >/dev/null 2>&1; then   # git -C "" acts on the cwd; pull only a resolved clone
   old="$(git -C "$clone" rev-parse HEAD)"
   git -C "$clone" pull --ff-only
 else
   echo "no better-dev clone found - install it first (see BOOTSTRAP.md)" >&2
 fi
 ```
+
+Since the 0.7.0 monorepo move the clone dir a host resolves may be the repo root (pre-0.7.0
+install) or the `better-dev/` subdir inside it (fresh install, plugin root) - the snippet's first
+guard normalizes either to the dir that holds `skills/`, which is also why the git probe is not a
+`.git` dir check: a subdir of a checkout has none of its own.
 
 Where the host gates machine-touching commands, hand the pull to the operator paste-ready
 (`git -C <clone> pull --ff-only`). `--ff-only` never clobbers local edits: a refused pull means
@@ -44,9 +52,11 @@ operator's behalf. A pull that fails offline: report it and stop; never guess wh
 git -C "$clone" diff --diff-filter=ADR --name-only "$old"..HEAD -- 'skills/*/SKILL.md'
 ```
 
-Non-empty output means the pull added, removed, or renamed a skill dir - hand the operator
-`<clone>/install.sh` paste-ready (it touches the machine's global skills dir, so the operator runs
-it). Empty output means content-only changes; the existing links already serve them - skip this step.
+Non-empty output means the pull added, removed, or renamed a skill dir - hand the operator the
+clone's installer paste-ready (it touches the machine's global skills dir, so the operator runs
+it). Resolve the installer, never assume its path: `ls "$clone/install.sh"` - a pull that moved the
+tool (0.7.0 moved it to `<repo>/better-dev/install.sh`) leaves the normalized `$clone` from step 1
+pointing at the right one, but a stale hand-typed path will not be. Empty output means content-only changes; the existing links already serve them - skip this step.
 
 ## 3. Read the release ledger
 

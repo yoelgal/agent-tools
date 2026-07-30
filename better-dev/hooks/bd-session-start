@@ -69,6 +69,18 @@ resolve_clone_via_symlink() {
   [ -n "$clone" ] && printf '%s' "$clone"
 }
 
+# --- normalize a clone candidate to the dir that actually holds the tool. A
+# pre-0.7.0 install (plugin root or symlink prefix) resolves to the old repo
+# root; since the agent-tools monorepo move the tool lives one level down in
+# better-dev/. Anchoring on skills/ also keeps the git probe from adopting an
+# unrelated repo (e.g. a git-managed $HOME) as a better-dev clone.
+normalize_clone() {
+  [ -n "${1:-}" ] || return 0
+  if [ -d "$1/skills" ]; then printf '%s' "$1"
+  elif [ -d "$1/better-dev/skills" ]; then printf '%s' "$1/better-dev"
+  fi
+}
+
 # --- update nudge: is the installed better-dev clone behind its origin? -------
 # Best-effort and strictly non-blocking. Locates the clone via CLAUDE_PLUGIN_ROOT
 # when it looks like a git checkout, else the same readlink fallback link_nudge
@@ -79,9 +91,10 @@ resolve_clone_via_symlink() {
 # unless the project opted into ff-only auto-update in overrides, which can
 # only fast-forward, never clobber.
 update_nudge() {
-  local overrides="$1" clone="${CLAUDE_PLUGIN_ROOT:-}" tobin behind
-  # a clone may be a subdir of a monorepo checkout, so probe git, not a .git dir
-  { [ -n "$clone" ] && git -C "$clone" rev-parse --git-dir >/dev/null 2>&1; } || clone="$(resolve_clone_via_symlink)"
+  local overrides="$1" clone tobin behind
+  clone="$(normalize_clone "${CLAUDE_PLUGIN_ROOT:-}")"
+  [ -n "$clone" ] || clone="$(normalize_clone "$(resolve_clone_via_symlink)")"
+  # the clone may be a subdir of a monorepo checkout, so probe git, not a .git dir
   { [ -n "$clone" ] && git -C "$clone" rev-parse --git-dir >/dev/null 2>&1; } || return 0
   git -C "$clone" rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1 || return 0
 
@@ -108,10 +121,11 @@ update_nudge() {
 # link-install hosts (codex, hermes) get the same treatment when it bites - the
 # hosts/ adapters own their own dir names.
 link_nudge() {
-  local clone="${CLAUDE_PLUGIN_ROOT:-}" hostdir="$HOME/.claude/skills" entry name target found missing n skill
+  local clone hostdir="$HOME/.claude/skills" entry name target found missing n skill
   # Locate the clone: the plugin root if it looks like one, else the fallback above.
-  [ -n "$clone" ] && [ -d "$clone/skills" ] || clone="$(resolve_clone_via_symlink)"
-  [ -n "$clone" ] && [ -d "$clone/skills" ] || return 0
+  clone="$(normalize_clone "${CLAUDE_PLUGIN_ROOT:-}")"
+  [ -n "$clone" ] || clone="$(normalize_clone "$(resolve_clone_via_symlink)")"
+  [ -n "$clone" ] || return 0
 
   # Guard: a plugin-only install with no host links skips silently - those skills
   # ride the plugin update, not install.sh.
@@ -122,7 +136,9 @@ link_nudge() {
     name="$(basename "$entry")"
     if [ -L "$entry" ]; then
       target="$(readlink "$entry" 2>/dev/null)"
-      case "$target" in "$clone"/skills/*) found=1 ;; esac
+      # match the normalized clone AND its pre-0.7.0 root: after the monorepo
+      # move every old link's target prefix is the root, not better-dev/.
+      case "$target" in "$clone"/skills/* | "${clone%/better-dev}"/skills/*) found=1 ;; esac
     elif [ -f "$entry/.better-dev-skill" ]; then
       found=1
     fi
@@ -136,7 +152,9 @@ link_nudge() {
   for skill in "$clone"/skills/*/; do
     [ -f "${skill}SKILL.md" ] || continue
     name="$(basename "$skill")"
-    [ -e "$hostdir/$name" ] || [ -L "$hostdir/$name" ] || { missing="$missing${missing:+, }$name"; n=$((n + 1)); }
+    # -e resolves through a live symlink; a dangling one (the moved-clone case)
+    # serves nothing and counts as missing so this nudge fires when it matters.
+    [ -e "$hostdir/$name" ] || { missing="$missing${missing:+, }$name"; n=$((n + 1)); }
   done
   [ "$n" -gt 0 ] || return 0
   printf ' better-dev: %s skill(s) in the installed clone have no link for this host (%s) - run %s/install.sh to reconcile.' "$n" "$missing" "$clone"
@@ -151,8 +169,9 @@ link_nudge() {
 # Pure local reads - no network, no fetch; anything missing or unparsable
 # stays silent, per the hook's best-effort contract.
 reonboard_nudge() {
-  local root="$1" clone="${CLAUDE_PLUGIN_ROOT:-}" releases wired newest
-  [ -n "$clone" ] && [ -f "$clone/docs/RELEASES.md" ] || clone="$(resolve_clone_via_symlink)"
+  local root="$1" clone releases wired newest
+  clone="$(normalize_clone "${CLAUDE_PLUGIN_ROOT:-}")"
+  [ -n "$clone" ] || clone="$(normalize_clone "$(resolve_clone_via_symlink)")"
   [ -n "$clone" ] && [ -f "$clone/docs/RELEASES.md" ] || return 0
   releases="$clone/docs/RELEASES.md"
   wired="$(cat "$root/.better-dev/wired-version" 2>/dev/null | tr -d '[:space:]' || true)"
@@ -408,6 +427,7 @@ if [ "${1:-}" = "selftest" ]; then
   ( cd "$seed" && git config user.email a@b.c && git config user.name t \
       && echo one > f && git add f && git commit -qm one && git push -q origin HEAD:main ) >/dev/null 2>&1
   clone="$tmp/clone"; git clone -q "$origin" "$clone"
+  mkdir -p "$clone/skills/onboard"; : > "$clone/skills/onboard/SKILL.md"   # normalize_clone anchors on skills/
   ( cd "$seed" && echo two >> f && git commit -qam two && git push -q origin HEAD:main ) >/dev/null 2>&1
   ( cd "$clone" && git fetch -q ) >/dev/null 2>&1   # clone now knows origin is ahead
   out="$(cd "$tmp/proj" && CLAUDE_PLUGIN_ROOT="$clone" "$SELF")"
@@ -421,6 +441,24 @@ if [ "${1:-}" = "selftest" ]; then
   ln -s "$clone/skills/onboard" "$fbhome/.claude/skills/onboard"
   out="$(cd "$tmp/proj" && HOME="$fbhome" CLAUDE_PLUGIN_ROOT= "$SELF")"
   printf '%s' "$out" | grep -q "update available" || fail "no update nudge via the clone-install fallback (CLAUDE_PLUGIN_ROOT unset)"
+
+  # Update nudge: 0.7.0 monorepo shape - the plugin root is a subdir of the
+  # checkout (no .git dir of its own). The old [ -d .git ] probe went silent
+  # here; the git probe plus normalize_clone must still fire the nudge.
+  mono="$tmp/mono"; git clone -q "$origin" "$mono"
+  mkdir -p "$mono/better-dev/skills/onboard"; : > "$mono/better-dev/skills/onboard/SKILL.md"
+  ( cd "$seed" && echo three >> f && git commit -qam three && git push -q origin HEAD:main ) >/dev/null 2>&1
+  ( cd "$mono" && git fetch -q ) >/dev/null 2>&1   # mono now knows origin is ahead
+  out="$(cd "$tmp/proj" && HOME="$tmp" CLAUDE_PLUGIN_ROOT="$mono/better-dev" "$SELF")"
+  printf '%s' "$out" | grep -q "update available" || fail "no update nudge when the clone is a monorepo subdir"
+
+  # Link nudge after the monorepo move: host links dangle at the old root paths;
+  # the resolver must step down into better-dev/ and count dangling as missing.
+  stalehome="$tmp/stalehome"; mkdir -p "$stalehome/.claude/skills"
+  ln -s "$mono/skills/onboard" "$stalehome/.claude/skills/onboard"   # old-root target, dangling post-move
+  out="$(cd "$tmp/proj" && HOME="$stalehome" CLAUDE_PLUGIN_ROOT= "$SELF")"
+  printf '%s' "$out" | grep -q "no link for this host" || fail "no link nudge when host links dangle at pre-monorepo paths"
+  printf '%s' "$out" | grep -q "$mono/better-dev/install.sh" || fail "link nudge names the old installer path after the monorepo move"
 
   # Opt-in ff-only auto-update: with the override, the clone fast-forwards itself.
   printf 'better-dev auto-update: ff-only\n' >> "$tmp/proj/.better-dev/overrides.md"
@@ -456,7 +494,7 @@ if [ "${1:-}" = "selftest" ]; then
   # stamp names the newest such version and /update. HOME stays isolated (home3
   # has no .claude/skills) so the symlink fallback can't wander into a real
   # install on the machine running this.
-  rclone="$tmp/rclone"; mkdir -p "$rclone/docs"
+  rclone="$tmp/rclone"; mkdir -p "$rclone/docs" "$rclone/skills"   # normalize_clone anchors on skills/
   printf '%s\n%s\n' '0.6.0 install,reonboard - /update verb and versioned update path' '0.5.0 install - earlier release' > "$rclone/docs/RELEASES.md"
   printf '0.5.1\n' > "$tmp/proj/.better-dev/wired-version"
   out="$(cd "$tmp/proj" && HOME="$home3" CLAUDE_PLUGIN_ROOT="$rclone" "$SELF")"
