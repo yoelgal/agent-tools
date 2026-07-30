@@ -20,6 +20,10 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
     orrgal1/claude-plugins graphify-wrapper v1.2.0 (MIT, (c) 2026 orrgal1); mechanics
     kept substantially verbatim, prose adapted to house rules (dash-free, Use-when
     descriptions, bridge-resolved lib path).
+  skills/review/standards-baseline.md - the Fowler smell baseline (entry wording, the
+    what-it-is -> how-to-fix form, and the "possible <smell>" judgement-call framing)
+    adapted from mattpocock/skills skills/engineering/code-review/SKILL.md (MIT,
+    (c) 2026 Matt Pocock); the surrounding review machinery is ours.
 
 ── Pattern inspiration (courtesy credit, not legally required) ──
   mattpocock/skills - Matt Pocock       (MIT)
@@ -49,7 +53,9 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
   "Getting started with loops" - delba_oliveira / ClaudeDevs (X article, ideas)
   Self-improving agent system in 14 steps - @0xCodez (Codez) (X article, ideas)
   Fable-extraction playbooks - @EXM7777 (Machina), @alex_prompter (X articles, ideas)
-  Eight-category edge-case pass - @nurijanian (George, prodmgmt.world) (X article, ideas)
+  Eight-category edge-case pass - @nurijanian (George, prodmgmt.world) (X article; the
+    pass is reimplemented, but the eight category names and their published order are
+    reproduced as-is in skills/plan-grill/done-contract.md)
   Human-simulating e2e QA - James Goldbach (@agentic.james) (IG reel, ideas)
   Fable-to-Opus skill capture - Ethan Stopperich (IG reel, ideas)
   Archive228/loopkit - Archive228        (MIT)
@@ -84,6 +90,9 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
     half-finished item between machines - reimplemented in worktree-branching's handoff
     notes, with better-dev's own consent re-pin on pick-up)
   ayghri/i-have-adhd - ayghri            (MIT; onboard's comms-style block adapts its rules)
+  Papercuts CLI - Steve Ruiz (@steveruizok, tldraw) (X post, ideas; the agent-facing
+    friction-log channel reimplemented as bd-mem's papercut command and its session-start
+    surfacing)
   Matt Shumer - "How to Run a Gauntlet Loop" (somethingbig.ai) and the Claude-of-Duty
     prompt (github.com/mshumer/Claude-of-Duty), plus "How I Prompt Fable" (shumer.dev)
     (method reimplemented in the gauntlet skill: goal-not-steps, a concrete inspectable
@@ -92,8 +101,8 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
 ── NOT copied - inspiration only, NOT redistributable ──
   Andrej Karpathy - LOOPS.md v060726 ("personal use permitted"). Concepts reimplemented
   in our own words; no prose copied.
-  Andrej Karpathy - "CLAUDE.md: Field Notes" one-pager ((c) 2026, personal use).
-  Concepts reimplemented in our own words; no prose copied.
+  Andrej Karpathy - "CLAUDE.md: Field Notes" one-pager ((c) 2026, personal use) and the
+  system-prompt-learning one-pager. Concepts reimplemented in our own words; no prose copied.
   "Fable Mode" one-pager (author withheld) and "CLAUDE.md: Field Notes on Running
   Claude Fable 5 Without Overpaying" one-pager (author unknown) - both personal-use
   only. Concepts reimplemented in our own words; no prose copied.
