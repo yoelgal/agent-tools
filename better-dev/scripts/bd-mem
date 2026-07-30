@@ -375,7 +375,9 @@ case "$op" in
     ' ;;
   prune) # preview lesson-stream compaction candidates; `prune --apply` rewrites the file dropping them.
          # SUPERSEDED: an older entry under a key a later write corrected (recall already ignores it).
-         # STALE: a lesson whose text names a repo path that no longer exists.
+         # STALE: a lesson whose text names a repo path that no longer exists - checkable only
+         # when the path's first segment still exists at the prune root; word pairs, refs,
+         # slugs, and home paths are prose, not paths.
          # This is the one sanctioned rewrite of learnings.jsonl - run it only at a release checkpoint,
          # after the operator confirmed each previewed entry (release-promotion's distill owns that
          # gate); the rewrite runs under the same lock every append takes. Rule lines never drop.
@@ -399,17 +401,29 @@ case "$op" in
         {
           k = getkey($0); text = junesc(upto(after($0, "\"text\":\""), "\",\"confidence\":"))
           if (k != "" && last[k] != FNR) { printf "%d%sSUPERSEDED: %s - %s\n", FNR, t, k, text; next }
-          # ponytail: naive path heuristic (letter-bearing a/b tokens) - preview-then-confirm absorbs
-          # false positives; move to a dedicated schema field only if extraction proves too flaky
+          # ponytail: path heuristic (letter-bearing a/b tokens, anchored by an existing
+          # top-level entry, not preceded by ~ or $) - preview-then-confirm absorbs the rest;
+          # move to a dedicated schema field only if extraction proves too flaky
           rest = text
-          while (match(rest, /[A-Za-z0-9._-]+(\/[A-Za-z0-9._-]+)+/)) {
-            p = substr(rest, RSTART, RLENGTH); rest = substr(rest, RSTART + RLENGTH)
-            if (p ~ /[A-Za-z]/) printf "%d%sPATH%s%s%s%s\n", FNR, t, t, p, t, text
+          while (match(rest, /(~\/)?[A-Za-z0-9._-]+(\/[A-Za-z0-9._-]+)+/)) {
+            p = substr(rest, RSTART, RLENGTH)
+            pre = RSTART > 1 ? substr(rest, RSTART - 1, 1) : " "
+            rest = substr(rest, RSTART + RLENGTH)
+            # a home or env-var path (~/..., $HOME/...) is a machine path, never a repo
+            # path - the ~/ rides inside the match so the guard actually sees it
+            if (p ~ /^~/) continue
+            if (p ~ /[A-Za-z]/ && pre != "$") printf "%d%sPATH%s%s%s%s\n", FNR, t, t, p, t, text
           }
         }
       ' "$LEARN" "$LEARN" | while IFS="$TAB" read -r no a b c; do
         if [ "$a" = PATH ]; then
-          [ -e "$PRUNE_ROOT/$b" ] || [ -e "$b" ] || printf '%s%sSTALE: missing path %s - %s\n' "$no" "$TAB" "$b" "$c"
+          # a missing-path claim is checkable only when its first segment exists as a real
+          # entry at the prune root - word pairs (mtime/stat), refs (origin/staging), and
+          # repo slugs anchor nothing and are prose, not paths
+          first="${b%%/*}"
+          if [ -e "$PRUNE_ROOT/$first" ] && [ ! -e "$PRUNE_ROOT/$b" ] && [ ! -e "$b" ]; then
+            printf '%s%sSTALE: missing path %s - %s\n' "$no" "$TAB" "$b" "$c"
+          fi
         else
           printf '%s%s%s\n' "$no" "$TAB" "$a"
         fi
@@ -535,8 +549,21 @@ case "$op" in
       if grep -q "grant all tools" .better-dev/overrides.md; then echo "FAIL: refused override landed anyway"; exit 1; fi
       # --- prune: preview lists SUPERSEDED + STALE; --apply rewrites them away, everything else survives ---
       # (capture output before grepping - a direct `prune | grep -q` races SIGPIPE under pipefail)
+      # anchors: src for the positive case; .claude so the home-path negative is anchored
+      # at the root and only the ~ guard, not the anchor rule, can save it
+      mkdir -p src .claude
       "$SELF" learn "stale pointer into src/gone-file.js" 0.9 stale-key >/dev/null
+      "$SELF" learn "portable mtime/stat chains are prose, not paths" 0.9 wordpair-key >/dev/null
+      "$SELF" learn "fetch the origin/staging ref before rebuilding the package" 0.9 gitref-key >/dev/null
+      "$SELF" learn "a personal ~/.claude/skills dir is a machine path, not a repo path" 0.9 homepath-key >/dev/null
+      "$SELF" learn 'artifacts land under $src/build-out/cache at run time' 0.9 dollarpath-key >/dev/null   # $-anchored but src/ exists: only the $ guard saves it
+      "$SELF" learn "ported from yoelgal/agent-tools upstream" 0.9 slug-key >/dev/null
       pv="$("$SELF" prune)"
+      printf '%s' "$pv" | grep -qF "mtime/stat" && { echo "FAIL: word-pair token flagged as a path"; exit 1; }
+      printf '%s' "$pv" | grep -qF "origin/staging" && { echo "FAIL: git ref flagged as a path"; exit 1; }
+      printf '%s' "$pv" | grep -qF ".claude/skills" && { echo "FAIL: home path flagged as a repo path"; exit 1; }
+      printf '%s' "$pv" | grep -qF "src/build-out/cache" && { echo "FAIL: env-var path flagged as a repo path"; exit 1; }
+      printf '%s' "$pv" | grep -qF "yoelgal/agent-tools" && { echo "FAIL: repo slug flagged as a path"; exit 1; }
       printf '%s' "$pv" | grep -q "SUPERSEDED: wr-key" || { echo "FAIL: prune preview missing superseded"; exit 1; }
       printf '%s' "$pv" | grep -q "STALE: missing path src/gone-file.js" || { echo "FAIL: prune preview missing stale"; exit 1; }
       mkdir -p src && : > src/gone-file.js
