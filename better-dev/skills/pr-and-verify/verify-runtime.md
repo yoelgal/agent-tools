@@ -23,7 +23,7 @@ an internal function is not a surface, so trace its caller out to one of these r
 
 | Change | Surface | Drive it, then look |
 |---|---|---|
-| CLI / TUI | the terminal | run the exact invocation a user would; keep the emitted output as the capture |
+| CLI / TUI | the terminal | run the exact invocation a user would; capture the pane as the evidence |
 | Server / API | the socket | send the request, read the response body |
 | GUI | the pixels | drive it under Playwright / computer-use, screenshot and actually look |
 | Mobile app | the device or simulator screen | install the build, drive the flow by touch, screenshot and actually look |
@@ -45,7 +45,8 @@ named gap `/plan-grill` can plan a work-item for, never a silent skip. Both are 
 
 Through the real interface: if a user clicks a button, click the button, don't curl the API underneath it.
 The diff's own tests count as the author's claim, never as a surface to observe - on a mixed src+tests
-change, drive the src's surface and leave the test files out of the observation. Operator feedback that contradicts a verified state triggers a
+change, drive the src's surface and leave the test files out of the observation. Operator feedback that
+contradicts a verified state triggers a
 which-surface-are-you-looking-at check before any re-diagnosis: a worktree's server shows this tree, while
 the habitual dev server shows stale code until the merge lands.
 
@@ -55,7 +56,8 @@ Confirming the happy path is the first half, not the job. Try to break your own 
 with at least one adversarial input: an empty value, the same action fired twice, a conflicting option, a
 malformed body, a missing required field, a concurrent edit, an empty state, a re-run over stale state. Even a
 probe that turns up nothing gets written down as a step taken - `--limit '' → rejected cleanly:
---limit needs a number, exit 2` is a result worth keeping. Where the contract carries a scenario table, that table is the
+--limit needs a number, exit 2` is a result worth keeping. Where the contract carries a scenario table, that
+table is the
 walk-list; drive each branch a user could take, not just the golden one, because an agent-written unit
 test overfits the golden path and the skipped branch is exactly where the bug lives.
 
@@ -67,7 +69,8 @@ Settle each criterion at one of four:
 - **FAIL** - it did the wrong thing, threw, or a probe broke it.
 - **BLOCKED** - something outside the change stopped the check from running (a missing credential, an
   environment that won't stand up). Name what blocked it.
-- **SKIP** - the change never reaches a runtime surface (docs, or types with no emitted code). Report `SKIP (no runtime
+- **SKIP** - the change never reaches a runtime surface (docs, or types with no emitted code). Report `SKIP
+(no runtime
   surface): <reason>`, and don't run the suite to fill the space.
 
 A pass is all-or-nothing: three green scenarios out of four settle FAIL until the fourth goes green or
