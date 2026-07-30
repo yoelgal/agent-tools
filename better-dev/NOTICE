@@ -84,6 +84,10 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
     half-finished item between machines - reimplemented in worktree-branching's handoff
     notes, with better-dev's own consent re-pin on pick-up)
   ayghri/i-have-adhd - ayghri            (MIT; onboard's comms-style block adapts its rules)
+  Matt Shumer - "How to Run a Gauntlet Loop" (somethingbig.ai) and the Claude-of-Duty
+    prompt (github.com/mshumer/Claude-of-Duty), plus "How I Prompt Fable" (shumer.dev)
+    (method reimplemented in the gauntlet skill: goal-not-steps, a concrete inspectable
+    bar, builder/critic separation with fresh critics, no fixed final round; our own words)
 
 ── NOT copied - inspiration only, NOT redistributable ──
   Andrej Karpathy - LOOPS.md v060726 ("personal use permitted"). Concepts reimplemented

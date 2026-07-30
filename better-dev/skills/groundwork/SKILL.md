@@ -16,6 +16,12 @@ sits over it - it shapes the whole idea, builds the substrate, then hands each c
 `/plan-grill` (feature) or `/diagnose` (fix). It runs after `/onboard` has wired the tool and the
 branching base, and before any single feature is grilled.
 
+One fork before shaping starts: a greenfield ask with a nameable external quality bar and appetite for
+one long autonomous run fits `/gauntlet` - its deliverable is a single loop prompt handed to a fresh
+session, where this skill's is a foundation plus parallel work-items in this repo. When the ask has
+that shape, offer the choice in one question and route by the answer; when the user wants incremental,
+reviewable work-items here, this skill proceeds.
+
 Read `.better-dev/overrides.md` first (`.better-dev/bin/bd-mem read overrides`). A project's own stack,
 architecture conventions, or a house way of slicing work wins over any default below.
 
