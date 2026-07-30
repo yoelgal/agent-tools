@@ -10,11 +10,11 @@ allowed-tools:
 
 # Gauntlet - grill the idea, hand off one loop prompt
 
-A Gauntlet Loop is a way to run one long autonomous build: a lead agent, a goal, and a real
-example of what great looks like, driven by builder-critic loops until the human stops the run
-(step 3 owns the operative mechanics). The method comes from Matt Shumer's
-Claude-of-Duty run (credited in `NOTICE`); it generalizes past games to any software the loop can
-inspect: a web app, a CLI, a design system, an API.
+A Gauntlet Loop is a way to run one long autonomous build: hand the lead agent a destination
+plus a reference artifact worth beating, then let builder-critic loops chase that reference
+until the human calls the run (step 3 owns the operative mechanics). The method comes from Matt
+Shumer's Claude-of-Duty run (credited in `NOTICE`); it generalizes past games to any software
+the loop can inspect: a web app, a CLI, a design system, an API.
 
 This skill's whole job is the prompt. It grills the idea until the prompt can be written, writes
 it, and hands it to the user to paste into a **fresh** session - fresh because the run wants its
@@ -47,11 +47,12 @@ genuinely uncertain. Six questions fired as a form is a worse grill than two aim
 ## 2. Pin a real bar
 
 The bar is the load-bearing slot. An adjective is not a bar - "amazing", "production-ready", and
-"AAA quality" each let the run stop at the model's own idea of good enough, which is below the
-user's. A bar passes one test: could a fresh critic, given only the bar and the artifact, decide
-which is better without asking a question? Screenshots of the market leader, a set of reference
-sites, paragraphs at the clarity the writing should reach, a test suite plus a latency target - all
-pass. The bar may be unreachable on purpose: it exists to give the loop a direction and to keep it
+"AAA quality" each let the run coast to the model's private sense of sufficient, which sits
+below the user's. A bar passes one test: could a fresh critic, given only the bar and the
+artifact, decide which is better without asking a question? Screenshots of the market leader,
+a set of reference sites, paragraphs at the clarity the writing should reach, a test suite plus
+a latency target - all pass. The bar may be unreachable on purpose: it exists to give the loop a
+direction and to keep it
 from settling the moment the result is merely impressive for a machine, not to be met.
 
 When the user has no bar, offer the two honest moves: pick a comp together now, or open the
@@ -71,13 +72,14 @@ prescribing, so move the detail into a house rule or delete it.
 
 The mechanics the prompt must carry, in whatever words fit: the lead agent carves the goal into
 the smallest units the loop can better and grade on their own; a builder and a separate
-fresh-context critic per unit; the critic inspects the real artifact - rendered pixels, a running binary, actual
-test output - never the builder's summary, compares it against the bar blind where possible, and
+fresh-context critic per unit; the critic inspects the real artifact - rendered pixels, a
+running binary, actual test output - never the builder's summary, compares it against the bar
+blind where possible, and
 names the biggest remaining gap; loop with no fixed round count; keep the progress surface updated;
 optionally, one fresh smoothing agent per major wave to make separately improved pieces feel like
 one thing. Spend the harness's heavy mode (ultracode or equivalent) only when the run is a
-foundation others will build on for months; a good loop with an ambitious bar usually gets there
-without it.
+foundation others will build on for months; an ordinary loop held to a demanding bar usually
+gets there without it.
 
 One filled example - a non-game, mixed visual and mechanical bar:
 
@@ -87,9 +89,9 @@ One filled example - a non-game, mixed visual and mechanical bar:
 > and the importer must pass a test suite you write first that covers the five bank-export formats
 > in the samples/ folder, including the malformed ones. House rules: TypeScript, no cloud calls,
 > data stays in one local SQLite file. Carve the work into the smallest units you can improve and
-> grade independently - the split is yours. Give every important piece its own builder and a
-> separate harsh critic with fresh context; the critic looks at the real rendered UI or the real
-> test run, compares against the bar side by side without being told which is which, names the
+> grade independently - the split is yours. Assign each unit one builder and one harsh critic
+> that starts from a clean context; the critic looks at the real rendered UI or the real
+> test run, compares against the bar side by side while blind to which one is ours, names the
 > biggest gap, and sends it back. Keep looping - there is no final round; I stop the run. Maintain
 > a live progress page with screenshots and test results as you go.
 
