@@ -16,8 +16,232 @@ fail=0
 ok()  { printf '  \033[32m✓\033[0m %s\n' "$*"; }
 bad() { printf '  \033[31m✗\033[0m %s\n' "$*"; fail=1; }
 
+# --- prove-new: every check a diff adds must have been red before its implementation ------------
+#
+# A check that is green before the thing it guards exists proves nothing, and reads exactly like one
+# that works. Three shipped in a single work-item before this existed. The rule: for every ok/bad
+# label the diff adds, run the CURRENT script against the BASE tree and require that label to come
+# back red. Green at base means the check was vacuous; absent at base means it silently skipped,
+# which is no better. A check that legitimately holds at base (a regression guard) says so on the
+# line and is exempted by name, never silently.
+
+# Longest run of literal text in a label, so an interpolated label still matches its printed line.
+_static_run() {
+  awk -v s="$1" 'BEGIN{
+    gsub(/\$\([^)]*\)/, "\001", s)
+    gsub(/\$\{[^}]*\}/, "\001", s)
+    gsub(/\$[A-Za-z_][A-Za-z0-9_]*/, "\001", s)
+    n = split(s, parts, "\001"); b = ""
+    for (i = 1; i <= n; i++) if (length(parts[i]) > length(b)) b = parts[i]
+    gsub(/^[ \t]+|[ \t]+$/, "", b)
+    print b
+  }'
+}
+
+# (repo root, script path relative to it, base ref) - parameterized so the fixtures below can point
+# it at a stub. Running the real gate inside a fixture repo would fail for unrelated reasons.
+# A check's ok-label and bad-label are different strings, and at base a check that FAILS prints its
+# bad-label. Matching ok-labels alone would read every genuinely-red check as "absent", so the two
+# are paired: an OK token immediately followed by a BAD token is one check, which is how every
+# `cond && ok "..." || bad "..."` in this file is written.
+#
+# Only TOP-LEVEL call sites count. Every real check in this file is top level; ok/bad text also
+# appears inside function bodies (this mode's own findings) and inside heredocs (its fixtures), and
+# counting those makes the mode trip over its own source. Line numbers come from the file at HEAD,
+# then get intersected with the lines the diff actually added.
+_check_tokens() {
+  local root="$1" script_rel="$2" base="$3" addedlines
+  addedlines="$(git -C "$root" diff --unified=0 "$base" -- "$script_rel" \
+    | awk '/^@@/ { if (match($0, /\+[0-9]+(,[0-9]+)?/)) {
+              spec = substr($0, RSTART + 1, RLENGTH - 1)
+              n = split(spec, a, ","); start = a[1] + 0; count = (n > 1 ? a[2] + 0 : 1)
+              for (i = 0; i < count; i++) print start + i } }' | tr '\n' ' ')"
+  case "$addedlines" in *[0-9]*) ;; *) return 0 ;; esac
+  awk -v added="$addedlines" '
+    BEGIN { n = split(added, arr, " "); for (i = 1; i <= n; i++) if (arr[i] != "") want[arr[i] + 0] = 1 }
+    {
+      line = $0
+      if (heredoc != "") { if (line == heredoc || line == heredoc "\n") heredoc = ""; next }
+      if (match(line, /<<[-]?'"'"'?[A-Za-z_][A-Za-z0-9_]*'"'"'?/)) {
+        d = substr(line, RSTART, RLENGTH); gsub(/^<<-?'"'"'?|'"'"'$/, "", d); heredoc = d; next
+      }
+      # A one-liner definition (helper() { ...; }) opens and closes on the same line, so it must not
+      # flip the in-function state - doing so swallows every real check below it.
+      if (line ~ /^[A-Za-z_][A-Za-z0-9_]*\(\)[ \t]*\{/) { if (line !~ /\}[ \t]*$/) infunc = 1; next }
+      if (infunc && line ~ /^\}/) { infunc = 0; next }
+      if (infunc) next
+      if (!(NR in want)) next
+      reason = ""
+      if (match(line, /# prove-new: regression-guard[ \t]*/)) {
+        reason = substr(line, RSTART + RLENGTH); line = substr(line, 1, RSTART - 1)
+      }
+      rest = line
+      while (match(rest, /(^|[^A-Za-z0-9_])(ok|bad)[ \t]+"[^"]*"/)) {
+        tok = substr(rest, RSTART, RLENGTH); rest = substr(rest, RSTART + RLENGTH)
+        kind = (tok ~ /ok[ \t]+"/) ? "OK" : "BAD"
+        sub(/^[^"]*"/, "", tok); sub(/"$/, "", tok)
+        t++; tk[t] = kind; tl[t] = tok; tr[t] = reason
+      }
+    }
+    # Pair here rather than in the shell: one record per CHECK keeps the caller free of arrays and
+    # process substitution, both of which the repo pre-commit hook rejects via sh -n.
+    END {
+      i = 1
+      while (i <= t) {
+        if (tk[i] == "OK" && tk[i + 1] == "BAD") { printf "%s\n%s\n%s\n", tl[i], tl[i + 1], tr[i]; i += 2 }
+        else if (tk[i] == "OK")                  { printf "%s\n\n%s\n",    tl[i], tr[i];            i += 1 }
+        else                                     { printf "\n%s\n%s\n",    tl[i], tr[i];            i += 1 }
+      }
+    }' "$root/$script_rel"
+}
+
+# (repo root, script path relative to it, base ref) - parameterized so the fixtures below can point
+# it at a stub. Running the real gate inside a fixture repo would fail for unrelated reasons.
+prove_new() {
+  local root="$1" script_rel="$2" base="$3"
+  local tmp base_out n_bad=0 checks
+
+  git -C "$root" rev-parse --verify --quiet "$base" >/dev/null \
+    || { printf 'prove-new: bad base ref: %s\n' "$base" >&2; return 1; }
+
+  checks="$(mktemp)"
+  _check_tokens "$root" "$script_rel" "$base" > "$checks"
+  if [ ! -s "$checks" ]; then
+    rm -f "$checks"
+    ok "prove-new: this diff adds no checks"
+    return 0
+  fi
+
+  tmp="$(mktemp -d)"
+  git -C "$root" archive "$base" 2>/dev/null | tar -x -C "$tmp" 2>/dev/null
+  mkdir -p "$tmp/$(dirname "$script_rel")"
+  cp "$root/$script_rel" "$tmp/$script_rel"
+  chmod +x "$tmp/$script_rel"
+  base_out="$( (cd "$tmp" && "./$script_rel" 2>&1) | sed 's/'$'\033''\[[0-9;]*m//g' )"
+  rm -rf "$tmp"
+
+  # Matches the label's longest literal run against a base line, and reports that line's mark.
+  _mark_at_base() {
+    local static line
+    static="$(_static_run "$1")"
+    [ "${#static}" -ge 8 ] || { printf 'SHORT'; return; }
+    line="$(printf '%s\n' "$base_out" | grep -F -- "$static" | head -1)"
+    case "$line" in
+      *"✗"*) printf 'RED' ;;
+      *"✓"*) printf 'GREEN' ;;
+      *)     printf 'ABSENT' ;;
+    esac
+  }
+
+  local oklab badlab why
+  while IFS= read -r oklab && IFS= read -r badlab && IFS= read -r why; do
+    [ -n "$oklab$badlab" ] || continue
+
+    if [ -n "$why" ]; then
+      ok "prove-new: EXEMPT [$(_static_run "${oklab:-$badlab}")] - regression-guard: $why"
+      continue
+    fi
+
+    local okmark="" badmark=""
+    [ -n "$oklab" ] && okmark="$(_mark_at_base "$oklab")"
+    [ -n "$badlab" ] && badmark="$(_mark_at_base "$badlab")"
+    local shown; shown="$(_static_run "${oklab:-$badlab}")"
+
+    if [ "$okmark" = SHORT ] || { [ -z "$oklab" ] && [ "$badmark" = SHORT ]; }; then
+      bad "prove-new: UNKNOWN [${oklab:-$badlab}] - no distinctive literal text to match at base; give the label a fixed phrase"
+      n_bad=$((n_bad + 1))
+    elif [ "$okmark" = GREEN ]; then
+      bad "prove-new: UNPROVEN [$shown] - already green at base, so it never proved anything"
+      n_bad=$((n_bad + 1))
+    elif [ "$badmark" = RED ]; then
+      ok "prove-new: PROVEN [$shown] - red at base"
+    else
+      bad "prove-new: UNPROVEN [$shown] - never ran at base, so it skipped rather than failed"
+      n_bad=$((n_bad + 1))
+    fi
+  done < "$checks"
+  rm -f "$checks"
+
+  [ "$n_bad" = 0 ]
+}
+
 # /refs a skill may compose from the host but better-dev does not ship.
 HOST_OPTIONAL="code-review security-review verify domain-modeling"
+
+# Fixtures for prove-new. A stub script inside a throwaway repo, not the real gate: running the real
+# gate in a fixture tree would fail for a dozen unrelated reasons and prove nothing about the mode.
+prove_new_selftest() {
+  local fx rc=0 out base
+  fx="$(mktemp -d)"
+  (
+    cd "$fx" || exit 1
+    git init -q . && git config user.email t@t && git config user.name t
+    mkdir -p scripts
+    cat > scripts/stub <<'STUB'
+#!/usr/bin/env bash
+ok()  { printf '  \342\234\223 %s\n' "$*"; }
+bad() { printf '  \342\234\227 %s\n' "$*"; }
+ok "a pre-existing check nobody touched"
+STUB
+    chmod +x scripts/stub
+    git add -A && git commit -qm base
+  ) || { printf 'prove-new selftest: fixture setup failed\n' >&2; rm -rf "$fx"; return 1; }
+  base="$(git -C "$fx" rev-parse HEAD)"
+
+  # HEAD adds one check of every classification the mode has to tell apart.
+  cat > "$fx/scripts/stub" <<'STUB'
+#!/usr/bin/env bash
+ok()  { printf '  \342\234\223 %s\n' "$*"; }
+bad() { printf '  \342\234\227 %s\n' "$*"; }
+ok "a pre-existing check nobody touched"
+ok "an unconditional vacuous claim"
+[ -f marker.txt ] && ok "a genuine guarded new check" || bad "a genuine guarded new check missing"
+if [ -f marker.txt ]; then ok "a check that skips itself at base"; fi
+ok "$x-$y"
+ok "an invariant that already held"   # prove-new: regression-guard the tree already satisfied this
+STUB
+  : > "$fx/marker.txt"
+  ( cd "$fx" && git add -A && git commit -qm head ) >/dev/null 2>&1
+
+  out="$(prove_new "$fx" "scripts/stub" "$base" 2>&1)"
+  local o="$out"
+  printf '%s' "$o" | grep -q 'UNPROVEN.*an unconditional vacuous claim' \
+    || { bad "prove-new selftest: a vacuous check was not flagged UNPROVEN"; rc=1; }
+  printf '%s' "$o" | grep -q 'PROVEN.*a genuine guarded new check' \
+    || { bad "prove-new selftest: a genuine red-at-base check was not cleared as PROVEN"; rc=1; }
+  printf '%s' "$o" | grep -q 'UNPROVEN.*a check that skips itself at base' \
+    || { bad "prove-new selftest: a check absent at base was not flagged UNPROVEN"; rc=1; }
+  printf '%s' "$o" | grep -q 'UNKNOWN' \
+    || { bad "prove-new selftest: an unattributable label was not flagged UNKNOWN"; rc=1; }
+  printf '%s' "$o" | grep -q 'EXEMPT.*the tree already satisfied this' \
+    || { bad "prove-new selftest: a regression-guard was not exempted and named"; rc=1; }
+  prove_new "$fx" "scripts/stub" "$base" >/dev/null 2>&1 \
+    && { bad "prove-new selftest: the mode exited 0 with unproven checks present"; rc=1; }
+
+  [ $rc = 0 ] && ok "prove-new: discriminates vacuous / genuine / skipped / unattributable / exempt"
+  rm -rf "$fx"
+  return $rc
+}
+
+# Same integration-branch walk bd-review-package uses, so one repo has one idea of what BASE means.
+_default_base() {
+  local ref
+  for ref in staging origin/staging origin/main main; do
+    git rev-parse --verify --quiet "$ref" >/dev/null && { git merge-base "$ref" HEAD && return 0; }
+  done
+  git rev-parse --verify --quiet HEAD~1 >/dev/null && { git rev-parse HEAD~1; return 0; }
+  printf 'prove-new: no staging/main/HEAD~1 to derive a base from - pass one explicitly\n' >&2
+  return 1
+}
+
+case "${1:-}" in
+  selftest)   prove_new_selftest; exit $? ;;
+  # [base] [root] - the root override exists so this can be pointed at another checkout (auditing a
+  # past commit) without copying anything into it, which would make the diff read its own overlay.
+  --prove-new)
+    shift
+    prove_new "${2:-$ROOT}" "scripts/bd-package-check" "${1:-$(_default_base)}"; exit $? ;;
+esac
 
 # SKILL body with frontmatter, fenced code, inline code, and quoted spans removed - so a backticked
 # `@AGENTS.md` or a quoted "MUST" (naming a token to forbid it) doesn't read as a real violation.
