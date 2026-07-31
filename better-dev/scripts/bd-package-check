@@ -61,6 +61,8 @@ _check_tokens() {
     BEGIN { n = split(added, arr, " "); for (i = 1; i <= n; i++) if (arr[i] != "") want[arr[i] + 0] = 1 }
     {
       line = $0
+      # A comment naming ok "..." while explaining the rule is not a check. This very file has one.
+      if (line ~ /^[ \t]*#/) next
       if (heredoc != "") { if (line == heredoc || line == heredoc "\n") heredoc = ""; next }
       if (match(line, /<<[-]?'"'"'?[A-Za-z_][A-Za-z0-9_]*'"'"'?/)) {
         d = substr(line, RSTART, RLENGTH); gsub(/^<<-?'"'"'?|'"'"'$/, "", d); heredoc = d; next

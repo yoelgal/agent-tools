@@ -60,6 +60,17 @@ voice), every helper and hook passes its `selftest`, the JSON manifests parse, a
 failure. Run it before tagging a release, in CI, and - via `/self-extension` - before promoting a freshly
 authored skill. A green check is the definition of shippable.
 
+**Adding a check to the gate.** `bd-package-check --prove-new [base] [root]` audits the checks a diff
+adds: it runs the current script against the base tree and requires every added check to come back
+red there. Green at base means the check was vacuous - it passed before the thing it guards existed,
+so it proved nothing; absent at base means it silently skipped, which is no better. CI runs this on
+every PR, and `bd-package-check selftest` carries the fixtures proving the audit itself
+discriminates. Two things a new check needs to survive it: a label with a distinctive literal phrase
+(an entirely interpolated label cannot be matched back to its printed line, and fails as `UNKNOWN`),
+and a top-level call site (ok/bad inside a function body or a heredoc is not read as a check). A
+check that legitimately holds at base - a regression guard for an invariant that already passes -
+declares itself on the line with `# prove-new: regression-guard <why>` and is exempted by name.
+
 Bump the `version` in `.claude-plugin/plugin.json` per release; tag through `/release-promotion`. The
 gate also refuses an empty manifest `version`, holds the no-em/en-dash rule over shipped text, and runs an
 install/uninstall roundtrip in a throwaway `HOME` so a broken installer can't ship green.
