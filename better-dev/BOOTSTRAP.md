@@ -57,17 +57,26 @@ want it on **every** session on this machine instead - including repos that neve
 
 This is the one thing better-dev writes outside a repo, into the operator's own global entry file, so
 it happens only on an explicit yes - never as a side effect of installing. On a yes, read the host's
-`bd_host_global_entry` from its `hosts/*` adapter and write the shipped body into it:
+`bd_host_global_entry` from its `hosts/*` adapter and write the shipped body into it. `bd` is the
+better-dev dir inside whichever clone step 2 produced (`~/agent-tools/better-dev` on the clone path,
+the plugin's own checkout on the plugin path), not a fixed location:
 
 ```sh
-entry=$(. ~/agent-tools/better-dev/hosts/<host> && printf %s "$bd_host_global_entry")
-[ -n "$entry" ] && ~/agent-tools/better-dev/scripts/bd-block "$entry" better-dev-comms \
-  < ~/agent-tools/better-dev/docs/comms-block.md
+bd=~/agent-tools/better-dev                                    # or the plugin clone's better-dev/
+entry=$(. "$bd/hosts/<host>" && printf %s "$bd_host_global_entry")
+if [ -n "$entry" ]; then
+  mkdir -p "$(dirname "$entry")"                               # the host's config dir may not exist yet
+  "$bd/scripts/bd-block" "$entry" better-dev-comms < "$bd/docs/comms-block.md"
+else
+  echo "this host has no verified machine-global entry file - skipping, /onboard still offers it per repo"
+fi
 ```
 
-An empty `bd_host_global_entry` means this host has no verified machine-global entry file: decline and
-name the gap rather than inventing a path. On a no, write nothing - `/onboard` still offers it per repo.
-To remove it later: `bd-block remove "$entry" better-dev-comms`.
+The `mkdir -p` is load-bearing, not defensive: `bd-block` creates the file but not its parent, so on a
+machine where the host has been installed but never run, the write fails without it. An empty
+`bd_host_global_entry` means this host has no verified machine-global entry file: decline and name the
+gap rather than inventing a path. On a no, write nothing - `/onboard` still offers it per repo. To
+remove it later: `bd-block remove "$entry" better-dev-comms`.
 
 ## 3. Wire this repo - run `/onboard`
 

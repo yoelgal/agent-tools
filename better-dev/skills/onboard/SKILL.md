@@ -347,8 +347,10 @@ mirroring the discovery-block rule.
 **When the machine already carries it globally.** The operator may have taken the global option at
 install (`BOOTSTRAP.md`), which puts the same block in the host's own entry file - the
 `bd_host_global_entry` path in the matching `hosts/*` adapter, `~/.claude/CLAUDE.md` on Claude Code.
-Check that file for the `<!-- BEGIN better-dev-comms -->` marker before writing, and let what you find
-decide:
+Resolve the clone the same way the rest of this phase does, from the bridge this repo already has
+(`bd=$(dirname "$(dirname "$(readlink .better-dev/bin)")")`, or the install marker found in Phase 1,
+which holds the clone path); the adapter and the block body both live under it. Check the entry file
+for the `<!-- BEGIN better-dev-comms -->` marker before writing, and let what you find decide:
 
 - **Found, solo adoption:** skip the repo block and name the skip in the Phase 5 recap. The operator
   already reads it from the global file, and a second copy is a duplicate tax on every turn of every

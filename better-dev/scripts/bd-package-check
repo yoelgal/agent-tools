@@ -276,13 +276,20 @@ if [ -f "$CB" ]; then
   if [ -z "$ge" ]; then
     ok "global comms install: hosts/claude declines (nothing to assert)"
   else
-    mkdir -p "$(dirname "$ge")"
-    printf 'my own notes\n' > "$ge"          # operator content that must survive
-    "$ROOT/scripts/bd-block" "$ge" better-dev-comms < "$CB" >/dev/null 2>&1
-    if grep -qxF '<!-- BEGIN better-dev-comms -->' "$ge" 2>/dev/null && grep -qF 'my own notes' "$ge" 2>/dev/null; then
-      ok "global comms install: block lands in the host entry file, operator text survives"
+    # Run BOOTSTRAP's documented sequence verbatim, including its mkdir, against a HOME where the host
+    # config dir does NOT exist - the never-run-this-host case. Pre-creating the dir here would test a
+    # command nobody documented and hide a failure on exactly that machine.
+    [ -d "$(dirname "$ge")" ] && bad "global comms install: fixture HOME already has $(dirname "$ge"), the absent-dir case is not being tested"
+    ( mkdir -p "$(dirname "$ge")" && "$ROOT/scripts/bd-block" "$ge" better-dev-comms < "$CB" ) >/dev/null 2>&1
+    printf 'my own notes\n' >> "$ge"         # operator content added after, must survive a re-write
+    before="$(cat "$ge")"
+    ( mkdir -p "$(dirname "$ge")" && "$ROOT/scripts/bd-block" "$ge" better-dev-comms < "$CB" ) >/dev/null 2>&1
+    if grep -qxF '<!-- BEGIN better-dev-comms -->' "$ge" 2>/dev/null \
+       && grep -qF 'my own notes' "$ge" 2>/dev/null \
+       && [ "$before" = "$(cat "$ge")" ]; then
+      ok "global comms install: BOOTSTRAP's sequence works on a never-run host, idempotently"
     else
-      bad "global comms install: block did not land in $ge (or clobbered the operator's own text)"
+      bad "global comms install: BOOTSTRAP's documented sequence failed against $ge (absent config dir, operator text, or re-run)"
     fi
   fi
   rm -rf "$gt"
