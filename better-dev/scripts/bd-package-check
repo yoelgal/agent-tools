@@ -225,15 +225,17 @@ CB="docs/comms-block.md"
 if [ ! -f "$CB" ]; then
   bad "$CB missing (the comms block body's single home)"
 else
-  # Sentinel = the body's opening sentence. Tracked files only, so the raw/ archive (gitignored, and
-  # holding the upstream source verbatim) is out of scope by construction.
+  # Sentinel = the body's opening sentence. Scan the shipped surfaces the same way the dash gate does,
+  # NOT the git index: an uncommitted second copy is exactly the drift this gate exists to catch, and
+  # `git ls-files` cannot see one. raw/ is the gitignored source archive and stays out of scope.
   probe="The reader may have ADHD"
-  homes="$(git ls-files 2>/dev/null | grep -v '^raw/' \
+  homes="$(find skills scripts docs hooks hosts -type f 2>/dev/null; ls install.sh README.md BOOTSTRAP.md 2>/dev/null)"
+  homes="$(printf '%s\n' "$homes" \
     | while read -r f; do [ -f "$f" ] && grep -lqF "$probe" "$f" 2>/dev/null && printf '%s\n' "$f"; done \
     | grep -v 'scripts/bd-package-check' || true)"
   nhomes="$(printf '%s' "$homes" | grep -c . || true)"
   [ "$nhomes" = 1 ] && ok "comms block body has exactly one home ($CB)" \
-    || bad "comms block body must live in exactly one tracked file, found $nhomes:$(printf ' %s' $homes)"
+    || bad "comms block body must live in exactly one shipped file, found $nhomes:$(printf ' %s' $homes)"
   lines="$(grep -c '' "$CB" || true)"
   [ "$lines" -le 24 ] && ok "comms block within its 24-line cap ($lines)" \
     || bad "comms block is $lines lines, cap is 24 - cut a line before adding one"

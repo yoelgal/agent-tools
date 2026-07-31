@@ -8,3 +8,4 @@ bd_host_display="OpenAI Codex CLI"
 bd_host_cli="codex"                         # PATH probe for --host auto
 bd_host_skills_dir="$HOME/.codex/skills"    # native global skills dir
 bd_host_dir_policy="create"                 # convention verified on a real install - install.sh may mkdir
+bd_host_global_entry="$HOME/.codex/AGENTS.md"    # global instructions file loaded in every session

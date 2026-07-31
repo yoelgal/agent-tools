@@ -47,6 +47,28 @@ needs a re-run of `./install.sh` too, so new ones link and orphans prune. You ca
 interactive plugin installer as the agent; when one is needed, hand the operator a paste-ready command
 and continue once they confirm.
 
+## 2b. Offer the communication style, machine-wide (ask once)
+
+better-dev ships an ADHD-adapted communication style: lead with the action, one bounded step at a time,
+no preamble. `/onboard` writes it into each repo it wires. Ask the operator once, here, whether they
+want it on **every** session on this machine instead - including repos that never get onboarded:
+
+> Style every session on this machine, or per repo? (global / per-repo)
+
+This is the one thing better-dev writes outside a repo, into the operator's own global entry file, so
+it happens only on an explicit yes - never as a side effect of installing. On a yes, read the host's
+`bd_host_global_entry` from its `hosts/*` adapter and write the shipped body into it:
+
+```sh
+entry=$(. ~/agent-tools/better-dev/hosts/<host> && printf %s "$bd_host_global_entry")
+[ -n "$entry" ] && ~/agent-tools/better-dev/scripts/bd-block "$entry" better-dev-comms \
+  < ~/agent-tools/better-dev/docs/comms-block.md
+```
+
+An empty `bd_host_global_entry` means this host has no verified machine-global entry file: decline and
+name the gap rather than inventing a path. On a no, write nothing - `/onboard` still offers it per repo.
+To remove it later: `bd-block remove "$entry" better-dev-comms`.
+
 ## 3. Wire this repo - run `/onboard`
 
 With the tool globally available, run `/onboard` from inside the current repo. It detects the stack,

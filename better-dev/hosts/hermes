@@ -9,3 +9,8 @@ bd_host_display="Hermes"
 bd_host_cli="hermes"                        # PATH probe for --host auto
 bd_host_skills_dir="$HOME/.hermes/skills"   # native global skills dir (observed on a real machine)
 bd_host_dir_policy="require-existing"       # never mkdir - decline and name the missing path instead
+# No verified machine-global entry file: hermes loads AGENTS.md per working directory (not global) and
+# its per-session file is the persona SOUL.md, which is the operator's, not ours to write. Empty means
+# the global comms-block option declines for this host and names the gap - same posture as the
+# require-existing dir policy above: never a path we invented.
+bd_host_global_entry=""

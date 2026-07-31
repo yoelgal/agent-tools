@@ -332,48 +332,39 @@ better-dev is additive: it complements, never replaces, whatever else is install
 
 **Comms-style block.** Beside the discovery block, write a second marker-bounded block -
 `<!-- BEGIN better-dev-comms -->` / `<!-- END better-dev-comms -->` - carrying the ADHD-adapted
-communication style every later session in this repo speaks in. It is always written, no knob; only
-the destination follows the recorded adoption. Solo: it goes in the local-only entry file
-(`CLAUDE.local.md` on the Claude family), the same mechanism as above. Team: it goes in the shared
-entry file after one confirm at onboard - the style shapes every teammate's sessions, so the one
-adopter confirms before it lands shared; a declined confirm falls back to the local-only file, so
-the operator still gets it personally. A solo host with no local-only entry file skips this block
-too and names that in the Phase 5 recap, mirroring the discovery-block rule.
+communication style every later session in this repo speaks in. The body is not retyped here: it ships
+as one file, `docs/comms-block.md` in the better-dev clone, and both this path and the machine-global
+one at install write *that file's contents*. A second copy of the body is drift waiting to happen, and
+the drift would only surface on a user's machine.
+
+The destination follows the recorded adoption. Solo: the local-only entry file (`CLAUDE.local.md` on
+the Claude family), the same mechanism as above. Team: the shared entry file after one confirm at
+onboard - the style shapes every teammate's sessions, so the one adopter confirms before it lands
+shared; a declined confirm falls back to the local-only file, so the operator still gets it personally.
+A solo host with no local-only entry file skips this block too and names that in the Phase 5 recap,
+mirroring the discovery-block rule.
+
+**When the machine already carries it globally.** The operator may have taken the global option at
+install (`BOOTSTRAP.md`), which puts the same block in the host's own entry file - the
+`bd_host_global_entry` path in the matching `hosts/*` adapter, `~/.claude/CLAUDE.md` on Claude Code.
+Check that file for the `<!-- BEGIN better-dev-comms -->` marker before writing, and let what you find
+decide:
+
+- **Found, solo adoption:** skip the repo block and name the skip in the Phase 5 recap. The operator
+  already reads it from the global file, and a second copy is a duplicate tax on every turn of every
+  session in this repo.
+- **Found, team adoption:** write it anyway. The shared block is not for the operator, it is for
+  teammates who have no global block of their own.
+- **Not found:** write as usual, and let the recap name the global option once. The install-time ask
+  is prose an agent follows, so a missed ask should cost one line to recover, not a re-install.
 
 The write mechanism is the discovery block's: the host's file-edit tool in an interactive session,
-`printf '%s\n' "$BODY" | .better-dev/bin/bd-block <entry-file> better-dev-comms` in scripted
+`.better-dev/bin/bd-block <entry-file> better-dev-comms < <clone>/docs/comms-block.md` in scripted
 contexts. Replace in place between the markers, byte-stable across re-runs, never touching the
 operator's own text or the discovery block. The block is a per-turn tax deliberately capped small:
-at most 24 lines between the markers - cut a line before adding one. The template (adapted from
-ayghri/i-have-adhd, MIT; `bd-block` writes the markers itself, so the piped body is the lines
-between them):
-
-```markdown
-<!-- BEGIN better-dev-comms -->
-## Communication style
-
-The reader may have ADHD: shape output so the reader can act on it, not just read it.
-
-- Lead with the action: the first line is a command, path, or snippet to run - context after.
-- Number multi-step work; each step is one bounded action.
-- In interactive turns, end with one concrete next action doable in under two minutes.
-- One thing at a time: finish the issue at hand; offer a second issue as a separate question.
-- In multi-step work, a one-line state header ("Step 3 of 5 done: X. Next: Y") precedes the
-  action line - it is the recap, and narrative recaps stay out.
-- Estimate effort in agent terms ("2 files, one command to verify"), not wall-clock promises.
-- Make wins visible and concrete: what now works, and the command that shows it.
-- State errors matter-of-fact: cause and fix, nothing more.
-- Cap lists at 5 items; past that, split into do-now vs later.
-- Skip preamble and closing pleasantries: start with the answer, end when it ends.
-
-Override when: asked to explain (full body with headers, still no preamble); a destructive
-action is ahead (confirm first); three turns of "still broken" (name the suspect assumption,
-ask one diagnostic question); the request is genuinely ambiguous (one short question beats
-guessing). An artifact a skill requires rendered in full (a contract at its gate, a required
-recap, a report) renders in full; these rules shape everything around it. This block composes
-with other active style skills, never replaces them.
-<!-- END better-dev-comms -->
-```
+at most 24 lines between the markers, gated by `bd-package-check` - cut a line before adding one.
+`bd-block` writes the markers itself, so the piped body is only the lines between them. The body is
+adapted from ayghri/i-have-adhd (MIT), credited in `NOTICE`.
 
 Then confirm the `.better-dev/` scaffold exists (`bd-mem init` created it), the `bin` bridge resolves,
 and both blocks read correctly at their destinations.
