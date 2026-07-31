@@ -268,6 +268,27 @@ printf '%s' "$ritual" | grep -q 'better-dev-comms' \
   && ok "TRAPS revalidation names clearing the global comms block" \
   || bad "docs/TRAPS.md revalidation ritual does not name clearing the global comms block before grading"
 
+echo "== release offer tier =="
+# An opt-in capability reaches a NEW install through its own front door (BOOTSTRAP), but an already
+# wired machine only ever hears what the update path tells it. The `offer` flag is that channel;
+# these three gates keep it from silently rotting the way the comms option nearly did.
+grep -q '`offer`' docs/RELEASES.md \
+  && ok "RELEASES.md documents the offer tier" \
+  || bad "docs/RELEASES.md does not document the \`offer\` flag - opt-in capabilities have no announce channel"
+
+# offer is machine-scoped but delivered by a session sitting in a repo, and the only nudge that fires
+# is the reonboard one (bd-session-start is a safety-gated hooks/** surface we do not edit here). So
+# an offer that is not also a reonboard is an offer nobody is ever nudged to collect.
+lonely="$(awk '$2 ~ /(^|,)offer(,|$)/ && $2 !~ /(^|,)reonboard(,|$)/ {print $1}' docs/RELEASES.md 2>/dev/null)"
+[ -z "$lonely" ] \
+  && ok "every offer release also carries reonboard (so the session-start nudge reaches it)" \
+  || bad "offer without reonboard in RELEASES.md:$(printf ' %s' $lonely) - no nudge fires, nobody is asked"
+
+offer_step="$(awk '/^## 4\. Top up this repo only/{f=1} f&&/^## 5\./{exit} f{print}' skills/update/SKILL.md 2>/dev/null)"
+printf '%s' "$offer_step" | grep -q 'offer' \
+  && ok "update's top-up step acts on pending offer flags" \
+  || bad "skills/update step 4 never acts on the offer flag - pending offers are collected and dropped"
+
 # End to end in a throwaway HOME: the adapter's path, the shipped body, and bd-block together put the
 # block where a session will actually read it. Hermetic - never touches the operator's real HOME.
 if [ -f "$CB" ]; then

@@ -66,11 +66,19 @@ install/uninstall roundtrip in a throwaway `HOME` so a broken installer can't sh
 
 Every version bump lands with a matching `docs/RELEASES.md` line declaring its needs flags -
 `install` when the release added, removed, or renamed a skill dir, `reonboard` when it changed a
-repo surface - and a pull-only release needs no line at all. That line is a release-step
-requirement the releaser confirms when tagging through `/release-promotion`, not a mechanical
-check: `bd-package-check` does not read `RELEASES.md`, and the session-start nudge and `/update`
-do, so a missing-but-needed line silently downgrades the release to pull-only for every wired
-repo - a defect to fix before tagging.
+repo surface, `offer` when it added something opt-in the operator has to be asked about - and a
+pull-only release needs no line at all. Whether the line *exists* is a release-step requirement the
+releaser confirms when tagging through `/release-promotion`, not a mechanical check, so a
+missing-but-needed line silently downgrades the release to pull-only for every wired repo - a defect
+to fix before tagging. What `bd-package-check` does check is the offer tier's shape: that the tier
+stays documented, that `/update` still acts on it, and that no `offer` line ships without
+`reonboard` beside it, since only the reonboard nudge fires and an unpaired offer is one nobody is
+ever prompted to collect.
+
+`offer` is the tier to reach for whenever a release adds a capability nobody has yet opted into. A
+first install meets such a capability at its own front door (`BOOTSTRAP.md`), but an already-wired
+machine never runs that again - so without the flag the capability ships visible to new installs
+only. `docs/RELEASES.md` carries the full tier definition.
 
 ## Updating and breaking changes
 
