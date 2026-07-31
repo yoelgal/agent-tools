@@ -60,19 +60,26 @@ _check_tokens() {
   awk -v added="$addedlines" '
     BEGIN { n = split(added, arr, " "); for (i = 1; i <= n; i++) if (arr[i] != "") want[arr[i] + 0] = 1 }
     {
-      line = $0
+      line = $0; skip = ""
       # A comment naming ok "..." while explaining the rule is not a check. This very file has one.
-      if (line ~ /^[ \t]*#/) next
-      if (heredoc != "") { if (line == heredoc || line == heredoc "\n") heredoc = ""; next }
-      if (match(line, /<<[-]?'"'"'?[A-Za-z_][A-Za-z0-9_]*'"'"'?/)) {
-        d = substr(line, RSTART, RLENGTH); gsub(/^<<-?'"'"'?|'"'"'$/, "", d); heredoc = d; next
+      if (line ~ /^[ \t]*#/) skip = "comment"
+      else if (heredoc != "") { if (line == heredoc) heredoc = ""; skip = "heredoc" }
+      else if (match(line, /<<[-]?'"'"'?[A-Za-z_][A-Za-z0-9_]*'"'"'?/)) {
+        d = substr(line, RSTART, RLENGTH); gsub(/^<<-?'"'"'?|'"'"'$/, "", d); heredoc = d; skip = "heredoc"
       }
       # A one-liner definition (helper() { ...; }) opens and closes on the same line, so it must not
       # flip the in-function state - doing so swallows every real check below it.
-      if (line ~ /^[A-Za-z_][A-Za-z0-9_]*\(\)[ \t]*\{/) { if (line !~ /\}[ \t]*$/) infunc = 1; next }
-      if (infunc && line ~ /^\}/) { infunc = 0; next }
-      if (infunc) next
+      else if (line ~ /^[A-Za-z_][A-Za-z0-9_]*\(\)[ \t]*\{/) { if (line !~ /\}[ \t]*$/) infunc = 1; skip = "funcdef" }
+      else if (infunc && line ~ /^\}/) { infunc = 0; skip = "funcend" }
+      else if (infunc) skip = "infunc"
       if (!(NR in want)) next
+      # Count what the filter drops rather than dropping it silently: an unaudited check is exactly
+      # what this mode exists to catch, so its own blind spot has to be visible.
+      if (skip != "") {
+        probe = line
+        while (match(probe, /(^|[^A-Za-z0-9_])(ok|bad)[ \t]+"[^"]*"/)) { skipped++; probe = substr(probe, RSTART + RLENGTH) }
+        next
+      }
       reason = ""
       if (match(line, /# prove-new: regression-guard[ \t]*/)) {
         reason = substr(line, RSTART + RLENGTH); line = substr(line, 1, RSTART - 1)
@@ -88,6 +95,7 @@ _check_tokens() {
     # Pair here rather than in the shell: one record per CHECK keeps the caller free of arrays and
     # process substitution, both of which the repo pre-commit hook rejects via sh -n.
     END {
+      if (skipped > 0) { printf "__SKIPPED__\n%d\n\n", skipped }
       i = 1
       while (i <= t) {
         if (tk[i] == "OK" && tk[i + 1] == "BAD") { printf "%s\n%s\n%s\n", tl[i], tl[i + 1], tr[i]; i += 2 }
@@ -138,6 +146,10 @@ prove_new() {
   local oklab badlab why
   while IFS= read -r oklab && IFS= read -r badlab && IFS= read -r why; do
     [ -n "$oklab$badlab" ] || continue
+    if [ "$oklab" = "__SKIPPED__" ]; then
+      printf '  \033[33m\342\200\242\033[0m %s\n' "prove-new: $badlab added ok/bad call(s) sit inside a function, heredoc or comment and were NOT audited - a check placed there is invisible to this mode"
+      continue
+    fi
 
     if [ -n "$why" ]; then
       ok "prove-new: EXEMPT [$(_static_run "${oklab:-$badlab}")] - regression-guard: $why"
@@ -201,6 +213,10 @@ ok "an unconditional vacuous claim"
 if [ -f marker.txt ]; then ok "a check that skips itself at base"; fi
 ok "$x-$y"
 ok "an invariant that already held"   # prove-new: regression-guard the tree already satisfied this
+hidden_checks() {
+  ok "a vacuous claim tucked inside a function body"
+}
+hidden_checks
 STUB
   : > "$fx/marker.txt"
   ( cd "$fx" && git add -A && git commit -qm head ) >/dev/null 2>&1
@@ -217,6 +233,8 @@ STUB
     || { bad "prove-new selftest: an unattributable label was not flagged UNKNOWN"; rc=1; }
   printf '%s' "$o" | grep -q 'EXEMPT.*the tree already satisfied this' \
     || { bad "prove-new selftest: a regression-guard was not exempted and named"; rc=1; }
+  printf '%s' "$o" | grep -q 'NOT audited' \
+    || { bad "prove-new selftest: an ok/bad added inside a function was skipped without saying so"; rc=1; }
   prove_new "$fx" "scripts/stub" "$base" >/dev/null 2>&1 \
     && { bad "prove-new selftest: the mode exited 0 with unproven checks present"; rc=1; }
 
