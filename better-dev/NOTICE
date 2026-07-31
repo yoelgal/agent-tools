@@ -89,7 +89,8 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
   Amp handoff pattern - Sourcegraph (ideas only; the handoff artifact that moves a
     half-finished item between machines - reimplemented in worktree-branching's handoff
     notes, with better-dev's own consent re-pin on pick-up)
-  ayghri/i-have-adhd - ayghri            (MIT; onboard's comms-style block adapts its rules)
+  ayghri/i-have-adhd - ayghri            (MIT; docs/comms-block.md adapts its rules - written per
+    repo by onboard and machine-wide by BOOTSTRAP's install-time ask)
   Papercuts CLI - Steve Ruiz (@steveruizok, tldraw) (X post, ideas; the agent-facing
     friction-log channel reimplemented as bd-mem's papercut command and its session-start
     surfacing)

@@ -61,15 +61,15 @@ pointing at the right one, but a stale hand-typed path will not be. Empty output
 ## 3. Read the release ledger
 
 `docs/RELEASES.md` in the clone holds one line per release, newest first:
-`<version> <flags> - <summary>`, flags a comma-joined subset of `install,reonboard`. A version with
-no line is pull-only; a clone with no file at all declares nothing pending.
+`<version> <flags> - <summary>`, flags a comma-joined subset of `install,reonboard,offer`. A version
+with no line is pull-only; a clone with no file at all declares nothing pending.
 
 This repo's baseline is `.better-dev/wired-version`; a missing file means wired before 0.6.0, older
 than every listed version. Collect the flags of every listed version strictly greater than the
 baseline - compare numerically, field by field on the dots (awk or IFS), because `sort -V` differs
 across the BSD/GNU userlands this runs on. A pending `install` flag that step 2's diff did not
 already surface still means a one-time `install.sh` re-run; a pending `reonboard` flag goes to
-step 4.
+step 4, and so does a pending `offer` flag - collect its summary line, it is the question's text.
 
 ## 4. Top up this repo only
 
@@ -77,6 +77,18 @@ When a reonboard flag is pending, run the `/onboard` top-up for the current repo
 idempotent and only fills gaps. Current repo only: every other wired repo carries its own
 session-start nudge and reaches here lazily on its own consent, so a sweep across repos imposes a
 top-up nobody in those repos asked for.
+
+**Pending `offer` flags are asked, not applied.** An offer names a capability the release added that
+nobody has opted into; the other flags restore what the operator already chose, so they run on their
+own, and this one never does. Put each pending offer to the operator once - the release line's
+summary is the question's text, and the summary names where the capability is enabled so the answer
+is actionable rather than a pointer to go hunting. Ask them together in one pass when several are
+pending, take a no as a no, and apply only what they accept. The offer is a question about this
+machine, so it stands whether or not the reonboard top-up above had anything to fill.
+
+The `wired-version` stamp in step 5 is what closes an offer, which is why stamping last matters here
+too: an offer declined this run is not re-asked next run, and an offer never reached because the run
+stopped early is still pending when the operator comes back.
 
 ## 5. Stamp the wired version
 
