@@ -103,7 +103,11 @@ writes one itself.
 
 A host is one file: `hosts/<name>`, shell-sourceable KEY=value pairs, no code. Required:
 `bd_host_name` (equals the filename), `bd_host_display`, `bd_host_cli` (the binary probed for
-auto-detection), and `bd_host_skills_dir` (the host's native global skills dir, under `$HOME`).
+auto-detection), `bd_host_skills_dir` (the host's native global skills dir, under `$HOME`), and
+`bd_host_global_entry` (the file this host loads into every session on the machine, which
+`BOOTSTRAP.md` offers to write the comms block into). Set `bd_host_global_entry` empty when no such
+path is verified for the host - empty declines the global option and names the gap, where an absent
+field reads the same but only means nobody looked yet.
 Optional: `bd_host_dir_policy` - `create` only for a host whose skills-dir convention has been
 verified on a real install; everything else stays the default `require-existing`, and `install.sh`
 then links only into a directory the host itself created - a link into an invented path reports
