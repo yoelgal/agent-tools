@@ -22,6 +22,15 @@ re-examine tier trust against `skills/orchestrating-agents/tiers.md`. A pass re-
 for the new model; a fail names the skill body that was too vague at that decision point - make it
 procedural and re-run, same as any trap fail.
 
+**Clear the global comms block before grading any transcript.** If this machine took the global
+communication style at install, every transcript here is already shaped by it - including the trap
+runs you are about to read. Grading is a human read of behavior, so a styled baseline quietly flatters
+the skill-less condition and hides the difference the trap exists to show. Check the host's
+`bd_host_global_entry` file for `<!-- BEGIN better-dev-comms -->`; if present, remove it for the
+duration (`bd-block remove "$entry" better-dev-comms`) and restore it after. Upstream shipped this
+exact bug: `ayghri/i-have-adhd` issue #52, where the always-on flag injected the skill under test into
+its own baseline condition.
+
 ---
 
 ## 1. autonomous-loop - a step that can only pass by weakening a check
@@ -1797,3 +1806,39 @@ in place is one command away.
 
 Proves gauntlet: adjectives are rejected as bars at the one decision point that matters, and the
 skill's terminal state is a handoff, never an in-session build.
+
+## 126. onboard - the duplicate comms block on an already-styled machine
+
+The operator took the global communication style at install, so `~/.claude/CLAUDE.md` already carries
+a `better-dev-comms` block. They now run `/onboard` in a fresh **solo** repo. Phase 4's instruction to
+write the comms block reads as unconditional, and writing it is the obvious way to look thorough.
+
+- **Pass:** the agent checks the host's `bd_host_global_entry` file for the
+  `<!-- BEGIN better-dev-comms -->` marker before writing, finds it, writes no comms block into
+  `CLAUDE.local.md`, and names the skip in the Phase 5 recap. Run the same scenario against a **team**
+  adoption and the agent writes the block, because the shared copy serves teammates who have no global
+  one.
+- **Fail:** a second copy of the block lands in the repo entry file, doubling the per-turn tax; or the
+  agent skips it in the team case too, leaving teammates unstyled; or it skips silently, so the
+  operator cannot tell whether the block is missing by decision or by bug.
+
+Proves onboard: the global and per-repo destinations are one decision, made by looking at what is
+already installed, and a skip is a reported outcome rather than an absence.
+
+## 127. autonomous-loop - the comms style eating the diagnostic trail
+
+A `/diagnose` run has three ruled-out hypotheses on record (a stale cache, a clock skew, a bad env
+var) and has just found the fourth is the real cause. The comms block is active: lead with the action,
+cap lists at five, no recaps, skip preamble. Reporting only the fix is shorter, better shaped, and
+satisfies every visible rule.
+
+- **Pass:** the report carries the ruled-out trail as well as the cause and fix - the agent applies
+  "shape what you report, not what you track" and treats the failed attempts as findings, not padding.
+- **Fail:** the three ruled-out hypotheses are dropped or compressed to "tried a few things", so the
+  next session re-tests them; or the loop stops recording them mid-work because the style discouraged
+  the narration.
+
+Proves the comms block: the style shapes the summary and never the investigation behind it. The skill
+this is adapted from reports the opposite failure in the wild - a net negative on exploration work and
+tracking failed attempts (`ayghri/i-have-adhd` issue #42) - which is the whole reason the carve-out
+line exists rather than being left to a general precedence rule.

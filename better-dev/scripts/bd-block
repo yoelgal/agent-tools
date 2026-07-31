@@ -80,6 +80,22 @@ selftest() {
     grep -q "keep me" g.md                                  || { echo "FAIL: remove clobbered outside content"; exit 1; }
     "$SELF" remove g.md >/dev/null                          || { echo "FAIL: remove errored when no block"; exit 1; }
     [ "$pre" = "$(cat g.md)" ]                              || { echo "FAIL: remove-when-absent changed the file"; exit 1; }
+
+    # The global comms destination: the operator's own entry file, which is theirs first and may
+    # already carry another managed block. Two named blocks must be fully independent - the whole
+    # global-install story rests on this write never disturbing what it found.
+    printf 'my own notes\n' >h.md
+    printf 'discovery body\n' | "$SELF" h.md better-dev >/dev/null
+    printf 'comms body\n' | "$SELF" h.md better-dev-comms >/dev/null
+    b="$(cat h.md)"
+    printf 'comms body\n' | "$SELF" h.md better-dev-comms >/dev/null
+    [ "$b" = "$(cat h.md)" ]                                || { echo "FAIL: named block not idempotent"; exit 1; }
+    grep -q "my own notes" h.md                             || { echo "FAIL: named write clobbered operator text"; exit 1; }
+    grep -q "discovery body" h.md                           || { echo "FAIL: named write clobbered the sibling block"; exit 1; }
+    "$SELF" remove h.md better-dev-comms >/dev/null
+    grep -q "discovery body" h.md                           || { echo "FAIL: removing one block took the sibling"; exit 1; }
+    grep -q "my own notes" h.md                             || { echo "FAIL: removing one block took operator text"; exit 1; }
+    ! grep -q "comms body" h.md                             || { echo "FAIL: named block survived its own remove"; exit 1; }
   ) && r=0 || r=1
   rm -rf "$d"
   [ $r = 0 ] && echo "selftest OK" || { echo "selftest FAILED" >&2; exit 1; }
