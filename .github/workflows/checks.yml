@@ -8,6 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # prove-new diffs this ref against its base, and a default checkout is fetch-depth 1 -
+          # the base commit simply is not in the clone, so the mode would have nothing to compare.
+          fetch-depth: 0
       - name: git identity for selftests that commit in fixtures
         run: |
           git config --global user.email ci@better-dev.local
@@ -22,6 +26,15 @@ jobs:
           fi
       - name: package gate
         run: better-dev/scripts/bd-package-check
+      # A check that is green before the thing it guards exists proves nothing and reads exactly
+      # like one that works. Every check this diff adds has to come back red against the base tree.
+      - name: new checks must have been red before their implementation
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          base="$BASE_SHA"
+          [ -n "$base" ] || base="$(git rev-parse HEAD~1)"
+          better-dev/scripts/bd-package-check --prove-new "$base"
       - name: script and hook selftests
         run: |
           matched=0
