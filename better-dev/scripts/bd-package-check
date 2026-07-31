@@ -217,5 +217,74 @@ else
   rm -rf "$rt"
 fi
 
+echo "== comms-style block =="
+# The block ships from exactly one file. onboard writes it per repo and BOOTSTRAP offers it globally;
+# two copies of the body would drift, and the drift only shows up on a user machine. Also gate the
+# 24-line cap the block is deliberately held to - it is a per-turn tax in every session that loads it.
+CB="docs/comms-block.md"
+if [ ! -f "$CB" ]; then
+  bad "$CB missing (the comms block body's single home)"
+else
+  # Sentinel = the body's opening sentence. Tracked files only, so the raw/ archive (gitignored, and
+  # holding the upstream source verbatim) is out of scope by construction.
+  probe="The reader may have ADHD"
+  homes="$(git ls-files 2>/dev/null | grep -v '^raw/' \
+    | while read -r f; do [ -f "$f" ] && grep -lqF "$probe" "$f" 2>/dev/null && printf '%s\n' "$f"; done \
+    | grep -v 'scripts/bd-package-check' || true)"
+  nhomes="$(printf '%s' "$homes" | grep -c . || true)"
+  [ "$nhomes" = 1 ] && ok "comms block body has exactly one home ($CB)" \
+    || bad "comms block body must live in exactly one tracked file, found $nhomes:$(printf ' %s' $homes)"
+  lines="$(grep -c '' "$CB" || true)"
+  [ "$lines" -le 24 ] && ok "comms block within its 24-line cap ($lines)" \
+    || bad "comms block is $lines lines, cap is 24 - cut a line before adding one"
+fi
+
+# Every adapter declares where this host keeps its global entry file. Empty is a legitimate answer
+# (the host has no verified path, so the global option declines rather than inventing one); what is
+# not legitimate is the field being absent, which reads identically to "declines" while meaning
+# "nobody has thought about it yet".
+for a in hosts/*; do
+  [ -f "$a" ] || continue
+  h="$(basename "$a")"
+  grep -q '^bd_host_global_entry=' "$a" \
+    || { bad "hosts/$h: no bd_host_global_entry (set it, or set it empty to decline the global option)"; continue; }
+  ge="$(HOME=/nonexistent bash -c 'source "$1" && printf %s "${bd_host_global_entry:-}"' _ "$a" 2>/dev/null)"
+  case "$ge" in
+    "") ok "hosts/$h: declines the global comms block (no verified entry file)" ;;
+    /nonexistent/*) ok "hosts/$h: global entry under HOME" ;;
+    *) bad "hosts/$h: bd_host_global_entry not under HOME ($ge)" ;;
+  esac
+done
+
+# A machine carrying the global block styles every transcript on it, trap transcripts included. Trap
+# grading is a human read (docs/TRAPS.md says so itself), so the ritual has to name the clearance or
+# the reader silently grades a contaminated run. Upstream shipped exactly this bug in its own evals.
+# Scoped to the ritual's own section: TRAPS.md names better-dev-comms elsewhere (the trap about a
+# re-run mangling the block), so a whole-file grep would pass without the ritual ever saying it.
+ritual="$(awk '/^## Revalidation ritual/{f=1} f&&/^---/{exit} f{print}' docs/TRAPS.md 2>/dev/null)"
+printf '%s' "$ritual" | grep -q 'better-dev-comms' \
+  && ok "TRAPS revalidation names clearing the global comms block" \
+  || bad "docs/TRAPS.md revalidation ritual does not name clearing the global comms block before grading"
+
+# End to end in a throwaway HOME: the adapter's path, the shipped body, and bd-block together put the
+# block where a session will actually read it. Hermetic - never touches the operator's real HOME.
+if [ -f "$CB" ]; then
+  gt="$(mktemp -d)"
+  ge="$(HOME="$gt" bash -c 'source "$1" && printf %s "${bd_host_global_entry:-}"' _ hosts/claude 2>/dev/null)"
+  if [ -z "$ge" ]; then
+    ok "global comms install: hosts/claude declines (nothing to assert)"
+  else
+    mkdir -p "$(dirname "$ge")"
+    printf 'my own notes\n' > "$ge"          # operator content that must survive
+    "$ROOT/scripts/bd-block" "$ge" better-dev-comms < "$CB" >/dev/null 2>&1
+    if grep -qxF '<!-- BEGIN better-dev-comms -->' "$ge" 2>/dev/null && grep -qF 'my own notes' "$ge" 2>/dev/null; then
+      ok "global comms install: block lands in the host entry file, operator text survives"
+    else
+      bad "global comms install: block did not land in $ge (or clobbered the operator's own text)"
+    fi
+  fi
+  rm -rf "$gt"
+fi
+
 echo
 [ $fail = 0 ] && echo "package-check: PASS ($(ls skills/ | wc -l | tr -d ' ') skills)" || { echo "package-check: FAIL"; exit 1; }
