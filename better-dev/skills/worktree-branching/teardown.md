@@ -58,7 +58,16 @@ operator recover from reflog or a backup while the trail is still warm.
 
 ## The finish menu
 
-When the work-item is done and tests are green, offer the choice rather than assuming:
+One case is already settled and does not go to the menu. When the branch is merged into its base and
+its remote is gone, apply the test the destructive-step gate above states: nothing here fails
+"couldn't undo with a `git revert` or a re-clone", because every commit is in the base and the branch
+is recoverable from it. Take option 2's teardown, run it through the same guard and safe order, and
+report what you removed in one line. Asking here buys no scrutiny - the answer is not in doubt, and a
+question whose answer is not in doubt trains the operator to approve without reading, which is exactly
+what you need them not to do at option 4. Anything short of that state - unmerged commits, a live
+remote branch, a dirty tree, work you cannot prove landed - goes to the menu below.
+
+Otherwise, when the work-item is done and tests are green, offer the choice rather than assuming:
 
 1. **Push + PR into the integration branch** - keep the worktree (default; needed to iterate on
    review).
