@@ -263,13 +263,16 @@ that already landed:
 .better-dev/bin/bd-mem ledger put <work-item> pr.md - <<<'PR #<n> → <state>: <one line>'
 ```
 
-On merge or close, run the close-out - five lines, each written explicitly. The negative form is a line,
+On merge or close, run the close-out - six lines, each written explicitly. The negative form is a line,
 never an omission; a close-out with a line missing is unfinished:
 
 - **Lesson** - the one keyed lesson this PR's verification taught (`.better-dev/bin/bd-mem learn
   "<lesson>" <confidence> "<key>"`), or `no durable lesson: <why>` - an event of this run ("PR merged
   cleanly") is a receipt, not a lesson. Promote to a rule (`bd-mem remember`) only per the confidence
-  law in `bd-mem`.
+  law in `bd-mem`. That law is a test you apply, never a question you put to the operator: a fact
+  verified once this run is a `learn` (scored, reversible), one you have now watched hold more than
+  once is a `remember`, and neither needs a click. Offering the write instead of doing it spends a
+  turn to collect a yes that no policy asked for.
 - **Shared-behavior change** - if the diff renamed a pattern, altered a default others rely on, or added
   a step every future change in this area must take, record the convention as a rule
   (`.better-dev/bin/bd-mem remember "<rule>"`) and add one heads-up line to the PR body's brief naming
@@ -286,7 +289,17 @@ never an omission; a close-out with a line missing is unfinished:
 - **Parked follow-ups** - each follow-up or out-of-scope line the contract parked gets a disposition:
   `filed: #<n>`, `handed to operator: <line>`, or `dropped: <one-line reason>`. A contract with none
   parked writes `no parked follow-ups`.
-- **Worktree disposition** - on merge, offer teardown via `/worktree-branching` (its guard and safe order
-  own the mechanics), or record `kept: <why>`. Not tearing down is a line, never an omission.
+- **Worktree disposition** - on merge, tear down or keep via `/worktree-branching` (its finish menu and
+  guard own the mechanics, including which dispositions still need the operator), and record which one
+  you took. Not tearing down is a line, never an omission.
+- **Release** - read the recorded cadence (`.better-dev/bin/bd-mem recall "release-cadence"`; nothing
+  recorded resolves to `on-demand`). On `per-merge`, continue into `/release-promotion` in this same
+  turn and record what it settled - `promoted: <tag>`, or the gate that held it, since that skill fails
+  closed on its own checks and a held promote is a normal outcome. On `on-demand`, record `release:
+  owed - <why>` and leave the promote to the operator, or `not owed - <why>`. Naming the next skill in
+  a closing line is not continuing to it: the operator reads a "Next: run X" as work still owed, so on
+  `per-merge` the line reports a promote that already ran. One exemption keeps that from recursing - a
+  PR this skill opened on `/release-promotion`'s behalf (its version or manifest bump) is
+  release-internal and never triggers the cadence, or the release would release itself.
 
 When you revise this skill, follow `/writing-skills`.
