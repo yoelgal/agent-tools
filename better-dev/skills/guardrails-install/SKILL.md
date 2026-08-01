@@ -320,6 +320,20 @@ existed keeps behaving exactly as it did. As with the merge policy, the recordin
 allowance and never the act: `/release-promotion` still fails closed on every one of its own gates,
 and a held promote under `per-merge` is a normal outcome the close-out reports.
 
+One of those gates has to be settled in the same sitting or `per-merge` blocks on itself. The soak
+window defaults to 24h of wall-clock since the last merge, which a repo merging several times a day
+never clears, so every promote would hold on soak and hand the operator back the decision the cadence
+was recorded to remove. Where `per-merge` is proposed, record the soak policy with it - for a repo
+with no time-based window (`deploy-surface: none`, nothing baking in production), that is one full
+green CI cycle, which `/release-promotion` already accepts as the alternative to wall-clock:
+
+```bash
+.better-dev/bin/bd-mem remember "soak window: <one full green CI cycle | <n>h wall-clock>"
+```
+
+A `per-merge` cadence recorded without it is not wrong, only inert, and inert in the direction that
+looks like the feature failing rather than a gate holding.
+
 Where `auto-on-green` is recorded and the host has a permission config, wire the allowance so the
 merge command actually runs without a prompt at the moment it is earned: on the Claude family that is
 the merge command in the project's `.claude/settings.local.json` allow list (a gitignored personal
