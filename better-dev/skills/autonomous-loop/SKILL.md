@@ -214,8 +214,9 @@ checkout (its `.git/hooks` included), another worktree, global config - is not t
 directly. Route such an edit through the skill that owns the surface (`/guardrails-install` for
 guardrail hooks) or settle `NEEDS_INPUT` naming the target.
 
-One exception, and it is the only one: a target the **contract itself names**, approved at seal on
-the gated-paths line, is consented to - the crossing included. Naming an out-of-boundary target in a
+One exception, and it is the only one: a target the **contract itself names** and the operator
+approved at seal - on the gated-paths line, or as an explicit implementation decision naming that
+target - is consented to, the crossing included. Naming an out-of-boundary target in a
 contract and then stopping on it anyway is a double-ask, and it is the shape that makes seal
 pre-authorization worthless for precisely the writes that need it: the operator answered this exact
 question when saying yes to a contract that spelled the target out. Write it, record the crossing in
