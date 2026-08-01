@@ -408,6 +408,43 @@ utt groundwork    "greenfield" "new project" "from scratch" "foundation"
 utt pr-and-verify "pull request" "open a pr" " pr "
 [ $fail = 0 ] && ok "entry skills carry canonical user phrasings" || true
 
+echo "== enumerated-count drift =="
+# A regression guard (declared as such on the ok/bad line below - prove-new reads that declaration as
+# a trailing comment on the call, never from a comment block like this one). It exists because the
+# announced number and the list drift apart silently: a later edit adds a bullet, the count above it
+# still reads six, and the skill now tells the agent to stop one item early. Scoped tight on purpose -
+# only a count whose sentence ENDS in a colon and is immediately followed by a top-level "- " list,
+# which is the one shape where the number is a promise about the list rather than prose. Two sites
+# match today and both are correct; a looser pattern reported prose like "four lenses" whose list sits
+# three paragraphs away and would have to be waived rather than fixed.
+count_drift=""
+for f in $(find skills -name '*.md' 2>/dev/null); do
+  d="$(awk '
+    BEGIN{ w["two"]=2;w["three"]=3;w["four"]=4;w["five"]=5;w["six"]=6
+           w["seven"]=7;w["eight"]=8;w["nine"]=9;w["ten"]=10 }
+    { L[NR]=$0 }
+    END{
+      for(i=1;i<=NR;i++){
+        if(match(L[i],/(two|three|four|five|six|seven|eight|nine|ten) (lines|steps|moves|checks|rungs|lenses|categories)/)==0) continue
+        tok=substr(L[i],RSTART,RLENGTH); split(tok,p," "); want=w[p[1]]
+        para=""; for(j=i;j<=NR && L[j]!="";j++) para=para L[j]
+        if(para !~ /:$/) continue
+        k=j; while(k<=NR && L[k]=="") k++
+        if(L[k] !~ /^- /) continue
+        n=0
+        while(k<=NR){
+          if(L[k] ~ /^- /) n++
+          else if(L[k]=="" || L[k] ~ /^  /){ }
+          else break
+          k++
+        }
+        if(n!=want) printf "%s:%d(%s!=%d) ", FILENAME, i, tok, n
+      }
+    }' "$f")"
+  count_drift="$count_drift$d"
+done
+[ -z "$count_drift" ] && ok "enumerated counts match the list that follows" || bad "enumerated count drift: $count_drift" # prove-new: regression-guard a skill announcing "six lines" above six bullets is correct at base; this catches the later edit that adds a seventh and leaves the count reading six
+
 echo "== install/uninstall roundtrip (every adapter) =="
 # Prove the two lifecycle deliverables stay honest for every registered host: a clean HOME installs,
 # links resolve, a planted foreign skill is left alone, and bd-uninstall removes only ours. Pre-creating
