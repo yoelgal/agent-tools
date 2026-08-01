@@ -271,8 +271,34 @@ Anything unresolved. If one blocks the plan, the state is NEEDS_INPUT - stop, do
 ## Merge
 merge: <auto | hold> - <auto only where the repo records merge-policy: auto-on-green and the
 user said auto for this item at seal; hold otherwise, including when no policy is recorded>
-This line is mechanically unskippable: `.better-dev/bin/bd-mem ledger approve` refuses a contract
-without a `merge: auto` or `merge: hold` line, so a seal that skipped the question cannot pin.
+gated paths: <recorded safety-gate paths this item is expected to touch, AND any write target outside
+this work-item's worktree (the primary checkout, global config, another repo), each with the
+operator's answer - or "none expected">
+The **merge** line is mechanically unskippable: `.better-dev/bin/bd-mem ledger approve` refuses a
+contract without a `merge: auto` or `merge: hold` line, so a seal that skipped the question cannot
+pin. The **gated-paths** line has no such mechanical check - `ledger approve` does not read it - so
+the pre-seal checklist below is the only thing that catches its absence. Say so rather than letting
+its position next to an enforced line imply an enforcement it does not have.
+
+The gated-paths line carries two kinds of entry, both asked at the only moment they can still change
+anything: a known human gate, and a write this item will have to make outside its own worktree. The
+second is there because `/autonomous-loop`'s edit boundary stops on an out-of-boundary target unless
+the contract named it - so a target named and answered here is the difference between the loop writing
+it and the loop handing the operator a command to run. Recall the repo's gates while writing this section (`.better-dev/bin/bd-mem recall
+"safety"`, then the overrides layer, which wins) and check them against the surface this plan already
+says it will touch. Where they intersect, name the intersection and put the gate to the user here,
+in the same breath as the merge question they are answering anyway. A gate first raised after the
+work is built collects a rubber stamp: at that point the only options are approve or discard ninety
+minutes of work, and an operator who cannot realistically say no is not reviewing, whatever the log
+records. Asked at seal, no is still cheap - the plan can change seam, scope, or approach in a
+sentence.
+
+This is pre-authorization, never a replacement. What the seal names is a prediction of blast radius,
+and predictions are wrong: an item that grows into a gated path nobody listed was never authorized
+for it, so the merge-time gate stands and fires on any gated path this line did not name. An item
+cannot buy its way out of a gate by mis-predicting its own reach, and the loop's mid-run escalation
+(`/autonomous-loop`'s human-gate classes) is unaffected - the log of what was consented at seal is
+exactly the list of what does not stop twice.
 
 ## Ground truth
 Verdict from the baseline check + link to ground-truth.md.
@@ -289,6 +315,9 @@ Before you pin the contract, each line reads yes or the contract isn't ready:
   number is an invented one.
 - The Merge line reads `auto` or `hold` - `auto` only where the repo records
   `merge-policy: auto-on-green` AND the user chose auto for this item (asked at seal, never assumed).
+- The gated-paths line names every recorded safety gate this plan's own surface intersects, each with
+  the user's answer, or reads `none expected` - checked against a live `recall "safety"` plus the
+  overrides layer, never from memory of what this repo gates.
 - The stop conditions are specific to this plan's real risks, not boilerplate.
 - No secret values appear anywhere - locations and credential types only.
 - Every promoted objection and lens finding has its matching contract line - an open concern, an

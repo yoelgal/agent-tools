@@ -212,8 +212,11 @@ rather than asserted:
   root cause - so a future red on this test identifies itself as *this bug recurring*, not as a new
   mystery or a flake candidate.
 - **Merge disposition** - the same seal question `/plan-grill`'s done-contract defines settles the
-  fix-contract's `merge: auto | hold` line; a fix earns auto-merge exactly the way a feature does,
-  never by being "just a fix".
+  fix-contract's `merge: auto | hold` line and its gated-paths line; a fix earns auto-merge exactly
+  the way a feature does, never by being "just a fix". The gated-paths line earns its keep here in
+  particular: a diagnosis already knows the file the root cause sits in, so whether the fix lands on a
+  gated path is answerable now rather than at merge, and a fix is the work-item most likely to be
+  aimed straight at machine-touching or high-consequence code.
 
 Then hand to `/autonomous-loop`. The same loop that builds features drives this red→green: it writes
 the regression test, watches it fail, applies the fix, watches it pass, and re-runs the Phase 1 signal
