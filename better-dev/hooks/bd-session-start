@@ -7,7 +7,9 @@
 # apply, the in-flight work-item count and a model-changed staleness warning.
 # Every run also emits a one-line user-visible welcome (systemMessage), wired
 # or not; when better-dev is not installed that welcome is the only output -
-# the hook never errors and never blocks the session.
+# the hook never errors and never blocks the session. When a nudge asks the
+# operator to act (/update, install.sh), that welcome line carries a short
+# marker: the agent-facing context is invisible to the human who has to run it.
 #
 # Reimplemented for better-dev from understanding of superpowers' session-start
 # (MIT, Jesse Vincent): the single-pass JSON escape, the three-way platform
@@ -204,7 +206,7 @@ reonboard_nudge() {
 }
 
 emit() {
-  local root="$1" note lessons n inflight bdm rows cnt oldest papercut_nudge papercuts fpnote fpcur fprec context escaped welcome custom
+  local root="$1" note lessons n inflight bdm rows cnt oldest papercut_nudge papercuts fpnote fpcur fprec context escaped welcome custom upd rnb lnk mark ver
   # Per-repo welcome wording: a "better-dev welcome: <text>" line in overrides.md
   # replaces the default (same knob style as "better-dev auto-update:"). Only the
   # wired message is overridable - an unwired repo has no overrides to read.
@@ -281,10 +283,28 @@ emit() {
   # Tier disposition rides the session note because dispatch decisions also happen outside any
   # skill trigger - an orchestrator using the host's raw fan-out never loads tiers.md on its own.
   context="better-dev practices are installed in this repo. The project's conventions and the list of available skills (onboard, plan-grill, diagnose, autonomous-loop, review, orchestrating-agents, worktree-branching, and more) live in a managed better-dev block in this project's CLAUDE.md or AGENTS.md; each skill self-describes through its description. Dispatching workers or fanning out agents? run each stage at the least-capable tier that fits it and escalate at judgment points - the reference is orchestrating-agents' tiers.md and the recorded tier-map (.better-dev/bin/bd-mem recall \"tier-map\").${note}${lessons}${inflight}${papercut_nudge}${papercuts}${fpnote}"
-  context="${context}$(update_nudge "$root/.better-dev/overrides.md")"
-  context="${context}$(reonboard_nudge "$root")"
-  context="${context}$(link_nudge)"
+  upd="$(update_nudge "$root/.better-dev/overrides.md")"
+  rnb="$(reonboard_nudge "$root")"
+  lnk="$(link_nudge)"
+  context="${context}${upd}${rnb}${lnk}"
   escaped=$(escape_for_json "$context")
+
+  # A nudge asks a HUMAN to run /update or install.sh, but additionalContext only
+  # ever reaches the agent - so a pending action also rides the one operator-visible
+  # line. The agent keeps its copy (it is the one that runs the thing); this stops
+  # delivery from depending on the agent choosing to relay it. Silent when nothing
+  # is pending, and appended after the welcome so a custom welcome still wins the
+  # wording. Static text plus a dotted version already matched against
+  # ^[0-9]+\.[0-9]+\.[0-9]+$ - no JSON-special characters to escape.
+  mark=""
+  if [ -n "$rnb" ]; then
+    ver="${rnb#*; }"; ver="${ver%% *}"
+    mark=" - update pending ($ver), run /update"
+  else
+    case "$upd" in *'update available'*) mark=" - update available, run /update" ;; esac
+  fi
+  [ -n "$lnk" ] && mark="${mark} - skill links missing, run install.sh"
+  welcome="${welcome}${mark}"
 
   # Emit only the field the current host reads. Cursor wants snake_case
   # additional_context; Claude Code wants nested hookSpecificOutput; Copilot and
@@ -333,12 +353,14 @@ if [ "${1:-}" = "selftest" ]; then
 
   # Per-repo welcome wording: a "better-dev welcome:" override line replaces the
   # default systemMessage, JSON-escaped; removing the line restores the default.
+  # HOME is pinned at an install-free dir so the symlink fallback can't reach a
+  # real clone and append a pending-action marker to these exact-match asserts.
   printf '  better-dev  welcome: Howdy "team" at ACME \r\n' >> "$tmp/proj/.better-dev/overrides.md"
-  out="$(cd "$tmp/proj" && CLAUDE_PLUGIN_ROOT=x "$SELF")" || fail "errored with welcome override"
+  out="$(cd "$tmp/proj" && HOME="$tmp" CLAUDE_PLUGIN_ROOT=x "$SELF")" || fail "errored with welcome override"
   printf '%s' "$out" | jq -e . >/dev/null || fail "welcome-override output not valid JSON"
   [ "$(printf '%s' "$out" | jq -r '.systemMessage')" = 'Howdy "team" at ACME' ] || fail "custom welcome not applied"
   printf 'note: better-dev welcome: prefixed knob\n' > "$tmp/proj/.better-dev/overrides.md"
-  out="$(cd "$tmp/proj" && CLAUDE_PLUGIN_ROOT=x "$SELF")" || fail "errored with prefixed knob line"
+  out="$(cd "$tmp/proj" && HOME="$tmp" CLAUDE_PLUGIN_ROOT=x "$SELF")" || fail "errored with prefixed knob line"
   [ "$(printf '%s' "$out" | jq -r '.systemMessage')" = 'prefixed knob' ] || fail "prefixed knob line not stripped through the knob"
   printf 'use tabs\n' > "$tmp/proj/.better-dev/overrides.md"
   out="$(cd "$tmp/proj" && CLAUDE_PLUGIN_ROOT=x "$SELF")" || fail "errored after welcome removal"
@@ -487,11 +509,14 @@ if [ "${1:-}" = "selftest" ]; then
   out="$(cd "$tmp/proj" && HOME="$home1" CLAUDE_PLUGIN_ROOT="$lclone" "$SELF")"
   printf '%s' "$out" | jq -e . >/dev/null || fail "link-nudge output not valid JSON"
   printf '%s' "$out" | grep -q "no link for this host (b)" || fail "missing link nudge for unlinked skill b"
+  printf '%s' "$out" | jq -r '.systemMessage' | grep -q 'skill links missing, run install.sh' || fail "missing link nudge from the operator-visible welcome"
 
   # All linked -> no nudge.
   ln -s "$lclone/skills/b" "$home1/.claude/skills/b"
   out="$(cd "$tmp/proj" && HOME="$home1" CLAUDE_PLUGIN_ROOT="$lclone" "$SELF")"
   printf '%s' "$out" | grep -q "no link for this host" && fail "link nudge fired with everything linked"
+  # Nothing pending -> the welcome stays exactly the default, no marker.
+  [ "$(printf '%s' "$out" | jq -r '.systemMessage')" = "$WELCOME_WIRED" ] || fail "welcome carried a marker with nothing pending"
 
   # Host skills dir with no better-dev entries at all (plugin-only) -> silent.
   home2="$tmp/home2"; mkdir -p "$home2/.claude/skills/unrelated"
@@ -514,6 +539,15 @@ if [ "${1:-}" = "selftest" ]; then
   printf '%s' "$out" | jq -e . >/dev/null || fail "reonboard output not valid JSON"
   printf '%s' "$out" | grep -q "wired at 0.5.1; 0.6.0 changed the repo surface" || fail "missing reonboard nudge behind a reonboard release"
   printf '%s' "$out" | grep -q "run /update" || fail "reonboard nudge must name /update"
+  # ...and the operator sees it: additionalContext never reaches the human, so the
+  # welcome line carries the pending action too.
+  [ "$(printf '%s' "$out" | jq -r '.systemMessage')" = "$WELCOME_WIRED - update pending (0.6.0), run /update" ] || fail "pending reonboard missing from the operator-visible welcome"
+
+  # A custom welcome keeps winning the wording; the marker only appends to it.
+  printf 'better-dev welcome: ACME\n' > "$tmp/proj/.better-dev/overrides.md"
+  out="$(cd "$tmp/proj" && HOME="$home3" CLAUDE_PLUGIN_ROOT="$rclone" "$SELF")"
+  [ "$(printf '%s' "$out" | jq -r '.systemMessage')" = 'ACME - update pending (0.6.0), run /update' ] || fail "custom welcome lost to the pending-action marker"
+  printf 'use tabs\n' > "$tmp/proj/.better-dev/overrides.md"
 
   # Reonboard retry: a plugin root with skills/ but no release ledger must fall
   # back to the symlink-resolved clone that has one (mirror of copyroot above).

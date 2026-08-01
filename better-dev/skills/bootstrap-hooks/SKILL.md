@@ -30,7 +30,11 @@ Two extensionless bash scripts and a manifest, all under `hooks/`:
   The nudge only suggests `git -C <clone> pull`; it never
   pulls on its own, honoring never-blocking. A project that wants hands-off updates can opt in with a
   `better-dev auto-update: ff-only` line in its overrides, which lets the clone fast-forward itself -
-  and only fast-forward, so it can never clobber local work.
+  and only fast-forward, so it can never clobber local work. Nudges that ask a *person* to act (a
+  pending `/update`, a missing skill link) also append a short marker to the one-line
+  `systemMessage` welcome: the context field reaches the agent alone, and delivery must not depend
+  on the agent relaying it. The marker is silent when nothing is pending, and a per-repo
+  `better-dev welcome:` override still wins the wording it appends to.
 - `bd-subagent-start` - fires when the host dispatches a subagent. SessionStart context reaches the
   parent thread only, so a fresh worker would otherwise run better-dev-unaware. This re-injects a
   *short* note - the practices and overrides still apply, see `/orchestrating-agents` for how
