@@ -273,8 +273,11 @@ merge: <auto | hold> - <auto only where the repo records merge-policy: auto-on-g
 user said auto for this item at seal; hold otherwise, including when no policy is recorded>
 gated paths: <recorded safety-gate paths this item is expected to touch, with the operator's answer
 for them - or "none expected">
-This line is mechanically unskippable: `.better-dev/bin/bd-mem ledger approve` refuses a contract
-without a `merge: auto` or `merge: hold` line, so a seal that skipped the question cannot pin.
+The **merge** line is mechanically unskippable: `.better-dev/bin/bd-mem ledger approve` refuses a
+contract without a `merge: auto` or `merge: hold` line, so a seal that skipped the question cannot
+pin. The **gated-paths** line has no such mechanical check - `ledger approve` does not read it - so
+the pre-seal checklist below is the only thing that catches its absence. Say so rather than letting
+its position next to an enforced line imply an enforcement it does not have.
 
 The gated-paths line is where a known human gate gets asked at the only moment it can still change
 anything. Recall the repo's gates while writing this section (`.better-dev/bin/bd-mem recall

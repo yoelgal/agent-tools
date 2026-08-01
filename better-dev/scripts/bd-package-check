@@ -418,7 +418,7 @@ echo "== enumerated-count drift =="
 # match today and both are correct; a looser pattern reported prose like "four lenses" whose list sits
 # three paragraphs away and would have to be waived rather than fixed.
 count_drift=""
-for f in $(find skills -name '*.md' 2>/dev/null); do
+for f in $(find skills docs -name '*.md' 2>/dev/null); do
   d="$(awk '
     BEGIN{ w["two"]=2;w["three"]=3;w["four"]=4;w["five"]=5;w["six"]=6
            w["seven"]=7;w["eight"]=8;w["nine"]=9;w["ten"]=10 }
