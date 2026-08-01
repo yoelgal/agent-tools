@@ -76,6 +76,17 @@ writes a matching keyed line here; the loop reads this overrides layer first. Wa
 safety gate waived to get past a moment of frustration is a different bar for the same code - if the reason
 is deadline rather than a real change of policy, keep the gate and take the one-off.
 
+Matching that key replaces the whole baseline entry, so write the override you actually mean. The
+baseline commonly holds several distinct gates under one key - `safety-gate:` typically names both the
+change classes and the specific paths that gate a human - and a general override written against that
+key does not sit beside them, it stands in for all of them. "The agent merges its own green PR without
+a human click" reads as a statement about the ordinary case and silently cancels the path-scoped gate
+on machine-touching code that the same key was carrying. An override meant to narrow rather than waive
+has to say what survives it, in its own text: name the exception ("except the recorded machine-touching
+paths, which keep their gate") rather than trusting a reader to infer that a broad line was meant
+narrowly. The tell that this went wrong is a gate nobody remembers retiring - still recorded in the
+baseline, still quoted in reviews, and dead on paper for weeks.
+
 ## The read-first side
 
 Every skill reads the overrides before it applies a default, so an accepted override quietly wins from
