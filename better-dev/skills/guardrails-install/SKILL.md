@@ -293,6 +293,7 @@ this skill's prose above is the authoritative home for what each key means:
 .better-dev/bin/bd-mem remember "safety-gate: <classes with a real surface here>"
 .better-dev/bin/bd-mem remember "safety-scope: <n>"                    # files touched that trip the scope gate; ~10 default
 .better-dev/bin/bd-mem remember "merge-policy: <auto-on-green | human>" # standing allowance: who MAY merge a gates-passed green PR
+.better-dev/bin/bd-mem remember "release-cadence: <per-merge | on-demand>" # whether a merge continues into /release-promotion
 ```
 
 The merge policy is recorded the same way the branch structure is - detected, proposed, written on a yes.
@@ -305,6 +306,19 @@ standing *allowance*, never the act - each work-item's contract carries its own 
 line (the seal question `/plan-grill`'s done-contract defines); the recording alone never merges
 anything. `/pr-and-verify`'s DONE state owns the full merge condition; an unset policy holds the
 merge for the operator.
+
+The release cadence is the same shape one step further down the chain, and it answers a question the
+merge policy does not: once a PR is merged, does the work continue into `/release-promotion` or stop
+there. The proposed default is `on-demand` - the merge lands, the close-out records that a release is
+owed, and the operator asks for it - because in most repos a release ships to real users and silence
+is never consent. Propose `per-merge` only where a release is cheap and reversible enough that
+batching buys nothing: the recalled `deploy-surface` is `none` (a library or CLI whose release is a
+tag plus a pull), or the repo already tags at roughly the rate it merges. Its payoff is that the
+version-bearing surface stops drifting from the branch, which is the failure a per-release version
+gate exists to catch. Recording nothing resolves to `on-demand`, so a repo wired before this key
+existed keeps behaving exactly as it did. As with the merge policy, the recording is the standing
+allowance and never the act: `/release-promotion` still fails closed on every one of its own gates,
+and a held promote under `per-merge` is a normal outcome the close-out reports.
 
 Where `auto-on-green` is recorded and the host has a permission config, wire the allowance so the
 merge command actually runs without a prompt at the moment it is earned: on the Claude family that is
