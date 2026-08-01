@@ -488,3 +488,49 @@ the second-consumer case the earlier rejection named as its predicate, so that r
 overridden. Branch discipline stays repo-wide (feat/* off staging, promoted to main); version stamps and
 release ledgers stay per tool. Clone detection accepts both shapes (a pre-0.7.0 install resolves the old
 repo root; `normalize_clone` in bd-session-start and the /update snippet step down into `better-dev/`).
+
+## D25 - the chain continues by default; a known gate is asked at seal (2026-08-01; user-ratified)
+
+From dogfooding issue 57: four operator stops in one work-item, three of which no policy required.
+Rulings, in the order they bind.
+
+1. **A recorded cadence decides the promote, not the agent's read.** `/guardrails-install` records
+`release-cadence: per-merge | on-demand` beside `merge-policy`. Default and unrecorded both resolve to
+`on-demand`, so every repo wired before this key behaves exactly as it did. On `per-merge`,
+`/pr-and-verify` continues into `/release-promotion` in the same turn; that skill still fails closed on
+its own gates, and a held promote is a normal reported outcome. A PR opened on `/release-promotion`'s
+behalf (its version or manifest bump) is release-internal and never triggers the cadence, or the
+release releases itself. Naming a successor skill in a closing line is NOT continuing to it: the
+operator reads "Next: run X" as work still owed, which is what made the stop.
+
+2. **The close-out is the only thing that binds.** `/pr-and-verify` had carried "hand the merged PR to
+`/release-promotion`" in prose since before this, and it produced a menu anyway, because the mandatory
+close-out enumerated five lines and none of them was the release. Second occurrence of the recorded
+`gate-at-decision-point` lesson (the plugin.json version drift was the first). The enforcing line lives
+in the checklist or it does not exist. Close-out is now six lines.
+
+3. **`bd-mem`'s confidence law is a test, not a question.** Nothing in the library ever gated a memory
+write on operator consent; `scripts/bd-mem` gates `remember` on verification alone. A fact verified
+once this run is a `learn`, one watched hold more than once is a `remember`, and neither needs a click.
+Offering the write spends a turn collecting a yes no policy asked for.
+
+4. **A same-key override replaces the whole baseline entry.** The precedence itself is unchanged
+(overrides win over the recalled baseline). What was missing is that one key commonly carries several
+gates: this repo's general "agent merges its own green PR" override silently cancelled the path-scoped
+`hooks/**` gate under the same `safety-gate` key, and the gate survived for weeks only because agents
+read the baseline and skipped the precedence rule. An override meant to narrow rather than waive must
+name what survives it. `/overrides` says so at the line that creates the collision.
+
+5. **A known human gate is pre-authorized at seal, and the merge-time gate stands as backstop.** The
+contract gains a `gated paths:` line beside the `merge:` line that `bd-mem ledger approve` already
+refuses to pin without. Rationale is the cost of "no": at seal, no changes the seam or scope in a
+sentence; at merge, no discards finished work, so the answer is structurally yes and the gate has
+stopped reviewing anything. Because the seal names a PREDICTION of blast radius, it is
+pre-authorization and never a replacement - a gated path the seal did not name still stops at merge,
+so an item cannot escape a gate by mis-predicting its own reach.
+
+Rejected: a new stop taxonomy. D1 already defines `NEEDS_INPUT` as "needs human/context/approval"; what
+was missing was a predicate, not a vocabulary. Also rejected: resolving same-key collisions by
+specificity (makes "which is narrower" a judgment call at the moment a safety gate fires) and surfacing
+them for the operator to resolve (adds a stop, in the safety class). Deferred, not refused: a
+library-wide closed list of never-ask actions.
