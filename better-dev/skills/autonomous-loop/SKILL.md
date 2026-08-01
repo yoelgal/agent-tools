@@ -211,9 +211,21 @@ same policy mechanically, and a deny or ask it raises is handled the same way: s
 the hook's message as the evidence - never retry the write, never lift the boundary to push through.
 The boundary also decides *where* a step may write: a target outside this worktree - the primary
 checkout (its `.git/hooks` included), another worktree, global config - is not the loop's to edit
-directly even when the contract names the seam, because the contract consents to the change, not to
-crossing the boundary. Route such an edit through the skill that owns the surface
-(`/guardrails-install` for guardrail hooks) or settle `NEEDS_INPUT` naming the target.
+directly. Route such an edit through the skill that owns the surface (`/guardrails-install` for
+guardrail hooks) or settle `NEEDS_INPUT` naming the target.
+
+One exception, and it is the only one: a target the **contract itself names**, approved at seal on
+the gated-paths line, is consented to - the crossing included. Naming an out-of-boundary target in a
+contract and then stopping on it anyway is a double-ask, and it is the shape that makes seal
+pre-authorization worthless for precisely the writes that need it: the operator answered this exact
+question when saying yes to a contract that spelled the target out. Write it, record the crossing in
+`approvals.log` as you would a waiver, and continue. Two things the exception does not cover, both
+because the seal cannot have consented to them: a denylist or human-gate-class path, which escalates
+on its own terms however the contract reads, and a target the contract did NOT name, which is the
+mis-prediction case the backstop exists for. And a missing tool is never the trigger for this stop -
+that the owning skill has no operation for the edit (an append-only recorder asked to replace a line)
+is a gap to route around or report, not consent the operator withheld. Handing over a command you
+wrote yourself, for a change already approved, is the stop this whole rule is meant to prevent.
 And watch for motion that mimics progress: a fix cascading into files it wasn't scoped to, or a refactor
 widening past what the contract asked - catch it mid-pass and re-pick the smallest change that satisfies
 the contract, rather than let it run out to the contract's scope tripwire that would stop it anyway. For

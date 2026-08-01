@@ -529,6 +529,16 @@ stopped reviewing anything. Because the seal names a PREDICTION of blast radius,
 pre-authorization and never a replacement - a gated path the seal did not name still stops at merge,
 so an item cannot escape a gate by mis-predicting its own reach.
 
+6. **A contract-named out-of-boundary target is consented to, crossing included.** `/autonomous-loop`'s
+edit boundary previously read "not the loop's to edit directly even when the contract names the seam,
+because the contract consents to the change, not to crossing the boundary" - which makes ruling 5's
+pre-authorization worthless for exactly the writes that need it. Caught by dogfooding this very
+work-item: the contract named this repo's `overrides.md` reword, the operator approved that text
+verbatim at seal, and the loop handed back a command it had written itself rather than running it.
+Naming a target and then stopping on it is a double-ask. The exception covers only what the seal could
+consent to: a denylist or human-gate-class path still escalates, and a target the contract never named
+still stops. A missing tool op is never the trigger - a gap to route around, not consent withheld.
+
 Rejected: a new stop taxonomy. D1 already defines `NEEDS_INPUT` as "needs human/context/approval"; what
 was missing was a predicate, not a vocabulary. Also rejected: resolving same-key collisions by
 specificity (makes "which is narrower" a judgment call at the moment a safety gate fires) and surfacing
