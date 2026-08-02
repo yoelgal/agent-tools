@@ -628,5 +628,40 @@ if [ -f "$CB" ]; then
   rm -rf "$gt"
 fi
 
+echo "== graphify integration =="
+
+# The operator-gate policy has to be written down and obeyed by both consumers. Graphify's setup
+# makes machine-global changes; onboard forbids silent ones. Before D26 neither DECISIONS.md nor
+# TRAPS.md mentioned graphify at all, so the contradiction survived by nobody having decided it.
+d26=$(awk '/^## D26 /,/^## D27 /' docs/DECISIONS.md)
+if [ -n "$d26" ] \
+   && printf '%s' "$d26" | grep -q 'reversible' \
+   && printf '%s' "$d26" | grep -q 'non-secret' \
+   && grep -q 'D26' skills/onboard/SKILL.md \
+   && grep -q 'machine-global' skills/graphify-wrapper-setup/SKILL.md; then
+  ok "graphify machine-global write policy is decided (D26) and both consumers agree"
+else
+  bad "graphify machine-global write policy: D26 missing/incomplete, or onboard and graphify-wrapper-setup do not reference it"
+fi
+
+# A chain that stops at -sync never reaches the only verb with user value. Both close-outs route on.
+setup_tail=$(awk '/^## 5\./,0' skills/graphify-wrapper-setup/SKILL.md)
+map_tail=$(awk '/^## 5\./,0' skills/graphify-wrapper-map/SKILL.md)
+if printf '%s' "$setup_tail" | grep -q 'graphify-wrapper-query' \
+   && printf '%s' "$map_tail" | grep -q 'graphify-wrapper-query'; then
+  ok "both graphify close-outs route on to /graphify-wrapper-query"
+else
+  bad "a graphify close-out does not route to /graphify-wrapper-query - the chain ends before the question"
+fi
+
+# /codebase-map already rebuts the never-indexed objection ("builds its index on first use").
+# A delegating skill that re-opens it with a "when one's installed" hedge undoes that rebuttal.
+if grep -q "when one's installed" skills/diagnose/SKILL.md \
+   || grep -q 'best structural map available' skills/plan-grill/SKILL.md; then
+  bad "structural-consult escape hatch still present in /diagnose or /plan-grill - it re-opens the cold-start excuse /codebase-map closed"
+else
+  ok "no structural-consult escape hatch in /diagnose or /plan-grill"
+fi
+
 echo
 [ $fail = 0 ] && echo "package-check: PASS ($(ls skills/ | wc -l | tr -d ' ') skills)" || { echo "package-check: FAIL"; exit 1; }
