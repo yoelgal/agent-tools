@@ -123,7 +123,9 @@ looks like (a top grade "satisfies every stated criterion with a runnable check 
 "misses the task or contradicts the brief"); a short list of named penalties, each subtracting a stated
 amount (an unverified claim, a criterion with no check, an unrequested scope add); and a declared
 tie-break cascade so near-ties resolve the same way across judges (say: correctness beats completeness
-beats polish). Each judge returns its grade with the anchor sentence it matched, not a naked number. The
+beats polish). Candidates reach every judge unlabeled and in shuffled order - a judge told which worker,
+tier, or attempt produced a candidate grades the label alongside the artifact.
+Each judge returns its grade with the anchor sentence it matched, not a naked number. The
 grades are advisory prose for picking a winner inside the shape - recorded nowhere - and a review verdict
 is never one of them: `/review` stays severity-gated, never averaged.
 
