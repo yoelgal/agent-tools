@@ -25,14 +25,14 @@ Validate and upsert into the registry. `--semantic` marks the domain for full
 extract on sync (default AST-only).
 
 ```bash
-name="$1"; path="$2"; sem=false
+name="$1"; idx_path="$2"; sem=false
 case "$*" in *--semantic*) sem=true;; esac
 root=$(gfx_this_worktree)
-[ -d "$root/$path" ] || { echo "path not found in repo: $path"; exit 1; }
+[ -d "$root/$idx_path" ] || { echo "path not found in repo: $idx_path"; exit 1; }
 tmp=$(mktemp "$(dirname "$reg")/.reg.XXXXXX")
-jq --arg n "$name" --arg p "$path" --argjson s "$sem" \
+jq --arg n "$name" --arg p "$idx_path" --argjson s "$sem" \
    '.indexes[$n]={path:$p, semantic:$s}' "$reg" > "$tmp" && mv "$tmp" "$reg"
-echo "registered '$name' -> $path (semantic=$sem)"
+echo "registered '$name' -> $idx_path (semantic=$sem)"
 jq '.indexes' "$reg"
 ```
 

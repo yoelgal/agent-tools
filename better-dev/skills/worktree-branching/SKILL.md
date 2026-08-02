@@ -124,17 +124,17 @@ placement, then branch off the *base*, not off HEAD:
 
 ```bash
 git check-ignore -q .worktrees || { printf '.worktrees/\n' >> .gitignore && git add .gitignore; }
-path=".worktrees/$slug"
-git worktree prune   # clear a stale registration if $path was removed but still listed
+wt_path=".worktrees/$slug"
+git worktree prune   # clear a stale registration if $wt_path was removed but still listed
 git fetch origin "$base" 2>/dev/null || true
-git worktree add -b "$branch" "$path" "origin/$base" 2>/dev/null \
-  || git worktree add -b "$branch" "$path" "$base"
+git worktree add -b "$branch" "$wt_path" "origin/$base" 2>/dev/null \
+  || git worktree add -b "$branch" "$wt_path" "$base"
 ```
 
 `git worktree prune` only clears entries whose directory is gone, so it's safe alongside a live
 concurrent run - a worktree still in use keeps its directory and survives the prune.
 
-If `$path` already exists or the branch is already checked out somewhere, this is a re-detect: point
+If `$wt_path` already exists or the branch is already checked out somewhere, this is a re-detect: point
 at the existing worktree rather than forcing a duplicate. If `git worktree add` fails on a sandbox
 permission error, say so and work in place - `edge-cases.md` covers that fallback.
 
@@ -183,7 +183,7 @@ Write the worktree's location into the ledger in the **primary checkout** (share
 so a later session or a restart can find it):
 
 ```bash
-printf 'branch: %s\nbase: %s\nworktree: %s\n' "$branch" "$base" "$(cd "$path" && pwd -P)" \
+printf 'branch: %s\nbase: %s\nworktree: %s\n' "$branch" "$base" "$(cd "$wt_path" && pwd -P)" \
   | .better-dev/bin/bd-mem ledger put "$slug" worktree.md -
 ```
 `bd-mem` resolves the primary checkout's ledger for you (the same path from any worktree), so there's
@@ -193,7 +193,7 @@ Then set the mechanical edit boundary. This skill is the boundary's one writer -
 worktree at creation, and the loop only verifies the boundary is set, never re-sets it:
 
 ```bash
-.better-dev/bin/bd-guard scope "$(cd "$path" && pwd -P)" --ttl 0
+.better-dev/bin/bd-guard scope "$(cd "$wt_path" && pwd -P)" --ttl 0
 ```
 
 The state lives in the worktree's own git dir (`.git/worktrees/<name>/bd-scope`), which is what makes

@@ -184,8 +184,12 @@ exists, and a version-floor upgrade surfacing there reads as an onboarding block
 unrelated errand it is. Defer by recording the gap and naming it in the Phase 5 recap:
 
 ```bash
-.better-dev/bin/bd-mem remember "graphify: deferred at onboard - no code to index yet; run /graphify-wrapper-setup once the stack lands"
+.better-dev/bin/bd-mem remember "graphify: deferred at onboard - no code to index yet; the first /graphify-wrapper-query builds it, or run /graphify-wrapper-setup once the stack lands"
 ```
+
+Deferring costs nothing, because the query path self-heals: `gfx_ensure_graph` creates the registry,
+carves a whole-repo domain, and runs an AST build the first time anything actually asks the graph a
+question. The operator never has to remember this - the first structural question wires it.
 
 Where the repo does carry code, run it as part of the same wiring - idempotent, so a re-run is safe:
 it installs the graphify CLI, gitignores `graphify-out/` globally, and inits the per-repo domain
