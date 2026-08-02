@@ -183,6 +183,11 @@ Then each pass:
    being the captured command, its exit code, and the output tail rather than a paraphrase of them, and
    give a settled step one line in `progress.md` stamped with an explicit status marker (`settled`,
    `blocked`, `needs-input`) rather than buried in prose, so a resume reads each step's state at a glance.
+   Those per-step markers are a different vocabulary from the terminal-state taxonomy below, and
+   `progress.md` carries both: step lines while the loop runs, then one terminal line at the end. Only
+   the last line is read as the work-item's state, and only when the taxonomy token starts it - a
+   step line reading `settled: DONE` is a step marker, and the item still shows `in-flight`. Never
+   hand-write that final line; `ledger settle` (below) is what writes it correctly.
    The receipt lands before the next pass picks - it is part of this pass, not paperwork to batch at the
    end. Friction the pass pushed through - a dead-end tool call, a broken doc link, a flaky command -
    gets one line too: `.better-dev/bin/bd-mem papercut add "<what happened>"`, the low-bar sibling of
@@ -369,6 +374,14 @@ clean when driving started; this one proves nothing edited it since. A re-opened
 at least one iteration entry, or the loop ran unrecorded - write the receipts from the session's actual
 tried/result/learned trail before settling, because an unrecorded loop settles nothing. The same moment re-hashes the protect-set's pins
 (the protect-set paragraph in "The loop" owns the disposition). In short:
+Whichever of the six it is, record it with the one verb that writes it in the form `ledger status`
+actually reads - a hand-written final line is where this goes wrong, silently, and the item then shows
+as open work for weeks:
+
+```bash
+.better-dev/bin/bd-mem ledger settle <work-item> <STATE> "<one line>"
+```
+
 `DONE` / `DONE_WITH_CONCERNS` hand off to the PR-into-staging gate (`/pr-and-verify`), the recorded green
 (the command and its exit-0 output) travelling with them as evidence a reviewer reads rather than a
 promise, concerns carried into the PR; a confirmed `NO_PROGRESS` restarts from the contract

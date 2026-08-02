@@ -23,6 +23,7 @@
 #   bd-mem ledger status                               one line per item: slug, state, age, branch (oldest first)
 #   bd-mem ledger approve <work-item>                  pin approval to contract.md's exact bytes (+ snapshot)
 #   bd-mem ledger check-approval <work-item>           exit 0 = unchanged since approval; else gate re-opened
+#   bd-mem ledger settle <work-item> <STATE> [note]    record the terminal state as progress.md's last line
 #
 # The four operations skills use are remember, recall, persist(-override) and read; `learn`, `init`,
 # `prune`, and `ledger` are helpers. The backend is swappable via BETTER_DEV_MEMORY:
@@ -211,7 +212,28 @@ ledger() {
         if [ -f "$d/.approved.contract.md" ]; then diff "$d/.approved.contract.md" "$d/contract.md" || true; fi
         exit 1
       fi ;;
-    *) die "ledger where|dir|init|resume|put|read|list|status|approve|check-approval" ;;
+    settle) # record a work-item's terminal state as progress.md's last line, LINE-INITIAL.
+            # The one verb that writes a terminal state, because `ledger status` reads only a
+            # line-initial taxonomy token on the last line (deliberately - see the status comment)
+            # and every caller that hand-rolled that line got it subtly wrong: a `settled: DONE`
+            # prefix reads in-flight, and a caller that reached an item through `put` alone has no
+            # progress.md to append to. Both are the same bug, fixed once here rather than in each
+            # skill that finishes a work-item.
+      [ $# -ge 2 ] || die "ledger settle <work-item> <DONE|DONE_WITH_CONCERNS|BLOCKED|NEEDS_INPUT|EXHAUSTED|NO_PROGRESS> [note]"
+      case "$2" in
+        DONE|DONE_WITH_CONCERNS|BLOCKED|NEEDS_INPUT|EXHAUSTED|NO_PROGRESS) ;;
+        *) die "not a terminal state: $2 (one of DONE, DONE_WITH_CONCERNS, BLOCKED, NEEDS_INPUT, EXHAUSTED, NO_PROGRESS)" ;;
+      esac
+      local d; d="$(ledger_dir "$1")"
+      # An item reached only through `put` has no scaffold; create the file rather than refusing,
+      # so settling never depends on whether someone remembered to run `init` first.
+      [ -f "$d/progress.md" ] || printf '# Progress - %s\n\nAppend-only recovery map: one settled step per line, then the terminal state.\nOn resume, trust this and `git log` over recollection.\n\n' "$1" | atomic_write "$d/progress.md"
+      lock_acquire
+      if [ $# -ge 3 ] && [ -n "$3" ]; then printf '%s - %s\n' "$2" "$3" >>"$d/progress.md"
+      else printf '%s\n' "$2" >>"$d/progress.md"; fi
+      lock_release
+      printf 'settled %s %s\n' "$1" "$2" ;;
+    *) die "ledger where|dir|init|resume|put|read|list|status|approve|check-approval|settle" ;;
   esac
 }
 
@@ -594,6 +616,24 @@ case "$op" in
       touch -t 202001010000 .better-dev/ledger/status-elder/contract.md
       elder="$("$SELF" ledger status | head -n1)"
       case "$elder" in status-elder"${TAB}"in-flight"${TAB}"*d"${TAB}"-) ;; *) echo "FAIL: status not oldest-first with dash branch: $elder"; exit 1 ;; esac
+      # --- ledger settle: the one verb that records a terminal state, line-initial ---
+      # work-item ledger-settle (issue #61). Root cause: `ledger put` creates an item dir with no
+      # progress.md and no settle verb existed, so every caller hand-rolled the terminal line - or,
+      # like /release-promotion, never wrote one at all. A red here is THAT bug recurring.
+      "$SELF" ledger put settle-probe release.md - <<<'x' >/dev/null   # dir created by put, no progress.md
+      [ -f .better-dev/ledger/settle-probe/progress.md ] && { echo "FAIL: fixture invalid - put must not scaffold progress.md"; exit 1; }
+      "$SELF" ledger status | grep -q "^settle-probe${TAB}in-flight${TAB}" || { echo "FAIL: put-created item must read in-flight"; exit 1; }
+      "$SELF" ledger settle settle-probe DONE "released and verified" >/dev/null || { echo "FAIL: ledger settle must succeed on an item with no progress.md"; exit 1; }
+      "$SELF" ledger status | grep -q "^settle-probe${TAB}DONE${TAB}" || { echo "FAIL: settle did not make status read DONE"; exit 1; }
+      grep -q '^DONE - released and verified$' .better-dev/ledger/settle-probe/progress.md || { echo "FAIL: settle must write a LINE-INITIAL terminal line"; exit 1; }
+      # settling again appends the newer state and status follows the last line
+      "$SELF" ledger settle settle-probe BLOCKED "upstream outage" >/dev/null
+      "$SELF" ledger status | grep -q "^settle-probe${TAB}BLOCKED${TAB}" || { echo "FAIL: re-settle must move the state"; exit 1; }
+      # a bogus state is refused rather than written as prose that silently reads in-flight
+      if "$SELF" ledger settle settle-probe FINISHED >/dev/null 2>&1; then echo "FAIL: settle must reject a state outside the taxonomy"; exit 1; fi
+      # the note is optional
+      "$SELF" ledger settle settle-probe DONE >/dev/null
+      grep -q '^DONE$' .better-dev/ledger/settle-probe/progress.md || { echo "FAIL: settle with no note must still write a bare line-initial state"; exit 1; }
       # --- distill nudge: a fat lesson store surfaces at ledger init, on stderr, stdout untouched ---
       i=0; while [ "$i" -lt 200 ]; do printf '{"kind":"lesson","text":"bulk lesson %s","confidence":0.6}\n' "$i"; i=$((i+1)); done >>.better-dev/learnings.jsonl
       out="$("$SELF" ledger init feat/nudge-probe 2>/dev/null)"
