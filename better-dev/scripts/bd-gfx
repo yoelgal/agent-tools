@@ -37,12 +37,13 @@ gfx_default_branch() {
   printf '%s\n' "${b:-main}"
 }
 
-# Absolute path of the worktree checked out on the default branch (seed source).
+# Absolute path of the primary checkout (seed source) - git's own main worktree,
+# always the first entry of `git worktree list --porcelain`. Deliberately not
+# "the worktree on the default branch": a staged repo defaults to main while its
+# primary checkout stands on staging, so that match found nothing and every
+# consumer's [ -n "$main" ] guard silently skipped seeding.
 gfx_main_worktree() {
-  local def; def=$(gfx_default_branch)
-  git worktree list --porcelain 2>/dev/null | awk -v b="refs/heads/$def" '
-    /^worktree /{wt=$2}
-    /^branch /{ if ($2==b){print wt; exit} }'
+  git worktree list --porcelain 2>/dev/null | sed -n '1s/^worktree //p'
 }
 
 # Path of the current worktree root.
@@ -161,6 +162,22 @@ gfx_ensure_graph() {
   printf '%s\n' "$graph"
 }
 
+# Links whose two endpoints live in different top-level subtrees of the indexed
+# path:  gfx_cross_edges <graph.json>  -> one integer on stdout. A cheap read of
+# how much a domain's structure crosses its own seams.
+#
+# A graph.json that exists is not a graph.json that parses (graphify leaves torn
+# output behind on an interrupted build), so this guards first the way
+# gfx_ensure_graph does. Missing, torn, or not shaped like a graph -> non-zero
+# and nothing on stdout, never a jq diagnostic passed off as a count.
+gfx_cross_edges() {
+  local graph="${1:-}"
+  jq -e . "$graph" >/dev/null 2>&1 || return 1
+  jq -r '(reduce .nodes[] as $n ({}; .[$n.id] = (($n.source_file // "none") | split("/")[0]))) as $sub
+    | [.links[] | select(($sub[.source] // "?") != ($sub[.target] // "?"))] | length' \
+    "$graph" 2>/dev/null
+}
+
 # --- selftest -------------------------------------------------------------
 # Runs only when this file is EXECUTED, never when sourced. Offline checks of
 # the helpers above against throwaway git repos and registries under mktemp.
@@ -241,6 +258,28 @@ _gfx_selftest() {
   _eq "main_worktree is this" \
       "$( cd "$mw" && gfx_main_worktree )" "$( cd "$mw" && gfx_this_worktree )"
   rm -rf "$mw"
+
+  # main_worktree: staged shape - default branch main, primary checkout standing
+  # on staging. No worktree is on main at all, and the seed source is still here.
+  local sw; sw=$(mktemp -d)
+  ( cd "$sw" && git init -q \
+      && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init \
+      && git update-ref refs/remotes/origin/main HEAD \
+      && git checkout -q -b staging )
+  _eq "main_worktree on staged repo" \
+      "$( cd "$sw" && gfx_main_worktree )" "$( cd "$sw" && gfx_this_worktree )"
+  rm -rf "$sw"
+
+  # cross_edges: pkg/a -> pkg/b stays inside one subtree, the other two cross
+  local cg; cg=$(mktemp -d)
+  printf '%s\n' '{"nodes":[{"id":"a","source_file":"pkg/a.py"},{"id":"b","source_file":"pkg/b.py"},{"id":"c","source_file":"lib/c.py"}],"links":[{"source":"a","target":"b"},{"source":"a","target":"c"},{"source":"b","target":"c"}]}' >"$cg/graph.json"
+  _eq "cross_edges count" "$( gfx_cross_edges "$cg/graph.json" )" "2"
+  # torn or absent is not a count: non-zero, stdout empty
+  printf '%s\n' '{"nodes":[' >"$cg/torn.json"
+  _eq "cross_edges torn stdout" "$( gfx_cross_edges "$cg/torn.json" 2>/dev/null )" ""
+  gfx_cross_edges "$cg/torn.json" >/dev/null 2>&1 && _fail "cross_edges torn: expected non-zero"
+  gfx_cross_edges "$cg/absent.json" >/dev/null 2>&1 && _fail "cross_edges absent: expected non-zero"
+  rm -rf "$cg"
 
   rm -rf "$d"
   [ "$rc" = 0 ] && printf 'bd-gfx selftest OK\n'
