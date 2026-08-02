@@ -39,6 +39,38 @@ You cannot drive an interactive installer. When one is needed (a package manager
 emit a paste-ready command block and let the operator run it (`! <cmd>` runs it in-session); do the
 file writes yourself after confirming.
 
+### A repo with no stack gets the stack-agnostic half, and nothing else
+
+Detect this first, before any recording or asking: **no dependency manifest, no build file, no source
+tree** - a `git init` and a README, the shape `/onboard` hands over on a greenfield project. Almost
+everything below needs a stack to describe, and run against an empty tree it produces ceremony with no
+object: `verify: none`, `dev-run: none`, `seed-reset: none`, `ops-runner: none`, a denylist of globs
+matching nothing, gate classes with no surface, and a settings-class paste block wiring enforcement for
+a policy that guards no code. Observed 2026-08-02 on a repo holding one empty commit: four `none`
+records, a prospective policy, a question, and two paste blocks - none of which the operator applied,
+because none of it had anything to act on yet.
+
+So on a no-stack repo, split the skill:
+
+- **Do install what needs no stack.** The staged-diff secret scan is the whole of it - it is worth
+  having from the first commit, costs no question, and needs nothing detected. Install it, prove it
+  (a clean commit passes, a planted secret is refused), and keep going.
+- **Do not write `none` placeholders.** One deferred line beats four hollow records that read like
+  findings: `.better-dev/bin/bd-mem remember "guardrails: deferred at onboard - no stack yet; re-run
+  /guardrails-install once /groundwork lands one, which is when verify/dev-run/seed-reset/ops-runner
+  and the real denylist can be recorded from what exists"`.
+- **Do not ask the policy questions.** Merge policy, release cadence, and the earned-autonomy line all
+  govern something that cannot happen yet - there is no PR to merge and no release to cut. Park each
+  as a `pending-decision` so the first skill that actually needs the answer must ask it
+  (`/onboard` Phase 5's mechanism), instead of spending the operator's attention now on a choice they
+  have no context to make.
+- **Do not emit the enforcement paste block.** `bd-guard` mechanically checks the blast-radius policy;
+  with no code, the policy is prospective and the hook has nothing to catch. It rides the re-run.
+
+The re-run is the point, not a consolation: `/groundwork` lands the stack, and this skill then records
+real commands read off real files. A greenfield close-out that ends with zero paste blocks and zero
+questions is the correct outcome here, not a skipped step.
+
 ## Detect what already guards this repo
 
 A read-only sweep. Report each as *observed value + where*, then move on:
