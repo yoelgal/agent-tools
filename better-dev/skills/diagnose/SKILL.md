@@ -167,11 +167,11 @@ the three honest next moves for the reporter to pick:
 The fix-contract is never written from a hypothesis that survived only by default.
 
 Fix the root cause, not the symptom. Before you settle where the fix lands, produce the **caller
-list**: grep every caller of the function you'd touch - `/codebase-map` surfaces them from a structural
-map when one's installed, plain grep when it isn't - and record them in the evidence chain. One guard
-in the shared function all callers route through is a smaller, more correct change than a guard in the
-single path the ticket named - which leaves every sibling caller broken. Guarding at the surface -
-swallowing an unexpected null, de-duping in the view, wrapping the throw in a try/catch - hides the
+list**: grep every caller of the function you'd touch - run `/codebase-map` to surface them - and
+record them in the evidence chain. One guard in the shared function all callers route through is a
+smaller, more correct change than a guard in the single path the ticket named - which leaves every
+sibling caller broken. Guarding at the surface - swallowing an unexpected null, de-duping in the
+view, wrapping the throw in a try/catch - hides the
 deviation instead of fixing it; if a value is unexpectedly null, the bug is wherever it was allowed to
 become null, not where it finally crashed.
 

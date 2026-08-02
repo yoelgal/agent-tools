@@ -544,3 +544,24 @@ was missing was a predicate, not a vocabulary. Also rejected: resolving same-key
 specificity (makes "which is narrower" a judgment call at the moment a safety gate fires) and surfacing
 them for the operator to resolve (adds a stop, in the safety class). Deferred, not refused: a
 library-wide closed list of never-ask actions.
+
+## D26 - reversible, non-secret machine-global writes are agent-run (2026-08-02; user-ratified)
+
+A machine-global write that one command undoes and that carries no credential - **reversible** and
+**non-secret** - is an agent write, and the running skill names it in its recap so the change is
+visible rather than silent. Settings-class writes are untouched: host settings and permission files
+stay operator-run per D22. D22's block is a **capability** limit (agent writes to
+`.claude/settings.json` are classifier-blocked, observed 2026-07-16), not a consequence rule, and
+over-reading it as a general ban on machine-global writes is the misreading that produced the drift
+this entry ends.
+
+The exception authorizes **specific named commands**, never an open class: an open class would
+authorize arbitrary package installs under agent authority. Two carry it today, both in
+`/graphify-wrapper-setup` - `uv tool install graphifyy` (undo: `uv tool uninstall graphifyy`), and
+`git config --global core.excludesfile` plus the `graphify-out/` append to that file (undo: drop the
+line). A third command joins by being added here, not by resembling these two.
+
+Evidence: `/graphify-wrapper-setup` has made both writes on every run since it shipped, while
+`/onboard` forbade silent global machine changes in the same phase that hands the operator a
+settings paste block; neither `docs/DECISIONS.md` nor `docs/TRAPS.md` carried a single graphify
+entry, so the contradiction survived by nobody having decided it (audit, 2026-08-02).

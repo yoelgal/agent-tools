@@ -94,10 +94,24 @@ echo "semantic backend: $b"
 
 ## 5. Report
 
+Name what this run changed outside the repo, so a machine-global write is visible
+rather than silent (D26). Both steps are idempotent, so report only the writes
+that actually happened - a re-run that found the CLI present and the ignore line
+already there says exactly that:
+
+- installed `graphifyy` (machine-global; undo: `uv tool uninstall graphifyy`)
+- added `graphify-out/` to the global gitignore step 2 printed (machine-global;
+  undo: drop that line)
+
+Then hand the operator the next verbs:
+
 - `/graphify-wrapper-index <name> <path>` to register a domain (or
   `/graphify-wrapper-index` with no args to have me analyze the repo and suggest
   domains).
 - `/graphify-wrapper-sync` to build/refresh the current worktree's indexes.
+- `/graphify-wrapper-query <name> "<question>"` to ask something now - it builds a
+  missing index on first use, so a first question is a legitimate next step and
+  never waits on a sync.
 
 Do **not** build any index here - that is `/graphify-wrapper-index` +
 `/graphify-wrapper-sync`.

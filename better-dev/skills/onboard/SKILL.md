@@ -43,9 +43,10 @@ Three rules carry the whole skill:
   matters - no integration branch to base worktrees on, or an entry file that's truly ambiguous.
   Don't batch a wall of questions, and don't ask about a default you can safely pick and record.
 
-You can't drive interactive UIs (a plugin installer, an auth login) or make global machine changes
-silently. For those, **emit a paste-ready command block** and let the operator run it (`! <cmd>` runs
-in-session); do file ops yourself after confirming.
+You can't drive interactive UIs (a plugin installer, an auth login), and settings or permission files
+stay operator-run. For those, **emit a paste-ready command block** and let the operator run it
+(`! <cmd>` runs in-session). Do file ops yourself after confirming, and the reversible, non-secret
+machine-global writes D26 names - each one named in the recap.
 
 ---
 
