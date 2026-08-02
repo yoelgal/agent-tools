@@ -594,9 +594,7 @@ lonely="$(awk '$2 ~ /(^|,)offer(,|$)/ && $2 !~ /(^|,)reonboard(,|$)/ {print $1}'
 # reads like an announcement that does nothing - strictly worse than the documented alternative, which
 # is to omit the line entirely (absence already means pull-only). Caught the hard way on 0.9.5.
 flagless="$(awk '$1 ~ /^[0-9]+\.[0-9]+\.[0-9]+$/ && $2 == "-" {print $1}' docs/RELEASES.md 2>/dev/null)"
-[ -z "$flagless" ] \
-  && ok "every RELEASES.md version line carries a non-empty flag set" \
-  || bad "flagless RELEASES.md line(s):$(printf ' %s' $flagless) - give it a tier, or drop the line (absent = pull-only)"
+[ -z "$flagless" ] && ok "every RELEASES.md version line carries a non-empty flag set" || bad "flagless RELEASES.md line(s):$(printf ' %s' $flagless) - give it a tier, or drop the line (absent = pull-only)" # prove-new: regression-guard RELEASES.md is correct at base, as it is after any release that got its flags right; this catches the later edit that announces a version while naming no tier, which /update then collects nothing from
 
 offer_step="$(awk '/^## 4\. Top up this repo only/{f=1} f&&/^## 5\./{exit} f{print}' skills/update/SKILL.md 2>/dev/null)"
 printf '%s' "$offer_step" | grep -q 'offer' \
