@@ -224,12 +224,18 @@ ledger() {
         DONE|DONE_WITH_CONCERNS|BLOCKED|NEEDS_INPUT|EXHAUSTED|NO_PROGRESS) ;;
         *) die "not a terminal state: $2 (one of DONE, DONE_WITH_CONCERNS, BLOCKED, NEEDS_INPUT, EXHAUSTED, NO_PROGRESS)" ;;
       esac
-      local d; d="$(ledger_dir "$1")"
-      # An item reached only through `put` has no scaffold; create the file rather than refusing,
-      # so settling never depends on whether someone remembered to run `init` first.
-      [ -f "$d/progress.md" ] || printf '# Progress - %s\n\nAppend-only recovery map: one settled step per line, then the terminal state.\nOn resume, trust this and `git log` over recollection.\n\n' "$1" | atomic_write "$d/progress.md"
+      local d note; d="$(ledger_dir "$1")"
+      # Flatten the note to ONE line. A newline in it would put a non-taxonomy line last, which is
+      # precisely the misread this verb exists to make impossible - a multi-line note would settle an
+      # item straight back to in-flight while printing success.
+      note="$(printf '%s' "${3:-}" | tr '\n\r\t' '   ')"
       lock_acquire
-      if [ $# -ge 3 ] && [ -n "$3" ]; then printf '%s - %s\n' "$2" "$3" >>"$d/progress.md"
+      # An item reached only through `put` has no scaffold; create the file rather than refusing, so
+      # settling never depends on whether someone remembered to run `init` first. Inside the lock:
+      # two concurrent settles that both saw no file would otherwise race, and the later scaffold
+      # would clobber the earlier one's appended line.
+      [ -f "$d/progress.md" ] || printf '# Progress - %s\n\nAppend-only recovery map: one settled step per line, then the terminal state.\nOn resume, trust this and `git log` over recollection.\n\n' "$1" | atomic_write "$d/progress.md"
+      if [ -n "$note" ]; then printf '%s - %s\n' "$2" "$note" >>"$d/progress.md"
       else printf '%s\n' "$2" >>"$d/progress.md"; fi
       lock_release
       printf 'settled %s %s\n' "$1" "$2" ;;
@@ -634,6 +640,12 @@ case "$op" in
       # the note is optional
       "$SELF" ledger settle settle-probe DONE >/dev/null
       grep -q '^DONE$' .better-dev/ledger/settle-probe/progress.md || { echo "FAIL: settle with no note must still write a bare line-initial state"; exit 1; }
+      # a multi-line note must NOT put a non-taxonomy line last - that would settle straight back to
+      # in-flight while reporting success, the exact misread this verb exists to prevent
+      "$SELF" ledger settle settle-probe DONE "first line
+second line" >/dev/null
+      "$SELF" ledger status | grep -q "^settle-probe${TAB}DONE${TAB}" || { echo "FAIL: a multi-line note broke the line-initial invariant"; exit 1; }
+      [ "$(awk 'NF{l=$0} END{print l}' .better-dev/ledger/settle-probe/progress.md)" = "DONE - first line second line" ] || { echo "FAIL: settle must flatten a multi-line note onto one line"; exit 1; }
       # --- distill nudge: a fat lesson store surfaces at ledger init, on stderr, stdout untouched ---
       i=0; while [ "$i" -lt 200 ]; do printf '{"kind":"lesson","text":"bulk lesson %s","confidence":0.6}\n' "$i"; i=$((i+1)); done >>.better-dev/learnings.jsonl
       out="$("$SELF" ledger init feat/nudge-probe 2>/dev/null)"
