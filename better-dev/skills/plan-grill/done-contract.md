@@ -311,8 +311,10 @@ Before you pin the contract, each line reads yes or the contract isn't ready:
 - A fresh context could execute this from the contract and the repo alone.
 - Every done-criterion is a command with an expected result, not a judgment ("make sure it works").
 - Every criterion names its concrete observable - a value, status, row, or output line.
-- Every number in Problem and Goal carries a named source or a `TBD(<owner>)` marker - an unsourced
-  number is an invented one.
+- Every number in Problem and Goal, and every threshold a done-criterion asserts, carries a named
+  source or a `TBD(<owner>)` marker - an unsourced number is an invented one. A latency, size, or
+  rate criterion cites a measured baseline, a real comp, or its owner; a bar the plan invented is
+  the run's private sense of sufficient wearing a number.
 - The Merge line reads `auto` or `hold` - `auto` only where the repo records
   `merge-policy: auto-on-green` AND the user chose auto for this item (asked at seal, never assumed).
 - The gated-paths line names every recorded safety gate this plan's own surface intersects, each with
