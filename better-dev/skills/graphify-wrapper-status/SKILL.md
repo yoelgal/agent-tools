@@ -23,18 +23,18 @@ echo
 head=$(git -C "$this" rev-parse HEAD 2>/dev/null)
 printf '%-14s %-28s %-9s %-8s %-8s %s\n' INDEX PATH SEMANTIC GRAPH FRESH BUILT
 for name in $(gfx_index_names); do
-  path=$(gfx_index_field "$name" path)
+  idx_path=$(gfx_index_field "$name" path)
   sem=$(gfx_index_field "$name" semantic)
-  g="$this/$path/graphify-out/graph.json"
+  g="$this/$idx_path/graphify-out/graph.json"
   if [ -f "$g" ]; then
     read -r nodes built <<<"$(jq -r '"\(.nodes|length) \(.built_at_commit // "?")"' "$g" 2>/dev/null)"
     ts=$(date -r "$g" '+%Y-%m-%d %H:%M' 2>/dev/null)
     if [ -z "$head" ] || [ "$built" = "?" ]; then fresh="?"
     elif [ "$built" = "$head" ]; then fresh="current"
     else fresh="behind"; fi
-    printf '%-14s %-28s %-9s %-8s %-8s %s\n' "$name" "$path" "$sem" "${nodes}n" "$fresh" "$ts"
+    printf '%-14s %-28s %-9s %-8s %-8s %s\n' "$name" "$idx_path" "$sem" "${nodes}n" "$fresh" "$ts"
   else
-    printf '%-14s %-28s %-9s %-8s %-8s %s\n' "$name" "$path" "$sem" "-" "-" "(not built here)"
+    printf '%-14s %-28s %-9s %-8s %-8s %s\n' "$name" "$idx_path" "$sem" "-" "-" "(not built here)"
   fi
 done
 ```

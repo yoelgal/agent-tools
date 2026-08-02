@@ -38,12 +38,12 @@ backend=$(gfx_backend)
 # with no architectural signal, and the source of oversized chunks that time out.
 exc_args=(); while IFS= read -r p; do [ -n "$p" ] && exc_args+=(--exclude "$p"); done < <(gfx_extract_excludes)
 for name in $names; do
-  path=$(gfx_index_field "$name" path)
-  [ -n "$path" ] || { echo "skip '$name': not registered"; continue; }
+  idx_path=$(gfx_index_field "$name" path)
+  [ -n "$idx_path" ] || { echo "skip '$name': not registered"; continue; }
   want_sem=$(gfx_index_field "$name" semantic)
   if [ "$sem" = true ] || [ "$want_sem" = true ]; then do_sem=true; else do_sem=false; fi
-  dst="$this/$path"; out="$dst/graphify-out"
-  [ -d "$dst" ] || { echo "skip '$name': $path absent in this worktree"; continue; }
+  dst="$this/$idx_path"; out="$dst/graphify-out"
+  [ -d "$dst" ] || { echo "skip '$name': $idx_path absent in this worktree"; continue; }
 
   # Repair a torn local graph.json (a partial/killed prior copy) so the seed
   # decision below treats the domain as missing rather than complete - graphify's
@@ -56,7 +56,7 @@ for name in $names; do
   # Seed from main if this worktree has no graph yet. Copy the siblings first,
   # then install main's graph.json last via a same-dir temp + mv, so an
   # interrupted copy never leaves an unparsable graph a later path trusts.
-  src="$main/$path/graphify-out"
+  src="$main/$idx_path/graphify-out"
   if [ ! -f "$out/graph.json" ] && [ -n "$main" ] && [ "$main" != "$this" ] \
      && jq -e . "$src/graph.json" >/dev/null 2>&1; then
     echo "[$name] seeding from main worktree"
@@ -81,10 +81,10 @@ for name in $names; do
       export GRAPHIFY_CLAUDE_CLI_MODEL="$(gfx_cli_model)"
       budget_args=(--token-budget "$(gfx_cli_token_budget)")
     fi
-    echo "[$name] semantic extract ($backend${GRAPHIFY_CLAUDE_CLI_MODEL:+/$GRAPHIFY_CLAUDE_CLI_MODEL}) on $path"
+    echo "[$name] semantic extract ($backend${GRAPHIFY_CLAUDE_CLI_MODEL:+/$GRAPHIFY_CLAUDE_CLI_MODEL}) on $idx_path"
     graphify extract "$dst" --backend "$backend" "${exc_args[@]}" "${budget_args[@]}"
   else
-    echo "[$name] AST update on $path"
+    echo "[$name] AST update on $idx_path"
     graphify update "$dst"
   fi
 done

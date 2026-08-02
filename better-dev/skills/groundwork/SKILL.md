@@ -156,6 +156,12 @@ worktrees can build in parallel without colliding. Each work-item gets a name an
 the files, directories, or modules it **owns** - and the ownership sets should barely overlap. The less
 two work-items share, the less their worktrees fight at merge time.
 
+Disjointness is a structural claim, so check it structurally rather than by eye. For each candidate
+item's owned surface, `/graphify-wrapper-query <name> --affected "<owned module>"` returns what
+depends on it; two items whose affected sets intersect will collide at merge even when their file
+lists look clean, because the collision is through an import, not a path. That is the failure mode
+the carve is most likely to miss and most expensive to discover - a wrong carve costs N worktrees.
+
 When two candidate items both want the same file, that shared thing is usually a signal it belonged in
 the foundation - push it down into step 2 rather than letting both items edit it. What can't be pushed
 down gets **sequenced**: the dependent item runs in a later wave, off staging, once the item it depends

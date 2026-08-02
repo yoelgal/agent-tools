@@ -56,6 +56,14 @@ walkthrough that repeats the author's framing leaks the very claim the channels 
 Each unit gets a line: what changed, and the one thing in it worth a careful second look - a behaviour
 change, an edge case, an error path, anything hard to reverse like a migration or a deletion.
 
+The ripple is the part a diff cannot show you: a diff lists what changed, never what depended on it.
+Ask that structurally rather than grepping for the symbol name -
+`/graphify-wrapper-query <name> --affected "<changed symbol>"` is reverse traversal, so it returns
+callers the diff never touched and a name-grep would miss on an aliased import or a re-export. Run it
+for each exported or cross-module symbol the diff changes or deletes; unreviewed ripple is where the
+regressions this gate exists to catch actually live. The index builds on first use, and a graph reflects
+its last build, so confirm each hit at `file:line` before it becomes a finding.
+
 Close the walkthrough with a ranked **scrutiny shortlist**: the 3-5 spots likeliest to be wrong, each a
 `file:line` and one sentence, hardest-hitting first. Head the shortlist by naming which fingerprint
 surfaces the diff touches (the `reviewer-brief.md` list - auth, migration, money, concurrency, wire

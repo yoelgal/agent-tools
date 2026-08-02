@@ -31,6 +31,13 @@ Get structure first: compose `/codebase-map` for callers, dependents, the real s
 radius of the areas you will look at. An audit that guesses at structure surfaces findings at the wrong
 seam.
 
+Ask the leverage question structurally before reading anything: `/graphify-wrapper-query <name>
+--hubs` lists the most-connected nodes, which is this skill's own "where is the leverage" rendered
+from the graph rather than from a sweep. A hub with weak tests, no error handling, or three
+responsibilities is a higher-ranked finding than the same defect in a leaf, and the ranking is
+otherwise a judgement call made blind. The index builds itself on first use, so a never-indexed repo
+is not a reason to skip this.
+
 Then read the repo's own decision and intent docs - an ADR, a `DESIGN.md`, a `CONTEXT.md`, the README's
 rationale. A tradeoff the team already settled and wrote down is not a finding; surfacing it as one
 wastes their attention and reads as an audit that didn't do its homework. Carry those decided tradeoffs

@@ -99,6 +99,68 @@ gfx_index_field() {
 
 gfx_index_names() { jq -r '.indexes | keys[]' "$(gfx_registry)" 2>/dev/null; }
 
+# Resolve a queryable graph, building whatever is missing. Prints the graph.json
+# path on stdout, every diagnostic on stderr, so a caller can capture the path.
+#
+# This exists because the query path used to dead-end: it exited 1 on a missing
+# registry, a missing domain, or a missing graph, and the caller silently fell
+# back to grep. Three misses down that chain and no repo ever built a graph at
+# all, so the capability shipped and never ran. Each miss is now healed in place
+# - the first real question is what wires the index up.
+#
+# The build here is always AST-only: free, no LLM, no API key. A `--semantic`
+# layer stays a deliberate `/graphify-wrapper-sync --semantic`, never something
+# a question triggers on the operator's behalf.
+gfx_ensure_graph() {
+  local name="${1:-}" reg root idx_path dst graph tmp
+  command -v graphify >/dev/null 2>&1 || {
+    printf 'graphify CLI not installed - run /graphify-wrapper-setup\n' >&2; return 1; }
+  root=$(gfx_this_worktree)
+  [ -n "$root" ] || { printf 'not inside a git worktree\n' >&2; return 1; }
+  reg=$(gfx_registry)
+
+  # Miss 1 - no registry: setup never ran here. Write the one it would have.
+  if [ ! -f "$reg" ]; then
+    mkdir -p "$(dirname "$reg")" || return 1
+    jq -n --arg key "$(gfx_repo_key)" --arg main "$(gfx_main_worktree)" \
+          --arg branch "$(gfx_default_branch)" \
+      '{repo_key:$key, main_worktree:$main, default_branch:$branch,
+        backend:"claude-cli", cli_model:"sonnet", indexes:{}}' > "$reg" || return 1
+    printf 'graphify: created registry %s\n' "$reg" >&2
+  fi
+
+  # Miss 2 - nothing carved: index the whole repo as one domain so the question
+  # can be answered now. /graphify-wrapper-map carves it properly once the repo
+  # is big enough to earn the split.
+  if [ -z "$(gfx_index_names)" ]; then
+    [ -n "$name" ] || name=repo
+    tmp=$(mktemp "$(dirname "$reg")/.reg.XXXXXX") || return 1
+    if jq --arg n "$name" '.indexes[$n]={path:".", semantic:false}' "$reg" > "$tmp"; then
+      mv "$tmp" "$reg" || { rm -f "$tmp"; return 1; }
+    else
+      rm -f "$tmp"; return 1
+    fi
+    printf 'graphify: no domain registered - indexing the whole repo as "%s" (carve it later with /graphify-wrapper-map)\n' "$name" >&2
+  fi
+
+  [ -n "$name" ] || name=$(gfx_index_names | head -1)
+  idx_path=$(gfx_index_field "$name" path)
+  [ -n "$idx_path" ] || { printf 'unknown index "%s" - see /graphify-wrapper-status\n' "$name" >&2; return 1; }
+  case "$idx_path" in .) dst="$root" ;; *) dst="$root/$idx_path" ;; esac
+  [ -d "$dst" ] || { printf 'index "%s" path absent in this worktree: %s\n' "$name" "$idx_path" >&2; return 1; }
+  graph="$dst/graphify-out/graph.json"
+
+  # Miss 3 - no graph in this worktree. A torn graph.json counts as missing:
+  # graphify's shrink guard refuses `update` over one it cannot parse.
+  if ! jq -e . "$graph" >/dev/null 2>&1; then
+    rm -f "$graph"
+    printf 'graphify: no graph for "%s" here - AST build, no LLM\n' "$name" >&2
+    graphify update "$dst" >&2 || { printf 'graphify build failed for "%s"\n' "$name" >&2; return 1; }
+  fi
+  jq -e . "$graph" >/dev/null 2>&1 || { printf 'graph still unusable after build: %s\n' "$graph" >&2; return 1; }
+  printf '%s\n' "$graph"
+}
+
 # --- selftest -------------------------------------------------------------
 # Runs only when this file is EXECUTED, never when sourced. Offline checks of
 # the helpers above against throwaway git repos and registries under mktemp.

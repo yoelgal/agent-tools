@@ -292,7 +292,11 @@ without touching the cause:
   only red that earns a fix pass - and the pass starts with one root-cause look, not an edit: name where
   the bad value or state was born before touching where it crashed. A guard at the crash site that
   leaves the origin wrong is a symptom patch the next pass pays for; a defect that resists one look gets
-  diagnosed, not hammered (`/diagnose` owns the full discipline).
+  diagnosed, not hammered (`/diagnose` owns the full discipline). Trace that origin structurally rather
+  than by re-reading files each pass: `/graphify-wrapper-query <name> --path "<crash site>" "<suspected
+  origin>"` returns the route between them, and `--affected "<function you are about to change>"` returns
+  every caller the fix could break. The loop is where this pays most - the index is built once and
+  queried on every iteration, where re-grepping the same subtree is paid for again on each pass.
 
 One red arrives pre-triaged: an attributed regression test - one whose body carries the attribution
 comment `/diagnose`'s contract requires, naming a past work-item and its root cause - going red is the

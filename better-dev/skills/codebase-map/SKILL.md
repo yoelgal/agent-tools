@@ -32,7 +32,11 @@ Look for a structural source the project or host already provides, and prefer it
 - A code-graph, structural-search, or knowledge-graph skill the host or project ships - names vary by
   host, so detect by what it answers (callers, dependents, symbol paths), not by a name this skill
   can't know is installed. better-dev ships `/graphify-wrapper-query` (with `/graphify-wrapper-sync`
-  for freshness) as exactly this class of tool once a repo has registered domains.
+  for freshness) as exactly this class of tool - and it **builds its index on first use**, so a repo
+  that has never been indexed is not a reason to skip it. Its verbs map straight onto the four
+  questions below: `query` (callers), `--affected` (blast radius), `--path` (how A reaches B),
+  `--hubs` (where the architecture concentrates). Reach for it before a wide grep, not after one
+  came back too big to read.
 - The language's own index - an LSP / IDE symbol index, `ctags`, or a framework's route and schema
   introspection.
 

@@ -373,6 +373,30 @@ for f in $(find skills scripts docs hooks hosts -type f 2>/dev/null; ls install.
 done
 [ -z "$dash_hits" ] && ok "no em/en dashes in shipped text" || bad "em/en dash in:$dash_hits"
 
+echo "== zsh path-variable trap =="
+# A skill's bash blocks are executed by the agent's shell, which is zsh on macOS (and the Claude Code
+# default there). zsh ties the `path` variable to `PATH`, so a plain `path=...` assignment REPLACES the
+# command search path: every later graphify/jq/git call in that block dies with "command not found".
+# This silently disabled the whole graphify wrapper until 0.9.4. Sourced helpers are covered too, since
+# they are sourced INTO that zsh. Executed scripts declare bash/sh in a shebang and are exempt.
+# Convention: idx_path / wt_path / <thing>_path - never the bare name.
+path_hits=""
+for f in $(find skills -name SKILL.md 2>/dev/null; ls scripts/bd-gfx 2>/dev/null); do
+  # Two forms, both fatal under zsh:
+  #   1. an assignment at a statement boundary (line start, or after ; & | ( or `do`/`then`)
+  #   2. a bare `path` in a `local`/`typeset`/`declare` name list - this one is worse, because it
+  #      ties AND EMPTIES PATH on the declaration line itself, before any assignment is visible.
+  #      It is the form that slipped a hand-rename and broke gfx_ensure_graph's first command.
+  LC_ALL=C grep -nE '(^|[;&|(]|[[:space:]](do|then))[[:space:]]*path=' "$f" 2>/dev/null >/dev/null \
+    && path_hits="$path_hits $f"
+  LC_ALL=C grep -nE '[[:space:]](local|typeset|declare)([[:space:]]+[^;#]*)?[[:space:]]path([[:space:]]|=|$)' "$f" 2>/dev/null >/dev/null \
+    && path_hits="$path_hits $f"
+done
+# sed drops the empty line `printf` emits for an empty hit list, so no-hits stays genuinely empty
+path_hits="$(printf '%s\n' $path_hits | sed '/^[[:space:]]*$/d' | sort -u | tr '\n' ' ')"
+[ -z "$path_hits" ] && ok "no bare 'path' variable in skill blocks or sourced helpers" \
+  || bad "zsh path-trap: a bare 'path' variable clobbers PATH in:$path_hits (use idx_path/wt_path)"
+
 echo "== vendored daemons (lint-shape only) =="
 # The vendored daemon trees (browse/, ios-qa/) are NOT behaviorally CI-gated here: this lints their dir
 # shape only. Each must carry its provenance (UPSTREAM), license (LICENSE-upstream), and README.md, and
