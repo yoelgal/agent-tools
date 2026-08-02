@@ -129,6 +129,13 @@ recorded as an override rather than overwritten:
   `feature branch prefix = feat/`, and `branch-model: staged`.
   Solo adoption skips the offer entirely: a shared branch created on one person's yes imposes a
   workflow the team never chose - record `branch-model: trunk` on the default branch.
+- **End the run standing on the integration branch.** Whichever shape resolved, check the working
+  tree out onto the branch just recorded (`git checkout staging`, or the trunk) *before* this run's
+  first commit, so onboard's own wiring commits land on the base every later worktree branches from.
+  A repo whose overrides read `integration branch = staging` while `git branch --show-current` reads
+  `main` has recorded a convention it is not standing on, and the operator's next commit lands on the
+  wrong base; a `git branch -f staging main` used to drag the branch along afterwards is the tell that
+  the commits went to the wrong place. Phase 5 names the checked-out branch in the recap.
 - Installed skills stay installed. better-dev complements them.
 
 Present real decisions one at a time; skip the ones you can default.
@@ -169,22 +176,42 @@ fi
 If the loop leaves `$sd` empty, no marker resolved and the tool is not installed for this host - loop
 back to the bootstrap block above rather than running `bd-link` against an empty path.
 
-Onboard also runs `/graphify-wrapper-setup` as part of the same wiring - idempotent, so a re-run is
-safe: it installs the graphify CLI, gitignores `graphify-out/` globally, and inits the per-repo domain
+**Graphify only where a graph would have something to say.** The capability indexes a codebase, so a
+repo with no code yet - a greenfield scaffold, a README and nothing else - gets `/graphify-wrapper-setup`
+**deferred, not run**. Installing a CLI, resolving its version floor, and initializing a registry over an
+empty tree spends the operator's attention on a capability that cannot answer a question until code
+exists, and a version-floor upgrade surfacing there reads as an onboarding blocker rather than the
+unrelated errand it is. Defer by recording the gap and naming it in the Phase 5 recap:
+
+```bash
+.better-dev/bin/bd-mem remember "graphify: deferred at onboard - no code to index yet; run /graphify-wrapper-setup once the stack lands"
+```
+
+Where the repo does carry code, run it as part of the same wiring - idempotent, so a re-run is safe:
+it installs the graphify CLI, gitignores `graphify-out/` globally, and inits the per-repo domain
 registry. When that registry holds no domains yet, offer `/graphify-wrapper-map` to build the first
 graph; a re-run treats a missing registry as a gap to fill, which is how an existing repo picks the
-capability up.
+capability up - and how a deferred greenfield repo picks it up once `/groundwork` has landed a stack.
 
 With the bridge resolving, offer the standing allowance so its own calls never trip the permission
-gate. Where the host has a permission config (Claude family: `.claude/settings.local.json`), emit a
-paste-ready snippet - offered to the clipboard where the host has one - adding two allow rules,
-`"Bash(.better-dev/bin/bd-mem:*)"` and `"Bash(.better-dev/bin/bd-guard:*)"`, merging into any existing
-allow list rather than replacing it. The rationale: these scripts write only inside `.better-dev/`, and
-nearly every skill leans on `bd-mem` for recall/remember/learn/ledger on almost every step (`bd-guard`
-at worktree creation), so an unwired host prompts on its own memory spine. The doctrine: a permission
-file is a settings-class mutation, so the write stays operator-run - the operator applies the snippet
-and confirms, the agent never edits the file itself. A host with no permission config skips this
-entirely, and a re-run that finds both rules already present proposes nothing.
+gate: two allow rules, `"Bash(.better-dev/bin/bd-mem:*)"` and `"Bash(.better-dev/bin/bd-guard:*)"`,
+merged into any existing allow list rather than replacing it. The rationale: these scripts write only
+inside `.better-dev/`, and nearly every skill leans on `bd-mem` for recall/remember/learn/ledger on
+almost every step (`bd-guard` at worktree creation), so an unwired host prompts on its own memory spine.
+
+**Propose it machine-wide, not per repo.** Both rules name a repo-relative path, so one grant in the
+host's global permission config (Claude family: `~/.claude/settings.json`) covers every repo better-dev
+is ever wired into, and every later `/onboard` then finds it present and proposes nothing at all. A
+repo-local grant asks the same question again in every repo the operator adopts - the friction this
+ordering exists to remove. Fall back to the repo-local config (`.claude/settings.local.json`) only
+where the host has no global one, or where the operator wants the grant kept to this repo.
+
+The doctrine holds at either scope: a permission file is a settings-class mutation, so the write stays
+operator-run - observed 2026-07-16, that write class is classifier-blocked for the agent even with
+adjacent operator consent, so proposing to make it yourself buys a denial rather than a shortcut. Emit
+one paste-ready snippet, put it on the clipboard where the host has a clipboard command, let the
+operator run it, and confirm afterwards that the rules read back. A host with no permission config
+skips this entirely, and a run that finds both rules already present at either scope proposes nothing.
 
 Now `.better-dev/bin/bd-mem` resolves. **Point the memory contract at what Phase 1 found, then
 initialize it:**
@@ -202,7 +229,9 @@ out of version control. What the rest does follows the recorded adoption:
 
   ```bash
   mkdir -p .better-dev
-  for p in 'bin/' 'ledger/' 'model-fingerprint'; do   # append only what's missing; never clobber a project's own entries
+  # 'bin' carries no trailing slash on purpose: it is a symlink, and git's dir-only pattern never
+  # matches one - 'bin/' leaves the per-machine bridge tracked on the first commit.
+  for p in 'bin' 'ledger/' 'model-fingerprint'; do   # append only what's missing; never clobber a project's own entries
     grep -qxF "$p" .better-dev/.gitignore 2>/dev/null || printf '%s\n' "$p" >> .better-dev/.gitignore
   done
   grep -qxF 'learnings.jsonl merge=union' .better-dev/.gitattributes 2>/dev/null \
@@ -287,7 +316,7 @@ itself - a tool you name wins over a row:
 | "add / build feature X", "I want Y" (non-trivial) | `/plan-grill` | -> `/autonomous-loop` -> `/pr-and-verify` |
 | "upgrade the dependency", "clear the CVE", "chore: X" | `/plan-grill` (contract-lite) | -> the loop, priced under a feature grill |
 | "X is broken / failing / slow", "why is prod down" | `/diagnose` | -> `/autonomous-loop` -> `/pr-and-verify` |
-| "let's build an app that does Y", a new project or epic | `/groundwork` | sets the foundation, then per-item front-ends |
+| "let's build an app that does Y", a new project or epic | `/groundwork` | asks steered or one-shot (`/gauntlet`) first, then sets the foundation |
 | "gauntlet this", "one-shot the whole thing", "write me a prompt to build X in a fresh session" | `/gauntlet` | grills goal + bar, hands you one loop prompt for a fresh session |
 | "ship it", "open a PR", "let's land this" | `/pr-and-verify` | -> `/release-promotion` on green |
 | "release this / promote to main", "roll back / revert the release", "hotfix prod", "did the deploy land / is prod healthy" | `/release-promotion` | tags, verifies live, reverts a bad release, double-merges the hotfix |
@@ -320,8 +349,10 @@ to an open item rides that item's existing worktree. Branching is `<detected con
   one with `/self-extension` only when discovery genuinely comes up empty. A skill you author here is
   repo-scoped: it lands in this repo's own project skills dir, not the global tool.
 - `/guardrails-install` records this repo's real verify command and safety baseline; on a greenfield
-  project, `/groundwork` takes the idea to a shared foundation and parallelizable work-items.
-- `.better-dev/` holds tracked data (rules, overrides, learnings); `bin/` and `ledger/` are per-machine
+  build ask, `/groundwork` opens by asking how you want it built - steered (foundation plus
+  parallelizable work-items, you review each) or one-shot (`/gauntlet` hands a fresh session one
+  prompt and runs long with minimal interaction).
+- `.better-dev/` holds tracked data (rules, overrides, learnings); `bin` and `ledger/` are per-machine
   and gitignored. A fresh clone re-runs `/onboard` to rebuild the `bin` bridge.
 - Update the tool with `/update` - it pulls the global clone (`git pull` underneath), reconciles
   skill links when needed, and tops up this repo's wiring when a release changed it.
@@ -344,6 +375,19 @@ shared; a declined confirm falls back to the local-only file, so the operator st
 A solo host with no local-only entry file skips this block too and names that in the Phase 5 recap,
 mirroring the discovery-block rule.
 
+**A confirm needs an audience.** `adoption: team` is recorded quietly wherever the history is all
+yours, a fresh `git init` included, so that label on its own can name a team of one - and a confirm
+asked on its authority stops the operator to settle something for nobody. Gate the ask on teammates
+actually existing: a remote **and** another author in `git log`. Without both, take the solo path
+without asking - the local-only file, or no block at all where the machine already carries one - and
+report the call in the Phase 5 recap instead of spending a question on it.
+
+**When the ask does fire, put it in the reader's terms.** The operator has no model of a "comms-style
+block" and cannot answer a question that names one; they answer by guessing. State the change and its
+blast radius - every session in this repo, for every teammate, speaks in one fixed terse style, and
+here is the file it lands in - and let the options differ on scope rather than on vocabulary. Two
+options a reader cannot tell apart is a question that has already failed, whatever they click.
+
 **When the machine already carries it globally.** The operator may have taken the global option at
 install (`BOOTSTRAP.md`), which puts the same block in the host's own entry file - the
 `bd_host_global_entry` path in the matching `hosts/*` adapter, `~/.claude/CLAUDE.md` on Claude Code.
@@ -352,11 +396,12 @@ Resolve the clone the same way the rest of this phase does, from the bridge this
 which holds the clone path); the adapter and the block body both live under it. Check the entry file
 for the `<!-- BEGIN better-dev-comms -->` marker before writing, and let what you find decide:
 
-- **Found, solo adoption:** skip the repo block and name the skip in the Phase 5 recap. The operator
-  already reads it from the global file, and a second copy is a duplicate tax on every turn of every
-  session in this repo.
-- **Found, team adoption:** write it anyway. The shared block is not for the operator, it is for
-  teammates who have no global block of their own.
+- **Found, no teammates** (solo adoption, or a `team` label with no remote and no second author):
+  skip the repo block without asking and name the skip in the Phase 5 recap. The operator already
+  reads it from the global file, and a second copy is a duplicate tax on every turn of every session
+  in this repo.
+- **Found, real teammates:** write it anyway, after the confirm above. The shared block is not for the
+  operator, it is for teammates who have no global block of their own.
 - **Not found:** write as usual, and let the recap name the global option once. The install-time ask
   is prose an agent follows, so a missed ask should cost one line to recover, not a re-install.
 
@@ -395,7 +440,10 @@ Close with a **loop-readiness** read - a short prose check on whether this repo 
 loop, not a score. Five signals, each drawn from what the phases above already turned up:
 
 - **Integration branch** - one exists (the `staging`/`develop` or the recorded integration branch) for
-  feature worktrees to branch off; without it `/worktree-branching` has no base to start a loop from.
+  feature worktrees to branch off, and the working tree is standing on it; without it
+  `/worktree-branching` has no base to start a loop from. Report the branch by name, read from
+  `git branch --show-current` rather than from what Phase 2 recorded - the recorded name is the
+  premise, the checked-out one is the fact.
 - **Guardrails & CI wired** - a pre-commit hook and a CI check run the repo's real lint/typecheck/test
   (`/guardrails-install`), so the loop's green rests on gates that actually hold.
 - **Verify command mapped** - the repo's real verify command is recorded, not guessed (the `verify`
@@ -410,10 +458,22 @@ loop, not a score. Five signals, each drawn from what the phases above already t
 All five clear → the repo is ready to drive the loop. A gap isn't a blocker: name it alongside the
 `/onboard <phase>` or `/guardrails-install` that closes it, and let the operator decide when to.
 
-When this was a greenfield or brand-new project, point to
-`/groundwork` as the next step - it takes the idea to a shared foundation and a set of parallelizable
-work-items before any single feature is grilled. Record a durable rule for anything worth remembering
-next session (`.better-dev/bin/bd-mem remember "<rule>"`).
+When this was a greenfield or brand-new project, the next step is `/groundwork` - and name, in the
+same breath, that it opens by asking *how* the thing gets built, because the two routes cost the
+operator very different amounts of their own attention:
+
+- **Steered** - groundwork's own path: a shared foundation lands first, the rest is carved into
+  parallelizable work-items, and each one is grilled and reviewed before it merges. The operator is
+  in the loop at every gate.
+- **One-shot** - `/gauntlet`: one prompt handed to a fresh session, which then builds against a
+  concrete bar for hours with almost no interaction. The operator's touchpoints are the bar and
+  stopping the run.
+
+Naming both here is the point. An operator who does not already know the word "gauntlet" cannot ask
+for it, so a close-out that offers only `/groundwork` silently picks the steered route for them - and
+the route is a real choice about how they want to spend their day, not an implementation detail.
+Record a durable rule for anything worth remembering next session
+(`.better-dev/bin/bd-mem remember "<rule>"`).
 
 ## Composability
 

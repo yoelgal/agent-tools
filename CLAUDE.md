@@ -10,7 +10,7 @@ itself - a tool you name wins over a row:
 | "add / build feature X", "I want Y" (non-trivial) | `/plan-grill` | -> `/autonomous-loop` -> `/pr-and-verify` |
 | "upgrade the dependency", "clear the CVE", "chore: X" | `/plan-grill` (contract-lite) | -> the loop, priced under a feature grill |
 | "X is broken / failing / slow", "why is prod down" | `/diagnose` | -> `/autonomous-loop` -> `/pr-and-verify` |
-| "let's build an app that does Y", a new project or epic | `/groundwork` | sets the foundation, then per-item front-ends |
+| "let's build an app that does Y", a new project or epic | `/groundwork` | asks steered or one-shot (`/gauntlet`) first, then sets the foundation |
 | "gauntlet this", "one-shot the whole thing", "write me a prompt to build X in a fresh session" | `/gauntlet` | grills goal + bar, hands you one loop prompt for a fresh session |
 | "ship it", "open a PR", "let's land this" | `/pr-and-verify` | -> `/release-promotion` on green |
 | "release this / promote to main", "roll back / revert the release", "hotfix prod", "did the deploy land / is prod healthy" | `/release-promotion` | tags, verifies live, reverts a bad release, double-merges the hotfix |
@@ -39,12 +39,14 @@ its own git worktree, off `staging` (`/worktree-branching` sets it up first); br
 - Durable rules and lessons: `.better-dev/bin/bd-mem` (backend: files). Project overrides in
   `.better-dev/overrides.md` **win over defaults**, so read them first.
 - `/guardrails-install` records this repo's real verify command and safety baseline; on a greenfield
-  project, `/groundwork` takes the idea to a shared foundation and parallelizable work-items.
+  build ask, `/groundwork` opens by asking how you want it built - steered (foundation plus
+  parallelizable work-items, you review each) or one-shot (`/gauntlet` hands a fresh session one
+  prompt and runs long with minimal interaction).
 - Hit a capability gap? Source an existing skill with `/tool-sourcing` before building anything; author
   one with `/self-extension` only when discovery genuinely comes up empty. A skill you author here is
   repo-scoped: it lands in this repo's own project skills dir, not the global tool.
 - `.better-dev/` holds better-dev data (rules, overrides, learnings); in **this** repo the whole dir is
-  gitignored as local runtime state (`bin/` and `ledger/` are per-machine regardless). A fresh clone
+  gitignored as local runtime state (`bin` and `ledger/` are per-machine regardless). A fresh clone
   re-runs `/onboard` to rebuild the `bin` bridge.
 - Update the tool with `/update` - it pulls the global clone (`git pull` underneath), reconciles
   skill links when needed, and tops up this repo's wiring when a release changed it.

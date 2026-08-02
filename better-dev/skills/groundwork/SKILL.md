@@ -19,11 +19,20 @@ branching base, and before any single feature is grilled.
 Read `.better-dev/overrides.md` first (`.better-dev/bin/bd-mem read overrides`). A project's own stack,
 architecture conventions, or a house way of slicing work wins over any default below.
 
-One fork after that read, before shaping starts: a greenfield ask with a nameable external quality bar
-and appetite for one long autonomous run fits `/gauntlet` - its deliverable is a single loop prompt
-handed to a fresh session, where this skill's is a foundation plus parallel work-items in this repo.
-When the ask has that shape and no override settles the route, offer the choice in one question; when
-the user wants incremental, reviewable work-items here, this skill proceeds.
+**One fork after that read, before shaping starts, on every greenfield build ask.** Two routes reach a
+built product and they spend the user's own attention very differently: this skill's - a shared
+foundation, then carved work-items each grilled, reviewed, and merged with the user at every gate - or
+`/gauntlet`'s, a single loop prompt handed to a fresh session that then builds against a concrete bar
+for hours with almost no interaction. Put it to the user in one question, described in those terms
+rather than by skill name. A recorded override settles the route without asking, and so does a user who
+named one themselves - `/gauntlet` reached directly is not re-litigated here.
+
+Ask the fork rather than judging it. Firing it only where the ask already carries a nameable external
+bar and a visible appetite for one long autonomous run puts the choice behind a judgement the user
+never sees made, and a user who does not know the word "gauntlet" cannot correct it. A missing bar is
+not a disqualification either: `/gauntlet` can open its prompt with a bar-finding task, so "I have no
+reference in mind" is an input to that route, not a reason to withhold it. When the user wants
+incremental, reviewable work-items here, this skill proceeds.
 
 Locate the repo's contribution guide in the same establishing read: an override may pin its path; else
 look for `CONTRIBUTING.md` or a coding-standards file at the root, under `docs/`, or under `.github/`.
