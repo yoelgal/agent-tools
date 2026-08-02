@@ -633,34 +633,58 @@ echo "== graphify integration =="
 # The operator-gate policy has to be written down and obeyed by both consumers. Graphify's setup
 # makes machine-global changes; onboard forbids silent ones. Before D26 neither DECISIONS.md nor
 # TRAPS.md mentioned graphify at all, so the contradiction survived by nobody having decided it.
-d26=$(awk '/^## D26 /,/^## D27 /' docs/DECISIONS.md)
-if [ -n "$d26" ] \
-   && printf '%s' "$d26" | grep -q 'reversible' \
-   && printf '%s' "$d26" | grep -q 'non-secret' \
+# The entry's safety clauses are asserted individually: a heading plus two adjectives would pass
+# while the clauses that bound the exception - the closed command list, the undo, the recap
+# requirement - were quietly dropped, which is the failure mode a policy gate exists to catch.
+# Anchor the range on "the next decision heading", not on D27 by name: D26 is currently last, so a
+# name anchor runs to EOF today and would swallow a later D28 added without a D27.
+d26=$(awk '/^## D26 /{f=1} /^## D[0-9]/ && !/^## D26 /{f=0} f' docs/DECISIONS.md)
+setup_report=$(awk '/^## 5\./,0' skills/graphify-wrapper-setup/SKILL.md)
+d26_has() { printf '%s' "$d26" | grep -q "$1"; }
+if [ -n "$d26" ] && d26_has 'reversible' && d26_has 'non-secret' \
+   && d26_has 'specific named commands' && d26_has 'undo:' && d26_has 'recap' \
+   && d26_has 'uv tool install graphifyy' && d26_has 'uv tool upgrade graphifyy' \
+   && d26_has 'core.excludesfile' && d26_has 'unset' \
    && grep -q 'D26' skills/onboard/SKILL.md \
-   && grep -q 'machine-global' skills/graphify-wrapper-setup/SKILL.md; then
-  ok "graphify machine-global write policy is decided (D26) and both consumers agree"
+   && printf '%s' "$setup_report" | grep -q 'machine-global' \
+   && printf '%s' "$setup_report" | grep -q 'graphifyy' \
+   && printf '%s' "$setup_report" | grep -q 'gitignore'; then
+  ok "graphify machine-global write policy is decided (D26), bounded, and announced by both consumers"
 else
-  bad "graphify machine-global write policy: D26 missing/incomplete, or onboard and graphify-wrapper-setup do not reference it"
+  bad "graphify machine-global write policy: D26 missing a safety clause (closed command list, per-command undo, recap requirement), or a consumer does not announce every write it makes"
 fi
 
 # A chain that stops at -sync never reaches the only verb with user value. Both close-outs route on.
-setup_tail=$(awk '/^## 5\./,0' skills/graphify-wrapper-setup/SKILL.md)
 map_tail=$(awk '/^## 5\./,0' skills/graphify-wrapper-map/SKILL.md)
-if printf '%s' "$setup_tail" | grep -q 'graphify-wrapper-query' \
+if printf '%s' "$setup_report" | grep -q 'graphify-wrapper-query' \
    && printf '%s' "$map_tail" | grep -q 'graphify-wrapper-query'; then
   ok "both graphify close-outs route on to /graphify-wrapper-query"
 else
   bad "a graphify close-out does not route to /graphify-wrapper-query - the chain ends before the question"
 fi
 
+# The carve /graphify-wrapper-map recommends is checked against the built graph rather than asserted.
+# The check belongs where a build actually happens, so the skill that builds is the one that must
+# name the helper - map registers domains and explicitly builds nothing.
+if grep -q 'gfx_cross_edges' skills/graphify-wrapper-sync/SKILL.md \
+   && grep -q 'gfx_cross_edges' scripts/bd-gfx; then
+  ok "the carve verification runs where the build runs (graphify-wrapper-sync names gfx_cross_edges)"
+else
+  bad "gfx_cross_edges is not reachable from the skill that builds - a carve check deferred to a step that never builds can never run"
+fi
+
 # /codebase-map already rebuts the never-indexed objection ("builds its index on first use").
 # A delegating skill that re-opens it with a "when one's installed" hedge undoes that rebuttal.
-if grep -q "when one's installed" skills/diagnose/SKILL.md \
-   || grep -q 'best structural map available' skills/plan-grill/SKILL.md; then
-  bad "structural-consult escape hatch still present in /diagnose or /plan-grill - it re-opens the cold-start excuse /codebase-map closed"
-else
+# ok-branch first, matching every other check here: prove-new pairs an OK token with the BAD that
+# follows it, so a bad-first check splits into two orphans and its ok label reports UNPROVEN.
+# The -f guards keep a renamed file from passing this vacuously - a grep over a missing file is
+# silently "no match", which reads identically to "hedge removed".
+if [ -f skills/diagnose/SKILL.md ] && [ -f skills/plan-grill/SKILL.md ] \
+   && ! grep -q "when one's installed" skills/diagnose/SKILL.md \
+   && ! grep -q 'best structural map available' skills/plan-grill/SKILL.md; then
   ok "no structural-consult escape hatch in /diagnose or /plan-grill"
+else
+  bad "structural-consult escape hatch still present in /diagnose or /plan-grill (or a delegating skill was renamed out from under this check)"
 fi
 
 echo

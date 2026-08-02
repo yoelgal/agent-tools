@@ -37,13 +37,19 @@ gfx_default_branch() {
   printf '%s\n' "${b:-main}"
 }
 
-# Absolute path of the primary checkout (seed source) - git's own main worktree,
-# always the first entry of `git worktree list --porcelain`. Deliberately not
-# "the worktree on the default branch": a staged repo defaults to main while its
-# primary checkout stands on staging, so that match found nothing and every
-# consumer's [ -n "$main" ] guard silently skipped seeding.
+# Absolute path of the seed source - the first entry of `git worktree list
+# --porcelain` that is a real working tree. Deliberately not "the worktree on the
+# default branch": a staged repo defaults to main while its primary checkout
+# stands on staging, so that match found nothing and every consumer's
+# [ -n "$main" ] guard silently skipped seeding. Not entry 1 either: on a
+# bare-repo-plus-linked-worktrees layout entry 1 is the bare dir, which has a
+# `bare` marker, no working tree and no graphs to seed from.
 gfx_main_worktree() {
-  git worktree list --porcelain 2>/dev/null | sed -n '1s/^worktree //p'
+  git worktree list --porcelain 2>/dev/null | awk '
+    /^worktree /  { wt = substr($0, 10); next }
+    /^bare$/      { wt = ""; next }
+    /^$/          { if (wt != "") { print wt; wt = ""; exit } }   # exit still runs END
+    END           { if (wt != "") print wt }'
 }
 
 # Path of the current worktree root.
@@ -166,6 +172,11 @@ gfx_ensure_graph() {
 # path:  gfx_cross_edges <graph.json>  -> one integer on stdout. A cheap read of
 # how much a domain's structure crosses its own seams.
 #
+# Only endpoints that resolve to a subtree count. A node whose source_file has no
+# `/` is a root-level file, in no subtree at all, and an endpoint id with no node
+# resolves to nothing - counting either inflates the number the operator makes a
+# split/keep decision on (this repo's own graph reported 7 where 1 was real).
+#
 # A graph.json that exists is not a graph.json that parses (graphify leaves torn
 # output behind on an interrupted build), so this guards first the way
 # gfx_ensure_graph does. Missing, torn, or not shaped like a graph -> non-zero
@@ -173,8 +184,11 @@ gfx_ensure_graph() {
 gfx_cross_edges() {
   local graph="${1:-}"
   jq -e . "$graph" >/dev/null 2>&1 || return 1
-  jq -r '(reduce .nodes[] as $n ({}; .[$n.id] = (($n.source_file // "none") | split("/")[0]))) as $sub
-    | [.links[] | select(($sub[.source] // "?") != ($sub[.target] // "?"))] | length' \
+  jq -r '(reduce .nodes[] as $n ({};
+            .[$n.id] = (($n.source_file // "") | split("/")
+                        | if length > 1 then .[0] else null end))) as $sub
+    | [.links[] | select($sub[.source] != null and $sub[.target] != null
+                         and $sub[.source] != $sub[.target])] | length' \
     "$graph" 2>/dev/null
 }
 
@@ -270,9 +284,32 @@ _gfx_selftest() {
       "$( cd "$sw" && gfx_main_worktree )" "$( cd "$sw" && gfx_this_worktree )"
   rm -rf "$sw"
 
-  # cross_edges: pkg/a -> pkg/b stays inside one subtree, the other two cross
+  # main_worktree: from a LINKED worktree - where every consumer's seed guard
+  # actually runs - it points back at the primary checkout, not at itself.
+  local lw; lw=$(mktemp -d)
+  ( cd "$lw" && git init -q primary && cd primary \
+      && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init \
+      && git worktree add -q ../feat -b feat/x )
+  _eq "main_worktree from linked wt" \
+      "$( cd "$lw/feat" && gfx_main_worktree )" "$( cd "$lw/primary" && gfx_this_worktree )"
+  rm -rf "$lw"
+
+  # main_worktree: bare-repo layout - entry 1 is the bare dir (no working tree,
+  # no graphs), so the seed source is the linked worktree behind it.
+  local bw; bw=$(mktemp -d)
+  ( cd "$bw" && git init -q src && cd src \
+      && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init \
+      && cd "$bw" && git clone -q --bare src repo.git \
+      && cd repo.git && git worktree add -q ../wt -b wt HEAD )
+  _eq "main_worktree on bare layout" \
+      "$( cd "$bw/wt" && gfx_main_worktree )" "$( cd "$bw/wt" && gfx_this_worktree )"
+  rm -rf "$bw"
+
+  # cross_edges: pkg/a -> pkg/b stays inside one subtree, the other two cross.
+  # A root-level file (README.md) is in no subtree and an id with no node resolves
+  # to nothing, so neither r -> c nor a -> gone is a crossing.
   local cg; cg=$(mktemp -d)
-  printf '%s\n' '{"nodes":[{"id":"a","source_file":"pkg/a.py"},{"id":"b","source_file":"pkg/b.py"},{"id":"c","source_file":"lib/c.py"}],"links":[{"source":"a","target":"b"},{"source":"a","target":"c"},{"source":"b","target":"c"}]}' >"$cg/graph.json"
+  printf '%s\n' '{"nodes":[{"id":"a","source_file":"pkg/a.py"},{"id":"b","source_file":"pkg/b.py"},{"id":"c","source_file":"lib/c.py"},{"id":"r","source_file":"README.md"}],"links":[{"source":"a","target":"b"},{"source":"a","target":"c"},{"source":"b","target":"c"},{"source":"r","target":"c"},{"source":"a","target":"gone"}]}' >"$cg/graph.json"
   _eq "cross_edges count" "$( gfx_cross_edges "$cg/graph.json" )" "2"
   # torn or absent is not a count: non-zero, stdout empty
   printf '%s\n' '{"nodes":[' >"$cg/torn.json"

@@ -171,9 +171,8 @@ list**: grep every caller of the function you'd touch - run `/codebase-map` to s
 record them in the evidence chain. One guard in the shared function all callers route through is a
 smaller, more correct change than a guard in the single path the ticket named - which leaves every
 sibling caller broken. Guarding at the surface - swallowing an unexpected null, de-duping in the
-view, wrapping the throw in a try/catch - hides the
-deviation instead of fixing it; if a value is unexpectedly null, the bug is wherever it was allowed to
-become null, not where it finally crashed.
+view, wrapping the throw in a try/catch - hides the deviation instead of fixing it; if a value is
+unexpectedly null, the bug is wherever it was allowed to become null, not where it finally crashed.
 
 The caller list also prices the fix before it exists. Read the planned fix's blast radius as
 evidence, not a work estimate: one file, additive, reads as the right layer; a fix that needs edits

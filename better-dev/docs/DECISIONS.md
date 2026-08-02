@@ -547,21 +547,37 @@ library-wide closed list of never-ask actions.
 
 ## D26 - reversible, non-secret machine-global writes are agent-run (2026-08-02; user-ratified)
 
-A machine-global write that one command undoes and that carries no credential - **reversible** and
-**non-secret** - is an agent write, and the running skill names it in its recap so the change is
-visible rather than silent. Settings-class writes are untouched: host settings and permission files
-stay operator-run per D22. D22's block is a **capability** limit (agent writes to
-`.claude/settings.json` are classifier-blocked, observed 2026-07-16), not a consequence rule, and
-over-reading it as a general ban on machine-global writes is the misreading that produced the drift
-this entry ends.
+A machine-global write **on the list below** is an agent write, and the running skill names it in
+its recap with its undo, so the change is visible rather than silent. **Reversible** (one command
+undoes it) and **non-secret** (it carries no credential) is what qualifies a command for the list,
+never what authorizes a command that is not on it. Settings-class writes are untouched: host
+settings and permission files stay operator-run per D22. D22's block is a **capability** limit
+(agent writes to `.claude/settings.json` are classifier-blocked, observed 2026-07-16), not a
+consequence rule, and over-reading it as a general ban on machine-global writes is the misreading
+that produced the drift this entry ends.
 
 The exception authorizes **specific named commands**, never an open class: an open class would
-authorize arbitrary package installs under agent authority. Two carry it today, both in
-`/graphify-wrapper-setup` - `uv tool install graphifyy` (undo: `uv tool uninstall graphifyy`), and
-`git config --global core.excludesfile` plus the `graphify-out/` append to that file (undo: drop the
-line). A third command joins by being added here, not by resembling these two.
+authorize arbitrary package installs under agent authority. Three carry it today, all in
+`/graphify-wrapper-setup`:
 
-Evidence: `/graphify-wrapper-setup` has made both writes on every run since it shipped, while
+- `uv tool install graphifyy` (undo: `uv tool uninstall graphifyy`)
+- `uv tool upgrade graphifyy`, run only below the version floor (undo: `uv tool install
+  'graphifyy==<the version the skill printed before upgrading>'`)
+- the `graphify-out/` append to the operator's global gitignore, plus `git config --global
+  core.excludesfile` **only where that key was unset** (undo: drop the appended line, plus, where
+  setup set the key, `git config --global --unset core.excludesfile`). An excludesfile the operator
+  already set is appended to, never re-pointed: `core.excludesFile` **replaces** git's default
+  resolution, so re-pointing it deactivates every rule the operator's real global ignore carried, in
+  every repo on the machine.
+
+Two costs the undos do not erase. `uv tool uninstall` reverses the installed files, not the code the
+install already ran, and the bound is the package name, not what an index serves for it. The
+`graphify-out/` append is one line whose reach is every repo on the machine: an unanchored pattern
+hides that directory from `git status` and from every diff-based review path, graphify repo or not.
+
+A fourth command joins by being added here, not by resembling these three.
+
+Evidence: `/graphify-wrapper-setup` has made these writes on every run since it shipped, while
 `/onboard` forbade silent global machine changes in the same phase that hands the operator a
 settings paste block; neither `docs/DECISIONS.md` nor `docs/TRAPS.md` carried a single graphify
 entry, so the contradiction survived by nobody having decided it (audit, 2026-08-02).

@@ -101,14 +101,6 @@ echo "registered domains:"; jq '.indexes' "$reg"
 Point the operator at `/graphify-wrapper-sync` to build all registered domains
 (AST, plus semantic where marked), or `/graphify-wrapper-sync <name>` for one.
 For a large first domain, suggest an AST-only sync to gauge build time before a
-`--semantic` pass. Then `/graphify-wrapper-query <name> "<question>"` - it builds
-a missing index on first use, so asking is a legitimate next step rather than
-something that waits on a sync.
+`--semantic` pass. Then `/graphify-wrapper-query <name> "<question>"`.
 
-After a build, check the carve instead of the proposal's promise:
-`gfx_cross_edges <path>/graphify-out/graph.json` prints how many edges cross the
-domain's own top-level subtrees. Report that count for any domain spanning
-multiple subtrees; zero means the carve bought no cross-subtree edges and a split
-would cost nothing - say so plainly. The count is what a query can actually
-traverse: an edge whose source line resolves through an interpolated path is
-absent from the graph and never counts.
+Sync reports each domain's cross-subtree edge count - that checks this carve.

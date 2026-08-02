@@ -87,6 +87,10 @@ for name in $names; do
     echo "[$name] AST update on $idx_path"
     graphify update "$dst"
   fi
+
+  # Check the carve against the graph just built, not against the proposal that
+  # recommended it: how many edges cross the domain's own top-level subtrees.
+  cross=$(gfx_cross_edges "$out/graph.json") && echo "[$name] cross-subtree edges: $cross"
 done
 ```
 
@@ -113,4 +117,8 @@ done
 ## Report
 
 Print one line per index: action taken (seed/refresh/scratch, AST/semantic),
-node+edge counts from the build output, and the `graph.json` path.
+node+edge counts from the build output, the `graph.json` path, and the
+cross-subtree edge count the loop printed. For a domain spanning several
+subtrees that count is the carve check `/graphify-wrapper-map` deferred here:
+zero means the carve bought no cross-subtree edges and a split would cost
+nothing - say so plainly.
