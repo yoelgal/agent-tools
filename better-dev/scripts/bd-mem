@@ -717,6 +717,12 @@ case "$op" in
       case "$ae" in 0.0*) ;; *) echo "FAIL: 6-month-old lesson did not decay (eff=$ae)"; exit 1 ;; esac
       printf '%s\n' "$so" | grep -q 'sc second answer.*contested' || { echo "FAIL: flip-flopped key not marked contested"; exit 1; }
       if printf '%s\n' "$so" | grep -q 'sc first answer'; then echo "FAIL: contested group printed the superseded text"; exit 1; fi
+      # source weight: an inferred claim is discounted against an identical observed one
+      printf '{"kind":"lesson","text":"sc weighted claim","confidence":0.5,"key":"sc-obs","ts":"2026-08-01T00:00:00Z","source":"observed"}\n' >> .better-dev/learnings.jsonl
+      printf '{"kind":"lesson","text":"sc weighted claim","confidence":0.5,"key":"sc-inf","ts":"2026-08-01T00:00:00Z","source":"inferred"}\n' >> .better-dev/learnings.jsonl
+      oe="$(BD_MEM_NOW=2026-08-02 "$SELF" recall sc-obs | sed -n 's/.*0\.50->\([0-9.]*\).*/\1/p')"
+      ie="$(BD_MEM_NOW=2026-08-02 "$SELF" recall sc-inf | sed -n 's/.*0\.50->\([0-9.]*\).*/\1/p')"
+      awk -v a="$oe" -v b="$ie" 'BEGIN{exit !(a > b)}' || { echo "FAIL: inferred not discounted vs observed (obs=$oe inf=$ie)"; exit 1; }
       # decay is off by construction when half-life is huge: same inputs, no collapse
       ne="$(BD_MEM_NOW=2026-08-02 BD_MEM_HALF_LIFE_DAYS=100000 "$SELF" recall "sc aged single" | sed -n 's/^sc aged single.*0\.90->\([0-9.]*\).*/\1/p')"
       [ "$ne" = "0.75" ] || { echo "FAIL: half-life knob not honoured (got $ne, want 0.75 ceiling)"; exit 1; }
