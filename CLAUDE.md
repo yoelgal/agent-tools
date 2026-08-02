@@ -28,15 +28,17 @@ itself - a tool you name wins over a row:
 | "here are some links / ingest these / harvest this", a link or dump of source material for the library - even one framed as "implement this" | `/source-harvest` | captures verbatim -> critical synthesis; a build ask then -> `/plan-grill` |
 | "just push to the PR / use feat/ / skip the grill" | `/overrides` | records the standing default |
 | "remove better-dev" | `/uninstall` | unwires this repo, keeps your data |
-| a one-to-two-step change | no front-end - just make it | still in a worktree; verify before done |
+| a one-to-two-step change | no front-end - just make it | inline in the work-item's worktree; verify before done |
 
 You name the entry, not every step: each front-end hands to `/autonomous-loop`, which hands a DONE
-result to `/pr-and-verify`, which hands a green PR to `/release-promotion`. Every change - even a
+result to `/pr-and-verify`, which hands a green PR to `/release-promotion`. Every work-item - even a
 trivial one that skips the front-ends - runs in
-its own git worktree, off `staging` (`/worktree-branching` sets it up first); branching is
-`feat/*` (`fix/*`), merged to `staging`, promoted to `main` on release.
+its own git worktree, off `staging` (`/worktree-branching` sets it up first); a follow-up to an open
+item rides that item's existing worktree. Branching is `feat/*` (`fix/*`), merged to `staging`,
+promoted to `main` on release.
 
-- Durable rules and lessons: `.better-dev/bin/bd-mem` (backend: files). Project overrides in
+- Durable rules and lessons: `.better-dev/bin/bd-mem` (backend: files); `--help` prints the full
+  command surface. Project overrides in
   `.better-dev/overrides.md` **win over defaults**, so read them first.
 - `/guardrails-install` records this repo's real verify command and safety baseline; on a greenfield
   build ask, `/groundwork` opens by asking how you want it built - steered (foundation plus
