@@ -210,6 +210,11 @@ repo-local grant asks the same question again in every repo the operator adopts 
 ordering exists to remove. Fall back to the repo-local config (`.claude/settings.local.json`) only
 where the host has no global one, or where the operator wants the grant kept to this repo.
 
+**Check before proposing.** Install offers this same grant once per machine (`BOOTSTRAP.md` step 2c),
+so read the global config first and propose nothing when both rules are already there - which is the
+steady state on any machine that took the install offer. Only a machine that predates that offer, or
+declined it, reaches this at all.
+
 The doctrine holds at either scope: a permission file is a settings-class mutation, so the write stays
 operator-run - observed 2026-07-16, that write class is classifier-blocked for the agent even with
 adjacent operator consent, so proposing to make it yourself buys a denial rather than a shortcut. Emit
@@ -274,6 +279,15 @@ real verify command and its safety baseline (the denylist, the gated classes, th
 signals rest on something recorded rather than assumed. Hand it the runnable entry points Phase 1
 observed - the dev/start and seed/reset commands, each with its file:line - for its `dev-run` /
 `seed-reset` recording step: it owns those keys, onboard only spots them.
+
+Say which repo you are handing over, because it changes what comes back. A repo with **no stack** - no
+dependency manifest, no build file, no source tree, which is every greenfield scaffold this phase just
+created - gets that skill's stack-agnostic half only: the secret-scan hook installed, one deferred line
+recorded, and no `none` placeholders, no policy questions, and no enforcement paste block, because each
+of those describes code that does not exist yet. Name the deferral in the Phase 5 recap alongside
+graphify's, pointing at the same trigger: `/groundwork` lands the stack, and both re-run against
+something real. A greenfield onboard that ends with nothing owed by the operator is the target, not a
+step that got skipped.
 
 ---
 

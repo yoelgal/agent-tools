@@ -78,6 +78,37 @@ machine where the host has been installed but never run, the write fails without
 gap rather than inventing a path. On a no, write nothing - `/onboard` still offers it per repo. To
 remove it later: `bd-block remove "$entry" better-dev-comms`.
 
+## 2c. Offer the standing permission allowance, machine-wide (ask once)
+
+Nearly every skill leans on `bd-mem` for recall/remember/learn/ledger on almost every step, and
+`bd-guard` fires at worktree creation. Without an allow rule the operator is prompted by better-dev's
+own memory spine, on their own repo, several times per work-item. Both rules name a repo-relative
+path, so **one grant here covers every repo this machine ever wires** - and the alternative is
+`/onboard` asking the same question again in each of them, forever:
+
+> Allow better-dev's own memory scripts to run without prompting, on every repo? (yes / no)
+
+On a yes, emit this paste-ready and let the operator run it. The write stays operator-run: a
+permission file is a settings-class mutation, and that write class is classifier-blocked for the agent
+(observed 2026-07-16), so proposing to make it directly buys a denial rather than a shortcut.
+
+```sh
+python3 - <<'PY'
+import json, pathlib
+p = pathlib.Path.home() / ".claude/settings.json"          # host's global permission config
+d = json.loads(p.read_text()) if p.exists() else {}
+a = d.setdefault("permissions", {}).setdefault("allow", [])
+for r in ("Bash(.better-dev/bin/bd-mem:*)", "Bash(.better-dev/bin/bd-guard:*)"):
+    if r not in a:
+        a.append(r)
+p.write_text(json.dumps(d, indent=2) + "\n")
+print("allow rules:", a)
+PY
+```
+
+The rules are narrow on purpose: these scripts write only inside `.better-dev/`. A host with no global
+permission config skips this - `/onboard` still offers the repo-local grant. On a no, write nothing.
+
 ## 3. Wire this repo - run `/onboard`
 
 With the tool globally available, run `/onboard` from inside the current repo. It detects the stack,
