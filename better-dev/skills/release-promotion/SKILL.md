@@ -147,6 +147,19 @@ printf 'released: %s\nfrom: %s@%s\nto: %s\ndeploy: %s\nhealth: %s\n' \
 # health: per-page "path: <load-ms>ms, <n> console errors", or "-"   (the next release's baseline)
 ```
 
+The receipt is not the settle. `ledger put` creates the release entry's directory on its own, so an
+entry that only ever receives `release.md` has no `progress.md` and reads `in-flight` forever - which
+is exactly how this repo accumulated four shipped releases still showing as open work. Close it with
+the one verb that records a terminal state, keyed to the same verdict the receipt carries:
+
+```bash
+.better-dev/bin/bd-mem ledger settle "release-$version" DONE "tagged at $(git rev-parse --short "$release"), deploy $deploy_verdict"
+```
+
+`DONE` only when the deploy verdict settled `VERIFIED` or `NO_SURFACE`; an `UNVERIFIED` or `DEGRADED`
+verdict settles the state its own section names (`NEEDS_INPUT`), so the ledger and the receipt never
+disagree about whether the release finished.
+
 Push normally here - never `--force`, and never `--no-verify` to slip past a failing hook. A
 protected release branch that rejects your push is reporting that a gate failed, not inviting you to
 force through it; bypassing a hook is the same mistake wearing a different flag. That holds past this
