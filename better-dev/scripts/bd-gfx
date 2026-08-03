@@ -2,8 +2,9 @@
 # bd-gfx - better-dev's shared graphify helpers.
 #   source it:  . "${CLAUDE_PLUGIN_ROOT}/scripts/bd-gfx"
 #          or:  . "$repo/.better-dev/bin/bd-gfx"
-# Repo-keyed central home holds only the registry; graphs live in-tree
-# (gitignored) at <path>/graphify-out/ per graphify's native layout.
+# Repo-keyed central home holds the registry AND every graph: output lives
+# OUTSIDE the tree it indexes, one dir per worktree per domain (gfx_out_dir), so
+# a build never writes into the repo it is reading.
 # Ported from orrgal1/claude-plugins graphify-wrapper (MIT), see NOTICE.
 
 # Canonical repo id, stable across all worktrees (derived from git identity).
@@ -26,53 +27,26 @@ gfx_repo_key() {
 gfx_home() { printf '%s\n' "${GRAPHIFY_HOME:-$HOME/.claude/graphify/$(gfx_repo_key)}"; }
 gfx_registry() { printf '%s\n' "$(gfx_home)/registry.json"; }
 
-gfx_default_branch() {
-  local b
-  b=$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null); b=${b#origin/}
-  if [ -z "$b" ]; then
-    for c in main master; do
-      git show-ref -q --verify "refs/remotes/origin/$c" 2>/dev/null && { b=$c; break; }
-    done
-  fi
-  printf '%s\n' "${b:-main}"
-}
-
-# Absolute path of the seed source: the primary checkout, which `git worktree list`
-# always lists first. Deliberately not "the worktree on the default branch": a
-# staged repo defaults to main while its primary checkout stands on staging, so
-# that match found nothing and every consumer's [ -n "$main" ] guard silently
-# skipped seeding.
-# A bare repo has no primary checkout - entry 1 is the bare dir (no working tree,
-# no graphs), and the linked worktrees behind it are peers in creation order, none
-# canonical. There the default-branch worktree is the seed source; with several
-# peers and none on it, the answer is nothing at all, because seeding a checkout
-# from whichever peer git listed first is worse than not seeding it.
-gfx_main_worktree() {
-  git worktree list --porcelain 2>/dev/null | awk -v db="refs/heads/$(gfx_default_branch)" '
-    function flush() {
-      if (wt == "") return
-      rec++
-      if (bare) { if (rec == 1) barelayout = 1 }
-      else {
-        nonbare++
-        if (first == "") first = wt
-        if (br == db && best == "") best = wt
-      }
-      wt = ""; br = ""; bare = 0
-    }
-    /^worktree / { flush(); wt = substr($0, 10); next }
-    /^bare$/     { bare = 1; next }
-    /^branch /   { br = substr($0, 8); next }
-    END {
-      flush()
-      if (!barelayout)       { if (first != "") print first }
-      else if (best != "")     print best
-      else if (nonbare == 1)   print first
-    }'
-}
-
 # Path of the current worktree root.
 gfx_this_worktree() { git rev-parse --show-toplevel 2>/dev/null; }
+
+# Absolute output dir for one domain in THIS worktree, always OUTSIDE the indexed
+# tree:  gfx_out_dir [name]  ->  <home>/worktrees/<worktree key>[/<name>].
+# Every read and write site derives from this, and a build exports it as
+# GRAPHIFY_OUT. graphify honours an ABSOLUTE GRAPHIFY_OUT in extract, update,
+# watch, query, the cache and its path guard (paths.py:26), but an absolute value
+# is ONE destination for every repo indexed under it, so it is exported per
+# invocation with this per-worktree, per-domain value - never set once globally.
+# The worktree key hashes the worktree's absolute path: stable across sessions (a
+# checkout does not move) and distinct per worktree. Deliberately not the branch
+# name - a branch is renamed and moves between worktrees, and the graph would
+# follow it into the wrong tree.
+gfx_out_dir() {
+  local wt; wt=$(gfx_this_worktree)
+  [ -n "$wt" ] || return 1
+  printf '%s/worktrees/%s%s\n' "$(gfx_home)" \
+    "$(printf '%s' "$wt" | shasum -a 256 | cut -c1-12)" "${1:+/$1}"
+}
 
 # Backend for --semantic builds; defaults to claude-cli (no API key, plan-billed).
 gfx_backend() {
@@ -138,7 +112,7 @@ gfx_index_names() { jq -r '.indexes | keys[]' "$(gfx_registry)" 2>/dev/null; }
 # layer stays a deliberate `/graphify-wrapper-sync --semantic`, never something
 # a question triggers on the operator's behalf.
 gfx_ensure_graph() {
-  local name="${1:-}" reg root idx_path dst graph tmp
+  local name="${1:-}" reg root idx_path dst out graph tmp
   command -v graphify >/dev/null 2>&1 || {
     printf 'graphify CLI not installed - run /graphify-wrapper-setup\n' >&2; return 1; }
   root=$(gfx_this_worktree)
@@ -148,10 +122,9 @@ gfx_ensure_graph() {
   # Miss 1 - no registry: setup never ran here. Write the one it would have.
   if [ ! -f "$reg" ]; then
     mkdir -p "$(dirname "$reg")" || return 1
-    jq -n --arg key "$(gfx_repo_key)" --arg main "$(gfx_main_worktree)" \
-          --arg branch "$(gfx_default_branch)" \
-      '{repo_key:$key, main_worktree:$main, default_branch:$branch,
-        backend:"claude-cli", cli_model:"sonnet", indexes:{}}' > "$reg" || return 1
+    jq -n --arg key "$(gfx_repo_key)" \
+      '{repo_key:$key, backend:"claude-cli", cli_model:"sonnet", indexes:{}}' \
+      > "$reg" || return 1
     printf 'graphify: created registry %s\n' "$reg" >&2
   fi
 
@@ -174,14 +147,16 @@ gfx_ensure_graph() {
   [ -n "$idx_path" ] || { printf 'unknown index "%s" - see /graphify-wrapper-status\n' "$name" >&2; return 1; }
   case "$idx_path" in .) dst="$root" ;; *) dst="$root/$idx_path" ;; esac
   [ -d "$dst" ] || { printf 'index "%s" path absent in this worktree: %s\n' "$name" "$idx_path" >&2; return 1; }
-  graph="$dst/graphify-out/graph.json"
+  out=$(gfx_out_dir "$name") || return 1
+  graph="$out/graph.json"
 
-  # Miss 3 - no graph in this worktree. A torn graph.json counts as missing:
+  # Miss 3 - no graph for this worktree. A torn graph.json counts as missing:
   # graphify's shrink guard refuses `update` over one it cannot parse.
   if ! jq -e . "$graph" >/dev/null 2>&1; then
     rm -f "$graph"
     printf 'graphify: no graph for "%s" here - AST build, no LLM\n' "$name" >&2
-    graphify update "$dst" >&2 || { printf 'graphify build failed for "%s"\n' "$name" >&2; return 1; }
+    GRAPHIFY_OUT="$out" graphify update "$dst" >&2 \
+      || { printf 'graphify build failed for "%s"\n' "$name" >&2; return 1; }
   fi
   jq -e . "$graph" >/dev/null 2>&1 || { printf 'graph still unusable after build: %s\n' "$graph" >&2; return 1; }
   printf '%s\n' "$graph"
@@ -266,83 +241,46 @@ _gfx_selftest() {
   _eq "backend no-key default" "$( GRAPHIFY_HOME="$bh" gfx_backend )" "claude-cli"
   rm -rf "$bh"
 
-  # default_branch: an origin/HEAD symbolic ref wins
-  local db; db=$(mktemp -d)
-  ( cd "$db" && git init -q \
-      && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init \
-      && git update-ref refs/remotes/origin/develop HEAD \
-      && git symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/develop )
-  _eq "default_branch origin/HEAD" "$( cd "$db" && gfx_default_branch )" "develop"
-  rm -rf "$db"
+  # out_dir: absolute, under the central home (so never inside the indexed tree),
+  # distinct per worktree, stable for one worktree across calls, and with no name
+  # it prints that worktree's graph base.
+  local w1 w2 o1 o2
+  w1=$(mktemp -d); w2=$(mktemp -d)
+  ( cd "$w1" && git init -q ) && ( cd "$w2" && git init -q )
+  o1=$( cd "$w1" && GRAPHIFY_HOME="$d/home" gfx_out_dir api )
+  o2=$( cd "$w2" && GRAPHIFY_HOME="$d/home" gfx_out_dir api )
+  case "$o1" in "$d/home/worktrees/"*/api) ;; *) _fail "out_dir shape: got '$o1'" ;; esac
+  [ "$o1" != "$o2" ] || _fail "out_dir: two worktrees collapse to one output dir ($o1)"
+  _eq "out_dir stable across calls" \
+      "$( cd "$w1" && GRAPHIFY_HOME="$d/home" gfx_out_dir api )" "$o1"
+  _eq "out_dir base with no name" \
+      "$( cd "$w1" && GRAPHIFY_HOME="$d/home" gfx_out_dir )" "${o1%/api}"
+  # outside a worktree there is no answer, and no in-tree fallback either
+  local ng; ng=$(mktemp -d)
+  ( cd "$ng" && GRAPHIFY_HOME="$d/home" gfx_out_dir api >/dev/null 2>&1 ) \
+    && _fail "out_dir: expected non-zero outside a git worktree"
+  rm -rf "$w1" "$w2" "$ng"
 
-  # default_branch: no origin/HEAD, but refs/remotes/origin/main present
-  local dm; dm=$(mktemp -d)
-  ( cd "$dm" && git init -q \
-      && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init \
-      && git update-ref refs/remotes/origin/main HEAD )
-  _eq "default_branch origin/main" "$( cd "$dm" && gfx_default_branch )" "main"
-  rm -rf "$dm"
-
-  # default_branch: nothing to go on -> main
-  local dn; dn=$(mktemp -d); ( cd "$dn" && git init -q )
-  _eq "default_branch fallback" "$( cd "$dn" && gfx_default_branch )" "main"
-  rm -rf "$dn"
-
-  # main_worktree: on the default branch it prints this worktree's root
-  local mw; mw=$(mktemp -d)
-  ( cd "$mw" && git init -q && git symbolic-ref HEAD refs/heads/main \
-      && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init )
-  _eq "main_worktree is this" \
-      "$( cd "$mw" && gfx_main_worktree )" "$( cd "$mw" && gfx_this_worktree )"
-  rm -rf "$mw"
-
-  # main_worktree: staged shape - default branch main, primary checkout standing
-  # on staging. No worktree is on main at all, and the seed source is still here.
-  local sw; sw=$(mktemp -d)
-  ( cd "$sw" && git init -q \
-      && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init \
-      && git update-ref refs/remotes/origin/main HEAD \
-      && git checkout -q -b staging )
-  _eq "main_worktree on staged repo" \
-      "$( cd "$sw" && gfx_main_worktree )" "$( cd "$sw" && gfx_this_worktree )"
-  rm -rf "$sw"
-
-  # main_worktree: from a LINKED worktree - where every consumer's seed guard
-  # actually runs - it points back at the primary checkout, not at itself.
-  local lw; lw=$(mktemp -d)
-  ( cd "$lw" && git init -q primary && cd primary \
-      && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init \
-      && git worktree add -q ../feat -b feat/x )
-  _eq "main_worktree from linked wt" \
-      "$( cd "$lw/feat" && gfx_main_worktree )" "$( cd "$lw/primary" && gfx_this_worktree )"
-  rm -rf "$lw"
-
-  # main_worktree: bare-repo layout - entry 1 is the bare dir (no working tree,
-  # no graphs), so the one linked worktree behind it is the seed source.
-  local bw; bw=$(mktemp -d)
-  ( cd "$bw" && git init -q src && cd src \
-      && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init \
-      && cd "$bw" && git clone -q --bare src repo.git \
-      && cd repo.git && git worktree add -q ../wt -b wt HEAD )
-  _eq "main_worktree on bare layout" \
-      "$( cd "$bw/wt" && gfx_main_worktree )" "$( cd "$bw/wt" && gfx_this_worktree )"
-  rm -rf "$bw"
-
-  # main_worktree: bare layout with SEVERAL linked worktrees. Creation order puts
-  # the feature worktree first, so "first working tree" seeds every peer from a
-  # feature branch - and from that peer itself returns itself, which reads as
-  # "nothing to seed from". The default-branch checkout is the answer from both.
-  local bm; bm=$(mktemp -d)
-  ( cd "$bm" && git init -q src && cd src && git symbolic-ref HEAD refs/heads/main \
-      && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init \
-      && cd "$bm" && git clone -q --bare src repo.git && cd repo.git \
-      && git worktree add -q ../feat -b feat/x HEAD \
-      && git worktree add -q ../mainwt main )
-  _eq "main_worktree on bare layout, from a feature worktree" \
-      "$( cd "$bm/feat" && gfx_main_worktree )" "$( cd "$bm/mainwt" && gfx_this_worktree )"
-  _eq "main_worktree on bare layout, from the default-branch worktree" \
-      "$( cd "$bm/mainwt" && gfx_main_worktree )" "$( cd "$bm/mainwt" && gfx_this_worktree )"
-  rm -rf "$bm"
+  # The invariant itself: a cold build through gfx_ensure_graph heals registry,
+  # domain and graph, writes the graph OUTSIDE the repo, and leaves the indexed
+  # repo byte-unchanged. Needs the CLI, so it is skipped where graphify is absent
+  # (CI installs no graphify); the same proof is run by hand in the work-item.
+  if command -v graphify >/dev/null 2>&1; then
+    local bt bhome bgraph
+    bt=$(mktemp -d); bhome="$d/bhome"
+    ( cd "$bt" && git init -q && printf 'def a():\n    return 1\n' > a.py \
+        && git add -A && git -c user.email=t@t -c user.name=t commit -q -m init ) \
+      || _fail "cold build: could not init the fixture repo"
+    bgraph=$( cd "$bt" && GRAPHIFY_HOME="$bhome" gfx_ensure_graph 2>/dev/null )
+    _eq "cold build lands outside the tree" "$bgraph" \
+        "$( cd "$bt" && GRAPHIFY_HOME="$bhome" gfx_out_dir repo )/graph.json"
+    jq -e . "$bgraph" >/dev/null 2>&1 || _fail "cold build: graph.json missing or torn"
+    _eq "cold build leaves the indexed repo byte-unchanged" \
+        "$( cd "$bt" && git status --porcelain )" ""
+    [ -z "$(find "$bt" -name graphify-out -print -quit 2>/dev/null)" ] \
+      || _fail "cold build wrote graphify-out inside the indexed repo"
+    rm -rf "$bt"
+  fi
 
   # cross_edges: pkg/a -> pkg/b stays inside one subtree, the other two cross.
   # A root-level file (README.md) is in no subtree and an id with no node resolves

@@ -644,13 +644,16 @@ echo "== graphify integration =="
 # and not just D26's prose: `grep -qF 'graphifyy>='` stayed green with the skill's floor lowered to
 # 0.0.1, so it certified a bound that was gone. The index pin is deliberately NOT asserted - it is
 # best-effort (`--default-index` is uv's lowest-priority index, `UV_INDEX` wins), so gating on it would
-# lock in a closure the command does not enforce. The ok label names D26's four writes and no more:
-# four literals cannot see a fifth write that shipped with no bullet, and claiming they can is the same
+# lock in a closure the command does not enforce. The ok label names D26's three writes and no more:
+# three literals cannot see a fourth write that shipped with no bullet, and claiming they can is the same
 # defect - a label asserting what its checks do not establish - that the checks themselves catch.
 # The reversibility clause is matched by its whole capitalised phrase: bare 'reversible' also matches
 # the lowercase "no reversible undo erases" caveat, so the clause could be deleted with the gate green.
 d26=$(awk '/^## D26 /{f=1} /^## D[0-9]/ && !/^## D26 /{f=0} f' docs/DECISIONS.md)
-setup_report=$(awk '/^## 5\./,0' skills/graphify-wrapper-setup/SKILL.md)
+# Anchor setup's Report on its NAME, not its step number: deleting the never-commit guard renumbered
+# the steps under it, and a number anchor would have quietly matched nothing - every rep_has below
+# vacuously false, the whole announce-bullet assertion gone while reading as enforced.
+setup_report=$(awk '/^## [0-9]+\. Report/,0' skills/graphify-wrapper-setup/SKILL.md)
 d26_has() { printf '%s' "$d26" | grep -qF -- "$1"; }
 rep_has() { printf '%s' "$setup_report" | grep -qF -- "$1"; }
 if [ -n "$d26" ] && d26_has '## D26 - a named list' \

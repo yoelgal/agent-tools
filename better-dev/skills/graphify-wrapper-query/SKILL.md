@@ -64,7 +64,8 @@ graphify save-result --question "<q>" --answer "<a>" --nodes <cited nodes> \
   --memory-dir "$(dirname "$graph")/memory"
 ```
 
-`graphify reflect` aggregates those into `graphify-out/reflections/LESSONS.md` -
+`graphify reflect --memory-dir "$(dirname "$graph")/memory" --out
+"$(dirname "$graph")/reflections/LESSONS.md"` aggregates those -
 nodes corroborated by repeated `useful` answers become preferred sources, repeat
 `dead_end` questions stop being re-derived, and contested nodes are flagged. It
 is deterministic, time-decayed (30-day half-life), and needs two distinct useful
