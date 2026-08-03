@@ -28,6 +28,9 @@ extract on sync (default AST-only).
 name="$1"; idx_path="$2"; sem=false
 case "$*" in *--semantic*) sem=true;; esac
 root=$(gfx_this_worktree)
+# The name becomes a directory under the graph home, so it is checked like one -
+# by the same validator the path helper uses, never a second copy of the pattern.
+gfx_valid_domain "$name" || exit 1
 [ -d "$root/$idx_path" ] || { echo "path not found in repo: $idx_path"; exit 1; }
 tmp=$(mktemp "$(dirname "$reg")/.reg.XXXXXX")
 jq --arg n "$name" --arg p "$idx_path" --argjson s "$sem" \
@@ -43,6 +46,17 @@ domain set, refines it with you interactively, and registers the chosen ones.
 
 ## Removing a domain
 
+Drop the registry entry, then this worktree's graph for it: nothing can reach that
+output once the name is gone, so leaving it behind leaks the whole dir forever.
+Other worktrees' copies go when they are removed from their own tree.
+
+The name is validated FIRST, on the same line of defence as registration: an empty
+`$1` resolves to this worktree's graph base, and the `rm -rf` below would then take
+every domain built here, semantic layers and retrieval memory included, while the
+`del` left the registry still advertising them.
+
 ```bash
+gfx_valid_domain "${1-}" || exit 1
 tmp=$(mktemp "$(dirname "$reg")/.reg.XXXXXX"); jq --arg n "$1" 'del(.indexes[$n])' "$reg" > "$tmp" && mv "$tmp" "$reg"
+out=$(gfx_out_dir "$1") && rm -rf "$out"
 ```

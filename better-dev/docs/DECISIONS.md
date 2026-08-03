@@ -558,8 +558,8 @@ classifier-blocked, observed 2026-07-16), not a consequence rule, and over-readi
 ban on machine-global writes is the misreading that produced the drift this entry ends.
 
 The exception authorizes **specific named commands**, never an open class: an open class would
-authorize arbitrary package installs under agent authority. Four carry it today, all made by
-`/graphify-wrapper-setup` except where the fourth says otherwise:
+authorize arbitrary package installs under agent authority. Three carry it today, all made by
+`/graphify-wrapper-setup` except where the third says otherwise:
 
 - `uv tool install 'graphifyy>=0.9.18' --default-index https://pypi.org/simple` (undo: `uv tool
   uninstall graphifyy`). The version floor is pinned in the command itself, so no install lands
@@ -569,16 +569,13 @@ authorize arbitrary package installs under agent authority. Four carry it today,
   account.
 - `uv tool upgrade graphifyy` with the same `--default-index`, run only below the version floor
   (undo: `uv tool install 'graphifyy==<the version the skill printed before upgrading>'`)
-- `git config --global core.excludesfile <file>` plus an append of `graphify-out/` to that file -
-  the never-commit guard, setup step 2, run on every setup that reaches it (undo: drop the appended line, and
-  `git config --global --unset core.excludesfile` only where setup set the pointer; dropping the
-  line alone leaves git's global ignore resolution re-pointed). This authorization is
-  **provisional**: the follow-up work-item that moves graph output out of the indexed tree
-  (upstream takes an absolute `GRAPHIFY_OUT`) deletes the write, and this item goes with it.
-- `mkdir -p ~/.claude/graphify/<repo key>/` and the `registry.json` written inside it - the
-  per-repo registry home (undo: `rm -rf` the registry home). Made by setup step 3, and by
-  `gfx_ensure_graph` when `/graphify-wrapper-query` heals a missing registry - the one write on
-  this list a second skill makes, so that skill names it too.
+- `mkdir -p ~/.claude/graphify/<repo key>/` and everything written inside it: this repo's
+  `registry.json` **and every graph built from any of its worktrees**, so what is authorized here
+  is unbounded in size rather than one small JSON file (undo: `rm -rf` that directory, which
+  discards every graph on this machine for this repo along with the registry; the next question
+  rebuilds them). Made by setup step 2, and by `gfx_ensure_graph` when `/graphify-wrapper-query`
+  heals a missing registry - the one write on this list a second skill makes, so that skill names
+  it too.
 
 Two costs no reversible undo erases. `uv tool uninstall` reverses the installed files, not the
 code the install already ran; the version floor bounds what may run, not that something ran. And
@@ -587,7 +584,18 @@ spawns a background child that runs `graphify update` on each registered domain 
 stale against HEAD and whose path the delta touched, so the package keeps running on that machine
 until the domains or the tool go.
 
-A fifth command joins by being added here, not by resembling these four.
+A fourth command joins by being added here, not by resembling these three.
+
+The list carried a fourth on the day this entry landed: the never-commit guard, a global-gitignore
+write made by setup so in-tree graph output could never be committed. It was authorized
+**provisionally**, against the work-item that would relocate that output. The relocation shipped
+(2026-08-03): graphs are written to an absolute `GRAPHIFY_OUT` under `~/.claude/graphify/<repo
+key>/`, outside the tree they index, so nothing graphify writes can land in a repo and the guard
+has nothing left to guard. The write is gone, so its authorization is gone with it - retired with
+its cause, not revoked on its merits. The ruling above is untouched. Retiring a write does not
+reverse the one already made: every machine that ran setup before the relocation still carries it,
+so the 0.9.7 line in `docs/RELEASES.md` carries the undo as an `offer`, which is the only channel
+that reaches an already-wired machine.
 
 Evidence: `/graphify-wrapper-setup` has made these writes on every run since it shipped, while
 `/onboard` forbade silent global machine changes in the same phase that hands the operator a

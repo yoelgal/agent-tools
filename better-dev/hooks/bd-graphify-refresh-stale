@@ -76,16 +76,20 @@ GFX_LIB="$GFX_LIB" nohup bash -c '
   head=$(git rev-parse HEAD 2>/dev/null) || exit 0
   [ -n "$head" ] || exit 0
   for name in "$@"; do
-    path=$(gfx_index_field "$name" path); [ -n "$path" ] || continue
-    g="$this/$path/graphify-out/graph.json"; [ -f "$g" ] || continue   # missing -> seed hook
-    built=$(jq -r ".built_at_commit // empty" "$g" 2>/dev/null)
-    [ -n "$built" ] || continue                          # no provenance -> leave alone
-    [ "$built" = "$head" ] && continue
-    # If built is a real commit, only refresh when the delta touches this path.
-    if git rev-parse --verify -q "$built^{commit}" >/dev/null 2>&1; then
-      [ -n "$(git diff --name-only "$built" "$head" -- "$path" 2>/dev/null)" ] || continue
-    fi
-    graphify update "$this/$path" >/dev/null 2>&1        # AST reconcile; never semantic
+    idx_path=$(gfx_index_field "$name" path); [ -n "$idx_path" ] || continue
+    out=$(gfx_out_dir "$name") || continue               # outside the indexed tree
+    g="$out/graph.json"; [ -f "$g" ] || continue         # never built here -> a query builds it
+    # One shared rule for "does this graph still describe this tree", so the
+    # background refresh and the query path can never disagree: 0 leave it, 1
+    # stale for this domain, 2 another tree built it at this path.
+    st=0; gfx_graph_state "$g" "$idx_path" || st=$?
+    [ "$st" = 0 ] && continue
+    # Discard rather than `update` over output from another tree: the shrink guard in
+    # graphify refuses that, silently, in here. gfx_discard_graph keeps `memory/`,
+    # and this site matters most - it runs in the background on a hook event, so a
+    # bare rm -rf here destroys retrieval memory before the query path can spare it.
+    [ "$st" = 2 ] && { gfx_discard_graph "$out" || continue; }
+    GRAPHIFY_OUT="$out" graphify update "$this/$idx_path" >/dev/null 2>&1   # AST; never semantic
   done
 ' _ "$this" "$@" >/dev/null 2>&1 &
 

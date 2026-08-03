@@ -298,6 +298,31 @@ for s in scripts/bd-*; do
   "$s" selftest >/dev/null 2>&1 && ok "$b" || bad "$b selftest FAILED"
 done
 
+echo "== shell parses (bash -n) =="
+# A selftest is not a parse check. `<script> selftest` returns before bash ever reads the rest of the
+# file, so a syntax error in the MAIN path runs green through the selftest runner below - which is
+# exactly how an unparseable hook reached a commit here, caught only by the repo's pre-commit hook.
+# CI and a --no-verify commit both skip that hook, so the gate has to parse every shipped script
+# itself.
+#
+# `bash -n`, not `sh -n`: every file here declares an interpreter and 13 of the 15 declare bash, so
+# the parser has to be the one they name. macOS /bin/sh IS bash 3.2, which hid this - on the only
+# machine that gates a merge (runs-on: ubuntu-latest) /bin/sh is dash, and `dash -n scripts/bd-mem`
+# rejects a herestring at PARSE time, turning CI red on untouched, correct code. Measured with the
+# real dash, not reasoned.
+#
+# The glob is the whole of each shipped tree, not `bd-*` within it, so the label is true rather than
+# true by accident: hosts/ is shipped shell that install.sh SOURCES (a broken adapter is a broken
+# installer) and carries no shebang, and any future helper not named bd-* would otherwise ship
+# unparsed under a label claiming it was checked.
+unparseable=""
+for s in scripts/* hooks/* hosts/* install.sh; do
+  [ -f "$s" ] || continue
+  case "$s" in *.json) continue ;; esac
+  bash -n "$s" 2>/dev/null || unparseable="$unparseable $s"
+done
+[ -z "$unparseable" ] && ok "every shipped script under scripts/, hooks/, hosts/ and install.sh parses under bash -n" || bad "shell syntax error in:$unparseable - a selftest cannot see this, it exits before the parse" # prove-new: regression-guard every shipped script parses at base, as it does after any change that did not break one; this catches the later edit that does, which the selftest runner structurally cannot see
+
 echo "== hook scripts (selftest) =="
 for s in hooks/bd-*; do
   [ -e "$s" ] || continue
@@ -644,13 +669,18 @@ echo "== graphify integration =="
 # and not just D26's prose: `grep -qF 'graphifyy>='` stayed green with the skill's floor lowered to
 # 0.0.1, so it certified a bound that was gone. The index pin is deliberately NOT asserted - it is
 # best-effort (`--default-index` is uv's lowest-priority index, `UV_INDEX` wins), so gating on it would
-# lock in a closure the command does not enforce. The ok label names D26's four writes and no more:
-# four literals cannot see a fifth write that shipped with no bullet, and claiming they can is the same
+# lock in a closure the command does not enforce. The ok label names D26's three writes and no more:
+# three literals cannot see a fourth write that shipped with no bullet, and claiming they can is the same
 # defect - a label asserting what its checks do not establish - that the checks themselves catch.
 # The reversibility clause is matched by its whole capitalised phrase: bare 'reversible' also matches
 # the lowercase "no reversible undo erases" caveat, so the clause could be deleted with the gate green.
 d26=$(awk '/^## D26 /{f=1} /^## D[0-9]/ && !/^## D26 /{f=0} f' docs/DECISIONS.md)
-setup_report=$(awk '/^## 5\./,0' skills/graphify-wrapper-setup/SKILL.md)
+# Anchor setup's Report on its NAME, not its step number: deleting the never-commit guard renumbered
+# the steps under it, and a stale number anchor matches nothing. The POSITIVE rep_has calls below
+# would then fail red, which is loud and survivable; the two NEGATIVE ones (`! rep_has 'global
+# gitignore:'`) stay vacuously TRUE over an empty range, so the clauses certifying that the retired
+# write really is gone would pass on a Report the anchor never found.
+setup_report=$(awk '/^## [0-9]+\. Report/,0' skills/graphify-wrapper-setup/SKILL.md)
 d26_has() { printf '%s' "$d26" | grep -qF -- "$1"; }
 rep_has() { printf '%s' "$setup_report" | grep -qF -- "$1"; }
 if [ -n "$d26" ] && d26_has '## D26 - a named list' \
@@ -659,17 +689,80 @@ if [ -n "$d26" ] && d26_has '## D26 - a named list' \
    && d26_has 'undo:' && d26_has 'recap' \
    && d26_has "uv tool install 'graphifyy>=0.9.18'" \
    && d26_has 'uv tool upgrade graphifyy' && d26_has '~/.claude/graphify/' \
-   && d26_has 'git config --global core.excludesfile' \
    && grep -q 'D26' skills/onboard/SKILL.md \
    && grep -qF 'floor=0.9.18;' skills/graphify-wrapper-setup/SKILL.md \
    && grep -qF 'graphifyy>=$floor' skills/graphify-wrapper-setup/SKILL.md \
    && rep_has 'machine-global' && rep_has 'uv tool uninstall graphifyy' \
    && rep_has "uv tool install 'graphifyy==" && rep_has 'registry: CREATED' \
-   && rep_has 'global gitignore:' \
-   && rep_has 'git config --global --unset core.excludesfile'; then
-  ok "graphify machine-global write policy is decided (D26), the 0.9.18 floor is pinned in the skill, and each of D26's four writes has its announce bullet"
+   && ! d26_has 'core.excludesfile' \
+   && ! rep_has 'global gitignore:'; then
+  ok "graphify machine-global write policy is decided (D26), the 0.9.18 floor is pinned in the skill, and each of D26's three writes has its announce bullet"
 else
-  bad "graphify machine-global write policy: D26 missing a safety clause (closed command list, per-command undo, recap requirement), the skill's install missing the 0.9.18 floor, or setup's Report missing the announce for one of D26's four writes"
+  bad "graphify machine-global write policy: D26 missing a safety clause, the skill's install missing the 0.9.18 floor, setup's Report missing an announce bullet, or the deleted never-commit guard's authorization still standing"
+fi
+
+# The out-of-tree invariant, and the whole reason this relocation exists: graphify's default writes
+# graphify-out/ INSIDE the tree it indexes, which is why a never-commit guard had to exist at all.
+# That guard produced a live CRITICAL in three consecutive review passes, the third introduced by the
+# second's hardening, defending a placement whose only justification was four words in a comment.
+# Assert the invariant at its source: one helper derives every output path, and no site reconstructs
+# an in-tree one behind its back. A relocation that leaves one hardcoded `$dst/graphify-out` writes
+# into the repo on exactly the path that skipped the helper. EVERY site that carries a graph path is
+# named here, not just bd-gfx and -sync: the refresh hook, -status and -query each resolve one too,
+# and with three of the five unwatched a full in-tree regression passed this gate green (measured).
+# The files are listed and required to exist, because a grep over a path that is gone is silently "no
+# match", which reads identically to "clean". The pattern is `/graphify-out` rather than a blanket
+# `graphify-out`, so bd-gfx's own selftest assertion (`find -name graphify-out`) still names the
+# string it has to look for. -query carries no such path at all: its retrieval dirs hang off the
+# resolved graph, so what is asserted there is that derivation.
+gfx_sites="scripts/bd-gfx hooks/bd-graphify-refresh-stale skills/graphify-wrapper-sync/SKILL.md \
+skills/graphify-wrapper-status/SKILL.md skills/graphify-wrapper-query/SKILL.md"
+gfx_missing=""
+for f in $gfx_sites; do [ -f "$f" ] || gfx_missing="$gfx_missing $f"; done
+if [ -z "$gfx_missing" ] && grep -q '^gfx_out_dir()' scripts/bd-gfx \
+   && ! grep -q '/graphify-out' $gfx_sites \
+   && grep -qF 'memory-dir "$(dirname "$graph")/memory"' skills/graphify-wrapper-query/SKILL.md \
+   && ! grep -qE '^#+ .*[Nn]ever-commit guard' skills/graphify-wrapper-setup/SKILL.md \
+   && ! grep -q 'core.excludesfile' skills/graphify-wrapper-setup/SKILL.md; then
+  ok "every graphify graph path derives from one out-of-tree helper (gfx_out_dir), across bd-gfx, the refresh hook and the sync/status/query skills, and the never-commit guard is gone with its global-gitignore write"
+else
+  bad "a graphify site resolves an in-tree output path (or was renamed out from under this check), or the never-commit guard survives under some heading - the relocation is incomplete and a build can still write inside a repo:$gfx_missing"
+fi
+
+# Prose stating an invariant is not the invariant. The two ways a build lands back inside a repo are
+# a home that IS the repo (a dotfiles checkout at $HOME, CI with HOME=workspace) and a graph left
+# behind by a previous worktree at the same path, which parses and so passes every torn-graph check.
+# Both are code, so both are gated as code: gfx_out_dir refuses a contained home rather than writing
+# into it, and nothing is served without provenance - in the query path and in the background hook,
+# which is where a silent failure is least visible.
+if grep -q 'is inside the tree it indexes' scripts/bd-gfx \
+   && grep -q '^gfx_graph_state()' scripts/bd-gfx \
+   && grep -qF 'gfx_graph_state "$graph" "$idx_path"' scripts/bd-gfx \
+   && grep -q 'gfx_graph_state' hooks/bd-graphify-refresh-stale \
+   && grep -q 'gfx_graph_state' skills/graphify-wrapper-sync/SKILL.md \
+   && grep -q '^gfx_discard_graph()' scripts/bd-gfx \
+   && grep -q 'gfx_discard_graph' hooks/bd-graphify-refresh-stale \
+   && grep -q 'gfx_discard_graph' skills/graphify-wrapper-sync/SKILL.md \
+   && ! grep -q 'rm -rf "\$out"' hooks/bd-graphify-refresh-stale \
+   && ! grep -q 'rm -rf "\$out"' skills/graphify-wrapper-sync/SKILL.md; then
+  ok "the out-of-tree invariant is enforced, not just stated: a home inside the indexed tree is refused, a graph another tree built is rebuilt rather than served, and all three discard sites route through the one helper that keeps retrieval memory"
+else
+  bad "bd-gfx states the out-of-tree invariant without enforcing it - gfx_out_dir does not refuse a home inside the indexed tree, a graph is served without checking which tree built it, or a discard site bypasses gfx_discard_graph and rm -rf's retrieval memory with the graph"
+fi
+
+# The seed hook existed only to copy a multi-file output dir BETWEEN worktrees, which is the whole
+# torn-graph temp+mv dance. Under one central home per worktree there is no cross-tree copy to make.
+# Assert that over hooks/ AS A WHOLE and over what hooks.json registers, never over the retired
+# file's own name: `grep -q 'cp -R' hooks/bd-graphify-seed-worktree` went permanently green the
+# moment that file was deleted (grep exits 2 on a missing path, and the `!` turns that into a pass),
+# so it could never go red again, and a copy reintroduced under another name or another verb - cp -a,
+# cp -r, rsync, tar - walked straight past it.
+if [ -d hooks ] && [ -f hooks/hooks.json ] \
+   && ! grep -rqE 'cp -[aRr]|rsync |tar -c' hooks/ \
+   && ! grep -q 'seed' hooks/hooks.json; then
+  ok "no hook copies graph output between worktrees, and hooks.json registers no seed hook"
+else
+  bad "a hook copies output tree-to-tree, or hooks.json still registers a seed hook - the machinery the relocation retires"
 fi
 
 # A chain that stops at -sync never reaches the only verb with user value. Both close-outs route on.
