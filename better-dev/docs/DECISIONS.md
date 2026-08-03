@@ -569,10 +569,13 @@ authorize arbitrary package installs under agent authority. Three carry it today
   account.
 - `uv tool upgrade graphifyy` with the same `--default-index`, run only below the version floor
   (undo: `uv tool install 'graphifyy==<the version the skill printed before upgrading>'`)
-- `mkdir -p ~/.claude/graphify/<repo key>/` and the `registry.json` written inside it - the
-  per-repo registry home (undo: `rm -rf` the registry home). Made by setup step 3, and by
-  `gfx_ensure_graph` when `/graphify-wrapper-query` heals a missing registry - the one write on
-  this list a second skill makes, so that skill names it too.
+- `mkdir -p ~/.claude/graphify/<repo key>/` and everything written inside it: this repo's
+  `registry.json` **and every graph built from any of its worktrees**, so what is authorized here
+  is unbounded in size rather than one small JSON file (undo: `rm -rf` that directory, which
+  discards every graph on this machine for this repo along with the registry; the next question
+  rebuilds them). Made by setup step 2, and by `gfx_ensure_graph` when `/graphify-wrapper-query`
+  heals a missing registry - the one write on this list a second skill makes, so that skill names
+  it too.
 
 Two costs no reversible undo erases. `uv tool uninstall` reverses the installed files, not the
 code the install already ran; the version floor bounds what may run, not that something ran. And
@@ -589,7 +592,10 @@ write made by setup so in-tree graph output could never be committed. It was aut
 (2026-08-03): graphs are written to an absolute `GRAPHIFY_OUT` under `~/.claude/graphify/<repo
 key>/`, outside the tree they index, so nothing graphify writes can land in a repo and the guard
 has nothing left to guard. The write is gone, so its authorization is gone with it - retired with
-its cause, not revoked on its merits. The ruling above is untouched.
+its cause, not revoked on its merits. The ruling above is untouched. Retiring a write does not
+reverse the one already made: every machine that ran setup before the relocation still carries it,
+so the 0.9.7 line in `docs/RELEASES.md` carries the undo as an `offer`, which is the only channel
+that reaches an already-wired machine.
 
 Evidence: `/graphify-wrapper-setup` has made these writes on every run since it shipped, while
 `/onboard` forbade silent global machine changes in the same phase that hands the operator a

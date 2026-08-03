@@ -56,7 +56,9 @@ per-worktree key inside it (`gfx_out_dir`) - outside the tree they index, which
 is why no gitignore of any kind is needed.
 
 ```bash
-home=$(gfx_home); reg=$(gfx_registry)
+# gfx_home refuses (printing why) where it would land inside the tree being
+# indexed - a repo checked out at $HOME. Stop there rather than writing into it.
+home=$(gfx_home) && reg=$(gfx_registry) || exit 1
 mkdir -p "$home"
 if [ ! -f "$reg" ]; then
   jq -n --arg key "$(gfx_repo_key)" \

@@ -298,6 +298,19 @@ for s in scripts/bd-*; do
   "$s" selftest >/dev/null 2>&1 && ok "$b" || bad "$b selftest FAILED"
 done
 
+echo "== shell parses (sh -n) =="
+# A selftest is not a parse check. `<script> selftest` returns before bash ever reads the rest of the
+# file, so a syntax error in the MAIN path runs green through the selftest runner below - which is
+# exactly how an unparseable hook reached a commit here, caught only by the repo's pre-commit hook.
+# CI and a --no-verify commit both skip that hook, so the gate has to parse every shipped script
+# itself. The recorded verify rule always said sh -n over these three trees; only this makes it true.
+unparseable=""
+for s in scripts/bd-* hooks/bd-* install.sh; do
+  [ -f "$s" ] || continue
+  sh -n "$s" 2>/dev/null || unparseable="$unparseable $s"
+done
+[ -z "$unparseable" ] && ok "every shipped script parses under sh -n" || bad "shell syntax error in:$unparseable - a selftest cannot see this, it exits before the parse" # prove-new: regression-guard every shipped script parses at base, as it does after any change that did not break one; this catches the later edit that does, which the selftest runner structurally cannot see
+
 echo "== hook scripts (selftest) =="
 for s in hooks/bd-*; do
   [ -e "$s" ] || continue
@@ -651,8 +664,10 @@ echo "== graphify integration =="
 # the lowercase "no reversible undo erases" caveat, so the clause could be deleted with the gate green.
 d26=$(awk '/^## D26 /{f=1} /^## D[0-9]/ && !/^## D26 /{f=0} f' docs/DECISIONS.md)
 # Anchor setup's Report on its NAME, not its step number: deleting the never-commit guard renumbered
-# the steps under it, and a number anchor would have quietly matched nothing - every rep_has below
-# vacuously false, the whole announce-bullet assertion gone while reading as enforced.
+# the steps under it, and a stale number anchor matches nothing. The POSITIVE rep_has calls below
+# would then fail red, which is loud and survivable; the two NEGATIVE ones (`! rep_has 'global
+# gitignore:'`) stay vacuously TRUE over an empty range, so the clauses certifying that the retired
+# write really is gone would pass on a Report the anchor never found.
 setup_report=$(awk '/^## [0-9]+\. Report/,0' skills/graphify-wrapper-setup/SKILL.md)
 d26_has() { printf '%s' "$d26" | grep -qF -- "$1"; }
 rep_has() { printf '%s' "$setup_report" | grep -qF -- "$1"; }
@@ -680,22 +695,57 @@ fi
 # second's hardening, defending a placement whose only justification was four words in a comment.
 # Assert the invariant at its source: one helper derives every output path, and no site reconstructs
 # an in-tree one behind its back. A relocation that leaves one hardcoded `$dst/graphify-out` writes
-# into the repo on exactly the path that skipped the helper.
-if grep -q '^gfx_out_dir()' scripts/bd-gfx \
-   && ! grep -q '\$dst/graphify-out\|\$this/\$idx_path/graphify-out\|\$root/graphify-out' scripts/bd-gfx \
-   && ! grep -q 'graphify-out' skills/graphify-wrapper-sync/SKILL.md \
-   && ! grep -q '^## 2\. Never-commit guard' skills/graphify-wrapper-setup/SKILL.md; then
-  ok "graphify output is derived out of tree by one helper (gfx_out_dir) and the never-commit guard is gone"
+# into the repo on exactly the path that skipped the helper. EVERY site that carries a graph path is
+# named here, not just bd-gfx and -sync: the refresh hook, -status and -query each resolve one too,
+# and with three of the five unwatched a full in-tree regression passed this gate green (measured).
+# The files are listed and required to exist, because a grep over a path that is gone is silently "no
+# match", which reads identically to "clean". The pattern is `/graphify-out` rather than a blanket
+# `graphify-out`, so bd-gfx's own selftest assertion (`find -name graphify-out`) still names the
+# string it has to look for. -query carries no such path at all: its retrieval dirs hang off the
+# resolved graph, so what is asserted there is that derivation.
+gfx_sites="scripts/bd-gfx hooks/bd-graphify-refresh-stale skills/graphify-wrapper-sync/SKILL.md \
+skills/graphify-wrapper-status/SKILL.md skills/graphify-wrapper-query/SKILL.md"
+gfx_missing=""
+for f in $gfx_sites; do [ -f "$f" ] || gfx_missing="$gfx_missing $f"; done
+if [ -z "$gfx_missing" ] && grep -q '^gfx_out_dir()' scripts/bd-gfx \
+   && ! grep -q '/graphify-out' $gfx_sites \
+   && grep -qF 'memory-dir "$(dirname "$graph")/memory"' skills/graphify-wrapper-query/SKILL.md \
+   && ! grep -qE '^#+ .*[Nn]ever-commit guard' skills/graphify-wrapper-setup/SKILL.md \
+   && ! grep -q 'core.excludesfile' skills/graphify-wrapper-setup/SKILL.md; then
+  ok "every graphify graph path derives from one out-of-tree helper (gfx_out_dir), across bd-gfx, the refresh hook and the sync/status/query skills, and the never-commit guard is gone with its global-gitignore write"
 else
-  bad "graphify still resolves an in-tree output path, or the never-commit guard section survives - the relocation is incomplete and a build can still write inside a repo"
+  bad "a graphify site resolves an in-tree output path (or was renamed out from under this check), or the never-commit guard survives under some heading - the relocation is incomplete and a build can still write inside a repo:$gfx_missing"
+fi
+
+# Prose stating an invariant is not the invariant. The two ways a build lands back inside a repo are
+# a home that IS the repo (a dotfiles checkout at $HOME, CI with HOME=workspace) and a graph left
+# behind by a previous worktree at the same path, which parses and so passes every torn-graph check.
+# Both are code, so both are gated as code: gfx_out_dir refuses a contained home rather than writing
+# into it, and nothing is served without provenance - in the query path and in the background hook,
+# which is where a silent failure is least visible.
+if grep -q 'is inside the tree it indexes' scripts/bd-gfx \
+   && grep -q '^gfx_graph_state()' scripts/bd-gfx \
+   && grep -qF 'gfx_graph_state "$graph" "$idx_path"' scripts/bd-gfx \
+   && grep -q 'gfx_graph_state' hooks/bd-graphify-refresh-stale \
+   && grep -q 'gfx_graph_state' skills/graphify-wrapper-sync/SKILL.md; then
+  ok "the out-of-tree invariant is enforced, not just stated: a home inside the indexed tree is refused, and a graph another tree built is rebuilt rather than served"
+else
+  bad "bd-gfx states the out-of-tree invariant without enforcing it - gfx_out_dir does not refuse a home inside the indexed tree, or a graph is served without checking which tree built it"
 fi
 
 # The seed hook existed only to copy a multi-file output dir BETWEEN worktrees, which is the whole
 # torn-graph temp+mv dance. Under one central home per worktree there is no cross-tree copy to make.
-if ! grep -q 'cp -R' hooks/bd-graphify-seed-worktree 2>/dev/null; then
-  ok "the graphify seed path no longer copies graph output across worktrees"
+# Assert that over hooks/ AS A WHOLE and over what hooks.json registers, never over the retired
+# file's own name: `grep -q 'cp -R' hooks/bd-graphify-seed-worktree` went permanently green the
+# moment that file was deleted (grep exits 2 on a missing path, and the `!` turns that into a pass),
+# so it could never go red again, and a copy reintroduced under another name or another verb - cp -a,
+# cp -r, rsync, tar - walked straight past it.
+if [ -d hooks ] && [ -f hooks/hooks.json ] \
+   && ! grep -rqE 'cp -[aRr]|rsync |tar -c' hooks/ \
+   && ! grep -q 'seed' hooks/hooks.json; then
+  ok "no hook copies graph output between worktrees, and hooks.json registers no seed hook"
 else
-  bad "hooks/bd-graphify-seed-worktree still copies graph output tree-to-tree - the machinery the relocation retires"
+  bad "a hook copies output tree-to-tree, or hooks.json still registers a seed hook - the machinery the relocation retires"
 fi
 
 # A chain that stops at -sync never reaches the only verb with user value. Both close-outs route on.

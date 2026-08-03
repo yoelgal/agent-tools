@@ -195,9 +195,10 @@ question. The operator never has to remember this - the first structural questio
 
 Where the repo does carry code, run it as part of the same wiring - idempotent, so a re-run is safe:
 it installs the graphify CLI and inits the per-repo domain registry (graph output lands outside
-every repo, so there is nothing to gitignore). When that registry holds no domains yet, offer `/graphify-wrapper-map` to build the first
-graph; a re-run treats a missing registry as a gap to fill, which is how an existing repo picks the
-capability up - and how a deferred greenfield repo picks it up once `/groundwork` has landed a stack.
+every repo, so there is nothing to gitignore). When that registry holds no domains yet, offer
+`/graphify-wrapper-map` to build the first graph; a re-run treats a missing registry as a gap to
+fill, which is how an existing repo picks the capability up - and how a deferred greenfield repo
+picks it up once `/groundwork` has landed a stack.
 
 With the bridge resolving, offer the standing allowance so its own calls never trip the permission
 gate: two allow rules, `"Bash(.better-dev/bin/bd-mem:*)"` and `"Bash(.better-dev/bin/bd-guard:*)"`,

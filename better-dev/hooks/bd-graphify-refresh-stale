@@ -75,17 +75,19 @@ GFX_LIB="$GFX_LIB" nohup bash -c '
   cd "$this" 2>/dev/null || exit 0                      # gfx_/git resolve to this worktree
   head=$(git rev-parse HEAD 2>/dev/null) || exit 0
   [ -n "$head" ] || exit 0
+  gfx_reap >/dev/null 2>&1 || true          # orphan dirs of worktrees that are gone
   for name in "$@"; do
     idx_path=$(gfx_index_field "$name" path); [ -n "$idx_path" ] || continue
     out=$(gfx_out_dir "$name") || continue               # outside the indexed tree
     g="$out/graph.json"; [ -f "$g" ] || continue         # never built here -> a query builds it
-    built=$(jq -r ".built_at_commit // empty" "$g" 2>/dev/null)
-    [ -n "$built" ] || continue                          # no provenance -> leave alone
-    [ "$built" = "$head" ] && continue
-    # If built is a real commit, only refresh when the delta touches this path.
-    if git rev-parse --verify -q "$built^{commit}" >/dev/null 2>&1; then
-      [ -n "$(git diff --name-only "$built" "$head" -- "$idx_path" 2>/dev/null)" ] || continue
-    fi
+    # One shared rule for "does this graph still describe this tree", so the
+    # background refresh and the query path can never disagree: 0 leave it, 1
+    # stale for this domain, 2 another tree built it at this path.
+    st=0; gfx_graph_state "$g" "$idx_path" || st=$?
+    [ "$st" = 0 ] && continue
+    # Discard rather than `update` over output from another tree: the shrink guard in
+    # graphify refuses that, silently, in here.
+    [ "$st" = 2 ] && rm -rf "$out"
     GRAPHIFY_OUT="$out" graphify update "$this/$idx_path" >/dev/null 2>&1   # AST; never semantic
   done
 ' _ "$this" "$@" >/dev/null 2>&1 &

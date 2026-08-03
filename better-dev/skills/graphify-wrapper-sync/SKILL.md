@@ -53,6 +53,15 @@ for name in $names; do
   if [ -f "$out/graph.json" ] && ! jq -e . "$out/graph.json" >/dev/null 2>&1; then
     echo "[$name] removing unparsable graph.json (will rebuild)"
     rm -f "$out/graph.json"
+  # A graph left by a DIFFERENT tree at this worktree path parses fine, so only
+  # provenance catches it (state 2). Refreshing on top of one would carry a dead
+  # codebase forward; the whole dir goes, cache and retrieval memory with it.
+  elif [ -f "$out/graph.json" ]; then
+    st=0; gfx_graph_state "$out/graph.json" "$idx_path" || st=$?
+    if [ "$st" = 2 ]; then
+      echo "[$name] discarding a graph built by a different tree at this path (will rebuild)"
+      rm -rf "$out"
+    fi
   fi
 
   if [ "$do_sem" = true ]; then
