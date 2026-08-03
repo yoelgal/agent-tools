@@ -63,16 +63,29 @@ gfx_home() {
       "$home" >&2
     return 1 ;;
   esac
+  # A `..` component defeats the containment walk below: the walk stops at the
+  # deepest EXISTING ancestor, so a `..` in the not-yet-created suffix is never
+  # examined, while `mkdir -p` walks it physically at create time. Measured:
+  # <outside>/pending/../../repo/gfxhome passed the guard and wrote inside the
+  # repo, then refused on the NEXT call once `pending` existed - after the write.
+  # No legitimate home needs `..`, so refusing it outright is cheaper than making
+  # the walk predict what mkdir will do.
+  case "$home" in *"/../"*|*"/..")
+    printf 'graphify home %s contains a ".." component - give GRAPHIFY_HOME a resolved absolute path\n' \
+      "$home" >&2
+    return 1 ;;
+  esac
   wt=$(gfx_this_worktree)
   if [ -n "$wt" ]; then
     base=$home
     while [ ! -d "$base" ]; do
       case "$base" in */?*) base=${base%/*}; [ -n "$base" ] || base=/ ;; *) break ;; esac
     done
-    # `cd -P`, not `cd`: bash collapses `..` LOGICALLY, so `<repo>/link/../graphs`
-    # with `link` a symlink out of the tree resolves to somewhere outside while the
-    # write lands at `<repo>/graphs`. The guard has to see the same path the write
-    # will, or a symlink plus `..` walks a home straight back into the repo.
+    # `cd -P`, not `cd`: bash collapses `..` LOGICALLY, so the two disagree wherever
+    # a symlink is involved and the guard trusts the wrong one. The reachable shape
+    # is a symlink OUTSIDE the tree pointing INTO it - `<outside>/slink/../graphs`
+    # with `slink -> <repo>/sub` reads as outside logically and lands at
+    # `<repo>/graphs` physically. `-P` makes the guard see the path the write will.
     base=$(cd -P "$base" 2>/dev/null && pwd -P) || base=$home
     # `${wt%/}` so a repo whose toplevel IS `/` compares against `/`* rather than
     # `//`*, which no ordinary absolute path matches: a repo containing everything
@@ -181,6 +194,32 @@ gfx_out_dir() {
 # structure. Closing it needs a stamp over the tree rather than the commit, which
 # graphify does not write; the exposure is one commit wide, same repo, untracked
 # and non-ignored files only, so it is documented rather than paid for.
+# Discard a domain's output because provenance says it is not this tree's: drops
+# the graph, the report, the manifest and every cache, and KEEPS `memory/`. That
+# dir is accumulated by the operator through graphify's `save-result` and cannot
+# be rebuilt from anything; `reflect` already drops nodes a graph no longer has,
+# so carrying it across is a soft cost where destroying it is a hard loss. The
+# unborn-HEAD case reaches state 2 as "cannot vouch for this" rather than proof
+# another tree built it, and a pre-first-commit repo asks on every question.
+#
+# ONE helper because there are THREE state-2 sites - here, the SessionStart hook,
+# and /graphify-wrapper-sync. Fixing only the query path left the hook destroying
+# `memory/` in the background before the query path could preserve it, which
+# defeated the fix in exactly the case it was written for.
+#
+# Status is returned, not swallowed: a partial failure leaves the foreign
+# graph.json in place, `graphify update` then runs incrementally over a dead
+# tree's graph, and the only downstream check is `jq -e .` - a parse, not a
+# provenance test - so it would be served.
+gfx_discard_graph() {
+  local out="$1"
+  [ -n "$out" ] && [ -d "$out" ] || return 0
+  # -mindepth 1 so `$out` itself survives; -maxdepth 1 so a nested `cache/memory`
+  # is still dropped. find emits paths rooted at the quoted operand with no shell
+  # re-parse, so a leading-dash or newline filename cannot escape it.
+  find "$out" -mindepth 1 -maxdepth 1 ! -name memory -exec rm -rf {} +
+}
+
 gfx_graph_state() {
   local graph="$1" idx_path="${2:-.}" built head top delta
   built=$(jq -r '.built_at_commit // empty' "$graph" 2>/dev/null) || return 2
@@ -306,8 +345,9 @@ gfx_ensure_graph() {
   # of them is served. (a) Torn graph.json: graphify's shrink guard refuses
   # `update` over one it cannot parse, so the file goes and the cache stays. (b)
   # Another tree's output, because the out dir outlives the worktree it is keyed
-  # on: it parses, so only provenance sees it, and the whole dir goes with it -
-  # cache and retrieval memory included, all of it describing a tree that is gone.
+  # on: it parses, so only provenance sees it, and the graph and every cache go
+  # (gfx_discard_graph), all of it describing a tree that is gone - `memory/` is
+  # the one thing kept, being operator-accumulated and unrebuildable.
   # (c) Stale for this domain: refreshed in place, which is incremental and keeps
   # any semantic layer. Serving a graph of the previous occupant's codebase is the
   # defect; a rebuild is the correct cost.
@@ -317,14 +357,7 @@ gfx_ensure_graph() {
   else
     gfx_graph_state "$graph" "$idx_path" || state=$?
     case "$state" in
-      # Discard the graph and its caches, never `memory/`. That dir is accumulated
-      # by the operator through `save-result` and cannot be rebuilt from anything;
-      # graphify's own `reflect` already drops nodes a graph no longer has, so
-      # carrying it across is a soft cost where destroying it is a hard loss. The
-      # unborn-HEAD case reaches state 2 as "cannot vouch for this", not as proof
-      # another tree built it, and a pre-first-commit repo asks on every question.
-      2) why='a different tree built the graph here'
-         find "$out" -mindepth 1 -maxdepth 1 ! -name memory -exec rm -rf {} + 2>/dev/null ;;
+      2) why='a different tree built the graph here'; gfx_discard_graph "$out" || return 1 ;;
       1) why='stale for commits that touched this domain' ;;
     esac
   fi
@@ -614,6 +647,35 @@ GFXSTUB
   _eq "a foreign graph at this path is rebuilt, not served" \
       "$( jq -r '.built_at_commit' "$other/graph.json" 2>/dev/null )" \
       "$( cd "$bt" && git rev-parse HEAD )"
+
+  # A discard drops the graph and every cache and KEEPS memory/. Shipped once as
+  # three copies of `rm -rf "$out"`, and fixing only the query path left the
+  # background hook destroying retrieval memory before that path could spare it.
+  local dg; dg=$(mktemp -d)
+  mkdir -p "$dg/memory/nested" "$dg/cache"
+  printf 'accumulated\n' >"$dg/memory/results.jsonl"
+  printf 'nested\n'      >"$dg/memory/nested/d.json"
+  printf '{}\n'          >"$dg/graph.json"
+  printf 'cached\n'      >"$dg/cache/ast.bin"
+  printf 'sem\n'         >"$dg/semantic.json"
+  gfx_discard_graph "$dg"
+  _eq "discard keeps retrieval memory"        "$( cat "$dg/memory/results.jsonl" 2>/dev/null )" "accumulated"
+  _eq "discard keeps memory subdirs"          "$( cat "$dg/memory/nested/d.json" 2>/dev/null )" "nested"
+  _eq "discard drops the graph"               "$( [ -e "$dg/graph.json" ] && echo left )"       ""
+  _eq "discard drops the cache"               "$( [ -e "$dg/cache" ] && echo left )"            ""
+  _eq "discard drops the semantic layer"      "$( [ -e "$dg/semantic.json" ] && echo left )"    ""
+  gfx_discard_graph "$dg/absent" || _fail "discard of a missing dir must be a no-op success"
+  rm -rf "$dg"
+
+  # Containment: a `..` component is refused outright, because the walk below stops
+  # at the deepest EXISTING ancestor and never sees a `..` in the missing suffix,
+  # while mkdir -p walks it physically. Measured writing inside the repo once.
+  local ch chout; ch=$(mktemp -d); chout=$(mktemp -d); ( cd "$ch" && git init -q )
+  _eq "home with a .. component refused" \
+      "$( cd "$ch" && GRAPHIFY_HOME="$chout/../$(basename "$chout")/h" gfx_home >/dev/null 2>&1; echo "rc=$?" )" "rc=1"
+  _eq "resolved home outside the tree still accepted" \
+      "$( cd "$ch" && GRAPHIFY_HOME="$chout/h" gfx_home >/dev/null 2>&1; echo "rc=$?" )" "rc=0"
+  rm -rf "$ch" "$chout"
   rm -rf "$bt"
 
   # cross_edges: pkg/a -> pkg/b stays inside one subtree, the other two cross.

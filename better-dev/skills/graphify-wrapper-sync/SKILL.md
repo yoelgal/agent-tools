@@ -55,12 +55,13 @@ for name in $names; do
     rm -f "$out/graph.json"
   # A graph left by a DIFFERENT tree at this worktree path parses fine, so only
   # provenance catches it (state 2). Refreshing on top of one would carry a dead
-  # codebase forward; the whole dir goes, cache and retrieval memory with it.
+  # codebase forward, so the graph and every cache go - but `memory/` stays, which
+  # is why this calls the shared helper rather than its own `rm -rf`.
   elif [ -f "$out/graph.json" ]; then
     st=0; gfx_graph_state "$out/graph.json" "$idx_path" || st=$?
     if [ "$st" = 2 ]; then
       echo "[$name] discarding a graph built by a different tree at this path (will rebuild)"
-      rm -rf "$out"
+      gfx_discard_graph "$out" || { echo "[$name] discard failed - skipping"; continue; }
     fi
   fi
 

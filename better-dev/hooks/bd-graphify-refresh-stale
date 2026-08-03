@@ -85,8 +85,10 @@ GFX_LIB="$GFX_LIB" nohup bash -c '
     st=0; gfx_graph_state "$g" "$idx_path" || st=$?
     [ "$st" = 0 ] && continue
     # Discard rather than `update` over output from another tree: the shrink guard in
-    # graphify refuses that, silently, in here.
-    [ "$st" = 2 ] && rm -rf "$out"
+    # graphify refuses that, silently, in here. gfx_discard_graph keeps `memory/`,
+    # and this site matters most - it runs in the background on a hook event, so a
+    # bare rm -rf here destroys retrieval memory before the query path can spare it.
+    [ "$st" = 2 ] && { gfx_discard_graph "$out" || continue; }
     GRAPHIFY_OUT="$out" graphify update "$this/$idx_path" >/dev/null 2>&1   # AST; never semantic
   done
 ' _ "$this" "$@" >/dev/null 2>&1 &
