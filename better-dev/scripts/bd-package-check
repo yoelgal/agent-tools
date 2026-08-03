@@ -640,26 +640,36 @@ echo "== graphify integration =="
 # name anchor runs to EOF today and would swallow a later D28 added without a D27.
 # One distinctive literal per authorized write on both sides, because three loose words ('machine-global',
 # 'graphifyy', 'registry') stayed satisfied with half the Report's bullets deleted - including the one
-# for the highest-consequence write. The version floor is asserted in the skill, not just described in
-# D26: a documented exposure is not a bounded one. The index pin is deliberately NOT asserted - it is
+# for the highest-consequence write. The floor's VALUE is asserted in the skill, not just its `>=` shape
+# and not just D26's prose: `grep -qF 'graphifyy>='` stayed green with the skill's floor lowered to
+# 0.0.1, so it certified a bound that was gone. The index pin is deliberately NOT asserted - it is
 # best-effort (`--default-index` is uv's lowest-priority index, `UV_INDEX` wins), so gating on it would
-# lock in a closure the command does not enforce.
+# lock in a closure the command does not enforce. The ok label names D26's four writes and no more:
+# four literals cannot see a fifth write that shipped with no bullet, and claiming they can is the same
+# defect - a label asserting what its checks do not establish - that the checks themselves catch.
+# The reversibility clause is matched by its whole capitalised phrase: bare 'reversible' also matches
+# the lowercase "no reversible undo erases" caveat, so the clause could be deleted with the gate green.
 d26=$(awk '/^## D26 /{f=1} /^## D[0-9]/ && !/^## D26 /{f=0} f' docs/DECISIONS.md)
 setup_report=$(awk '/^## 5\./,0' skills/graphify-wrapper-setup/SKILL.md)
 d26_has() { printf '%s' "$d26" | grep -qF -- "$1"; }
 rep_has() { printf '%s' "$setup_report" | grep -qF -- "$1"; }
-if [ -n "$d26" ] && d26_has '## D26 - a named list' && d26_has 'reversible' \
+if [ -n "$d26" ] && d26_has '## D26 - a named list' \
+   && d26_has '**Reversible** (one command undoes it)' \
    && d26_has 'non-secret' && d26_has 'specific named commands' \
    && d26_has 'undo:' && d26_has 'recap' \
    && d26_has "uv tool install 'graphifyy>=0.9.18'" \
    && d26_has 'uv tool upgrade graphifyy' && d26_has '~/.claude/graphify/' \
+   && d26_has 'git config --global core.excludesfile' \
    && grep -q 'D26' skills/onboard/SKILL.md \
-   && grep -qF 'graphifyy>=' skills/graphify-wrapper-setup/SKILL.md \
+   && grep -qF 'floor=0.9.18;' skills/graphify-wrapper-setup/SKILL.md \
+   && grep -qF 'graphifyy>=$floor' skills/graphify-wrapper-setup/SKILL.md \
    && rep_has 'machine-global' && rep_has 'uv tool uninstall graphifyy' \
-   && rep_has "uv tool install 'graphifyy==" && rep_has 'registry: CREATED'; then
-  ok "graphify machine-global write policy is decided (D26), floor-pinned, and announced write by write"
+   && rep_has "uv tool install 'graphifyy==" && rep_has 'registry: CREATED' \
+   && rep_has 'global gitignore:' \
+   && rep_has 'git config --global --unset core.excludesfile'; then
+  ok "graphify machine-global write policy is decided (D26), the 0.9.18 floor is pinned in the skill, and each of D26's four writes has its announce bullet"
 else
-  bad "graphify machine-global write policy: D26 missing a safety clause (closed command list, per-command undo, recap requirement), the install missing its version floor, or setup's Report dropping the announce for a write it makes"
+  bad "graphify machine-global write policy: D26 missing a safety clause (closed command list, per-command undo, recap requirement), the skill's install missing the 0.9.18 floor, or setup's Report missing the announce for one of D26's four writes"
 fi
 
 # A chain that stops at -sync never reaches the only verb with user value. Both close-outs route on.

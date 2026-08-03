@@ -194,7 +194,11 @@ gfx_ensure_graph() {
 # Only endpoints that resolve to a subtree count. A node whose source_file has no
 # `/` is a root-level file, in no subtree at all, and an endpoint id with no node
 # resolves to nothing - counting either inflates the number the operator makes a
-# split/keep decision on (this repo's own graph reported 7 where 1 was real).
+# split/keep decision on (this repo's own graph reported 7 where 1 was real). An
+# ABSOLUTE source_file splits to a leading empty element, which is no subtree
+# either: a graph still carrying them (a pre-normalisation graphify wrote it)
+# counts 0 because nothing resolved, not because nothing crosses. `graphify
+# update` rewrites the paths relative before sync calls this.
 #
 # A graph.json that exists is not a graph.json that parses (graphify leaves torn
 # output behind on an interrupted build), so this guards first the way
@@ -205,7 +209,7 @@ gfx_cross_edges() {
   jq -e . "$graph" >/dev/null 2>&1 || return 1
   jq -r '(reduce .nodes[] as $n ({};
             .[$n.id] = (($n.source_file // "") | split("/")
-                        | if length > 1 then .[0] else null end))) as $sub
+                        | if length > 1 and .[0] != "" then .[0] else null end))) as $sub
     | [.links[] | select($sub[.source] != null and $sub[.target] != null
                          and $sub[.source] != $sub[.target])] | length' \
     "$graph" 2>/dev/null
@@ -346,6 +350,10 @@ _gfx_selftest() {
   local cg; cg=$(mktemp -d)
   printf '%s\n' '{"nodes":[{"id":"a","source_file":"pkg/a.py"},{"id":"b","source_file":"pkg/b.py"},{"id":"c","source_file":"lib/c.py"},{"id":"r","source_file":"README.md"}],"links":[{"source":"a","target":"b"},{"source":"a","target":"c"},{"source":"b","target":"c"},{"source":"r","target":"c"},{"source":"a","target":"gone"}]}' >"$cg/graph.json"
   _eq "cross_edges count" "$( gfx_cross_edges "$cg/graph.json" )" "2"
+  # an absolute source_file is in no subtree: it must not become a bucket of its
+  # own (a crossing against every relative node) nor a bucket they all share.
+  printf '%s\n' '{"nodes":[{"id":"x","source_file":"/w/apps/x.ts"},{"id":"y","source_file":"pkg/y.ts"},{"id":"z","source_file":"/w/lib/z.ts"}],"links":[{"source":"x","target":"y"},{"source":"x","target":"z"}]}' >"$cg/abs.json"
+  _eq "cross_edges absolute source_file" "$( gfx_cross_edges "$cg/abs.json" )" "0"
   # torn or absent is not a count: non-zero, stdout empty
   printf '%s\n' '{"nodes":[' >"$cg/torn.json"
   _eq "cross_edges torn stdout" "$( gfx_cross_edges "$cg/torn.json" 2>/dev/null )" ""

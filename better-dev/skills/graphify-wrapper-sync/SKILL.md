@@ -82,14 +82,17 @@ for name in $names; do
       budget_args=(--token-budget "$(gfx_cli_token_budget)")
     fi
     echo "[$name] semantic extract ($backend${GRAPHIFY_CLAUDE_CLI_MODEL:+/$GRAPHIFY_CLAUDE_CLI_MODEL}) on $idx_path"
-    graphify extract "$dst" --backend "$backend" "${exc_args[@]}" "${budget_args[@]}"
+    graphify extract "$dst" --backend "$backend" "${exc_args[@]}" "${budget_args[@]}"; built=$?
   else
     echo "[$name] AST update on $idx_path"
-    graphify update "$dst"
+    graphify update "$dst"; built=$?
   fi
 
   # Check the carve against the graph just built, not against the proposal that
-  # recommended it: how many edges cross the domain's own top-level subtrees.
+  # recommended it: how many edges cross the domain's own top-level subtrees. Only
+  # when the build succeeded - a failed one leaves the seeded or stale graph in
+  # place, and it parses, so a count off it reads as a fresh measurement.
+  [ "$built" = 0 ] || { echo "[$name] build failed (rc=$built) - no carve check"; continue; }
   cross=$(gfx_cross_edges "$out/graph.json") && echo "[$name] cross-subtree edges: $cross"
 done
 ```
@@ -101,10 +104,11 @@ done
 - `extract` sends docs **and images** to the LLM as text; SVG markup and decoded
   binary bytes are token noise and the cause of chunks that time out, so semantic
   builds drop image/asset globs (`gfx_extract_excludes`; override per-repo with an
-  `.extract_excludes` array, which replaces the default set).
+  `.extract_excludes` array in the registry, which replaces the default set).
 - `claude-cli`'s per-chunk subprocess timeout is a hardcoded 600s (`--api-timeout`
   only affects HTTP backends), so semantic builds on it cap `--token-budget`
-  (`gfx_cli_token_budget`, default 20000; override with `.cli_token_budget`).
+  (`gfx_cli_token_budget`, default 20000; override with `.cli_token_budget` in the
+  registry).
 - A semantic build seeded onto a worktree is reconciled by AST `update` on later
   plain syncs; the named/semantic layer goes stale until the next `--semantic`
   run. Re-run with `--semantic` when you need fresh community naming.
@@ -113,9 +117,13 @@ done
 
 ## Report
 
-Print one line per index: action taken (seed/refresh/scratch, AST/semantic),
-node+edge counts from the build output, the `graph.json` path, and the
-cross-subtree edge count the loop printed. For a domain spanning several
-subtrees that count is the carve check `/graphify-wrapper-map` deferred here:
-zero means the carve bought no cross-subtree edges and a split would cost
-nothing - say so plainly.
+One line per index - action taken (seed/refresh/scratch, AST/semantic), node+edge
+counts from the build output, the `graph.json` path, and the
+cross-subtree edge count the loop printed - in this shape:
+
+    [api] refresh, AST - 812 nodes / 3104 edges - apps/api/graphify-out/graph.json - cross-subtree edges: 1
+
+For a domain spanning several subtrees that count is the carve check
+`/graphify-wrapper-map` deferred here: zero means the carve bought no
+cross-subtree edges and a split would cost nothing - say so plainly. A domain
+whose build failed has no count: report the failure, never a stale number.

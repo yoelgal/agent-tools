@@ -31,7 +31,8 @@ gfxlow() { [ -z "$1" ] || [ "$(printf '%s\n%s\n' "$floor" "$1" | sort -V | head 
 if command -v graphify >/dev/null; then echo "graphifyy: already present"
 else uv tool install "graphifyy>=$floor" "${idx[@]}" && echo "graphifyy: INSTALLED"; fi
 have=$(gfxver); echo "graphify ${have:-unknown}"
-if gfxlow "$have"; then
+if ! command -v graphify >/dev/null; then echo "graphifyy: NOT ON PATH"
+elif gfxlow "$have"; then
   uv tool upgrade graphifyy "${idx[@]}" || true; now=$(gfxver)
   [ "$now" = "$have" ] || echo "graphifyy: UPGRADED from $have to $now"
   if gfxlow "$now"; then echo "graphifyy: BELOW FLOOR $floor (still ${now:-unknown})"; fi
@@ -39,10 +40,13 @@ fi
 ```
 
 `uv tool upgrade` exits 0 on a no-op, so the announce is the observed version
-change, never the exit code. `BELOW FLOOR` means the upgrade did not clear it (an
-exact `==` pin does that): stop, hand the operator `uv tool install
-'graphifyy@latest'`, and do not run steps 2-4. No `uv` at all: stop and say `brew
-install uv` - never a global `pip install`.
+change, never the exit code. Two stops, and both skip steps 2-4. `BELOW FLOOR`
+means the upgrade did not clear it (an exact `==` pin does that): hand the
+operator `uv tool install 'graphifyy@latest'`. `NOT ON PATH` means the version was
+never read, because the binary uv installed is not resolvable here - a re-install
+cannot fix that, so hand `uv tool update-shell` instead (uv warns about this on a
+fresh machine). No `uv` at all: stop and say `brew install uv` - never a global
+`pip install`.
 
 ## 2. Never-commit guard (global gitignore)
 
@@ -80,9 +84,10 @@ cat "$reg"
 ## 4. Pick a semantic backend
 
 `--semantic` builds need a backend. Default is `claude-cli` (the local `claude` CLI
-on the operator's plan - **no API key**), pinned to `cli_model: "sonnet"` because
-that path otherwise defaults to Opus, overkill for structured-JSON extraction.
-Prefer an API key already in the env:
+on the operator's plan - **no API key**, billed to the plan), pinned in the registry
+to `cli_model: "sonnet"` because that path otherwise defaults to Opus, overkill for
+structured-JSON extraction; `/graphify-wrapper-sync --semantic` exports that pin as
+`GRAPHIFY_CLAUDE_CLI_MODEL`. Prefer an API key already in the env:
 
 ```bash
 if   [ -n "${ANTHROPIC_API_KEY:-}" ]; then b=claude
@@ -99,9 +104,17 @@ echo "semantic backend: $b"
 
 Name what this run changed outside the repo, so a machine-global write is visible
 rather than silent (D26). Steps 1 and 3 each printed which branch they took: report
-a bullet for every line below that fired, with its undo, and none for the rest - a
-run that printed none of them changed nothing outside the repo and says that.
+a bullet for every line below that fired, with its undo, and none for the rest.
+Step 2's bullet fires on every run because that write is unconditional, so no run
+of this skill leaves the machine untouched and none claims it did.
 
+- `global gitignore: <file>` - pointed git's **global** `core.excludesfile` at that
+  file and added `graphify-out/` to it, so that path is ignored in every repo on
+  this machine (undo: remove the added line, plus
+  `git config --global --unset core.excludesfile` where setup set the pointer -
+  removing the line alone leaves the pointer moved). A re-run on an
+  already-guarded machine is a no-op, but this run cannot tell which it was, so
+  report the write.
 - `graphifyy: INSTALLED` - installed `graphifyy` (undo: `uv tool uninstall graphifyy`)
 - `graphifyy: UPGRADED from <v> to <w>` - replaced the machine's `graphifyy` (undo:
   `uv tool install 'graphifyy==<v>'`, an exact pin; `graphifyy@latest` unpins)

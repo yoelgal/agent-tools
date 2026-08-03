@@ -25,6 +25,10 @@ repo ever built a graph at all. **A first question is allowed to be the thing
 that wires the index up.** A `--semantic` layer stays deliberate
 (`/graphify-wrapper-sync --semantic`) - a question never triggers LLM spend.
 
+Healing the registry is the one machine-global write this skill makes (D26). When
+it prints `graphify: created registry <dir>`, say so with the answer and give the
+undo: `rm -rf` that directory.
+
 Never name a shell variable `path` in these blocks. zsh ties `path` to `PATH`, so
 the assignment wipes command lookup and every later `graphify`/`jq`/`git` call
 dies with "command not found" - the failure that kept this wrapper from ever
