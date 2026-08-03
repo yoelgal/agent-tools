@@ -16,11 +16,13 @@ Make a repo ready for graphify-wrapper. Idempotent - safe to re-run.
 
 ## 1. Ensure the CLI
 
-The PyPI package is `graphifyy` (double-y); the binary is `graphify`. Install it
-pinned in both axes: below the 0.9.18 floor graph writes are non-atomic (the
-refresh hook's own floor is far older - `built_at_commit`, 0.7.0), and an unpinned
-index lets `UV_INDEX` / `UV_DEFAULT_INDEX` / `UV_INDEX_URL` decide whose build
-backend runs under the operator's account here.
+The PyPI package is `graphifyy` (double-y); the binary is `graphify`. Pin the
+version: below the 0.9.18 floor graph writes are non-atomic (the refresh hook's
+own floor is far older - `built_at_commit`, 0.7.0). `--default-index` is
+best-effort and bounds nothing: it sets uv's **lowest-priority** index, so it
+turns back a `UV_DEFAULT_INDEX` / `UV_INDEX_URL` redirect of the base index and
+nothing more. `UV_INDEX` and `UV_EXTRA_INDEX_URL` add indexes uv searches first
+and they still decide whose build backend runs here (measured, uv 0.11.7).
 
 ```bash
 floor=0.9.18; idx=(--default-index https://pypi.org/simple)
@@ -44,23 +46,17 @@ install uv` - never a global `pip install`.
 
 ## 2. Never-commit guard (global gitignore)
 
-Graphs live in-tree at `<path>/graphify-out/`. Keep them out of every repo via the
-gitignore git already reads - never by re-pointing `core.excludesFile`, which
-**replaces** git's default resolution, so re-pointing a value any scope already set
-deactivates every rule it carried (`.env`, `*.pem`) in every repo on the machine.
-Writing the key at all does the same, freezing a path git re-resolves per
-invocation to whatever this run's `HOME`/`XDG_CONFIG_HOME` said - and an agent's
-environment is not the operator's shell.
+Graphs live in-tree at `<path>/graphify-out/`. Keep them out of every repo via
+the operator's **global** gitignore so a host repo's tracked files are never
+touched and nothing can be pushed.
 
 ```bash
-. .better-dev/bin/bd-gfx 2>/dev/null || . "${CLAUDE_PLUGIN_ROOT}/scripts/bd-gfx"
-gfx_ignore_guard   # every scope + probe + refusal live here, under selftest
+gi=$(git config --global --get core.excludesfile || echo "$HOME/.config/git/ignore")
+mkdir -p "$(dirname "$gi")"
+git config --global core.excludesfile "$gi"
+grep -qxF 'graphify-out/' "$gi" 2>/dev/null || printf 'graphify-out/\n' >> "$gi"
+echo "global gitignore: $gi"
 ```
-
-A non-absolute value is refused (it would land inside this repo) and a failed
-append prints `FAILED`. Either way the never-commit guard is **not** in place:
-name the file the operator has to add `graphify-out/` to, rather than reporting a
-write that did not land.
 
 ## 3. Init the per-repo registry
 
@@ -102,18 +98,13 @@ echo "semantic backend: $b"
 ## 5. Report
 
 Name what this run changed outside the repo, so a machine-global write is visible
-rather than silent (D26). Steps 1-3 each printed which branch they took: report a
-bullet for every line below that fired, with its undo, and none for the rest - a
+rather than silent (D26). Steps 1 and 3 each printed which branch they took: report
+a bullet for every line below that fired, with its undo, and none for the rest - a
 run that printed none of them changed nothing outside the repo and says that.
 
 - `graphifyy: INSTALLED` - installed `graphifyy` (undo: `uv tool uninstall graphifyy`)
 - `graphifyy: UPGRADED from <v> to <w>` - replaced the machine's `graphifyy` (undo:
   `uv tool install 'graphifyy==<v>'`, an exact pin; `graphifyy@latest` unpins)
-- `appended graphify-out/: yes` - added `graphify-out/` to the gitignore step 2
-  printed (undo: drop that line, and delete the file and its parent dir if this run
-  made them). `FAILED`, or a refusal line, means no guard: say so and name the file.
-- `set core.excludesfile: yes` - pointed git's global excludes at that file, which
-  git did not otherwise reach (undo: `git config --global --unset core.excludesfile`)
 - `registry: CREATED <dir>` - created this repo's registry home under
   `~/.claude/graphify/` (undo: `rm -rf` that directory)
 

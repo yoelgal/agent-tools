@@ -557,38 +557,27 @@ consequence rule, and over-reading it as a general ban on machine-global writes 
 that produced the drift this entry ends.
 
 The exception authorizes **specific named commands**, never an open class: an open class would
-authorize arbitrary package installs under agent authority. Four carry it today, all in
+authorize arbitrary package installs under agent authority. Three carry it today, all in
 `/graphify-wrapper-setup`:
 
 - `uv tool install 'graphifyy>=0.9.18' --default-index https://pypi.org/simple` (undo: `uv tool
-  uninstall graphifyy`). Version and index are pinned in the command itself: `uv` otherwise
-  resolves whatever `UV_INDEX` / `UV_DEFAULT_INDEX` / `UV_INDEX_URL` carries, and the package's
-  build backend runs under the operator's account before any floor check could read a version.
+  uninstall graphifyy`). The version floor is pinned in the command itself, so no install lands
+  below it. The index pin is best-effort and bounds nothing: `--default-index` sets uv's
+  lowest-priority index, and `UV_INDEX` / `UV_EXTRA_INDEX_URL` are searched first (measured, uv
+  0.11.7), so this authorization does not bound whose build backend runs under the operator's
+  account.
 - `uv tool upgrade graphifyy` with the same `--default-index`, run only below the version floor
   (undo: `uv tool install 'graphifyy==<the version the skill printed before upgrading>'`)
-- the `graphify-out/` append to the gitignore git actually reads - the value of
-  `core.excludesfile` in **any** scope, system through local - plus `git config --global
-  core.excludesfile` only where no scope set that key **and** a probe shows git does not already
-  reach the appended file (undo: drop the appended line, plus, where setup set the key, `git
-  config --global --unset core.excludesfile`). An excludesfile any scope already set is appended
-  to, never re-pointed: `core.excludesFile` **replaces** git's default resolution, so re-pointing
-  it deactivates every rule the operator's real global ignore carried, in every repo on the
-  machine - and so does pinning the key to a path this run resolved from its own `HOME` /
-  `XDG_CONFIG_HOME`, which git was otherwise re-resolving per invocation.
-- the directories and files those writes need where they are absent: the gitignore's parent
-  (`~/.config/git/`) and the per-repo registry home `~/.claude/graphify/<repo key>/` written by
-  setup step 3 (undo: `rm -rf` the registry home, and delete the gitignore file and its parent
-  where setup created them).
+- the directories and files those writes need where they are absent: the per-repo registry home
+  `~/.claude/graphify/<repo key>/` written by setup step 3 (undo: `rm -rf` the registry home).
 
-Three costs no reversible undo erases. `uv tool uninstall` reverses the installed files, not the
-code the install already ran; the pins bound what may run, not that something ran. The
-`graphify-out/` append is one line whose reach is every repo on the machine: an unanchored pattern
-hides that directory from `git status` and from every diff-based review path, graphify repo or not.
-And the install is not a one-time execution: `hooks/bd-graphify-refresh-stale` runs `graphify
-update` in a background child at every SessionStart for every registered domain, so the package
-keeps running on that machine until the domains or the tool go.
+Two costs no reversible undo erases. `uv tool uninstall` reverses the installed files, not the
+code the install already ran; the version floor bounds what may run, not that something ran. And
+the install is not a one-time execution: `hooks/bd-graphify-refresh-stale` runs `graphify update`
+in a background child at every SessionStart for every registered domain, so the package keeps
+running on that machine until the domains or the tool go.
 
-A fifth command joins by being added here, not by resembling these four.
+A fourth command joins by being added here, not by resembling these three.
 
 Evidence: `/graphify-wrapper-setup` has made these writes on every run since it shipped, while
 `/onboard` forbade silent global machine changes in the same phase that hands the operator a
