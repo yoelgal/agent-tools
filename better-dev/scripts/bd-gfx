@@ -160,7 +160,8 @@ gfx_out_dir() {
 #     0 - it describes this tree: serve it
 #     1 - stale for that domain: refresh in place (`graphify update` is diff-aware,
 #         so the semantic layer survives an AST refresh)
-#     2 - another tree's output: discard the whole dir and build cold
+#     2 - another tree's output: gfx_discard_graph (the graph and every cache go,
+#         `memory/` stays) and build cold
 #
 # gfx_out_dir keys on the worktree's PATH, so output now OUTLIVES the tree it
 # describes: /worktree-branching names worktrees .claude/worktrees/feat+<slug> and

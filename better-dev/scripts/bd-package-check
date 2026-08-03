@@ -739,10 +739,15 @@ if grep -q 'is inside the tree it indexes' scripts/bd-gfx \
    && grep -q '^gfx_graph_state()' scripts/bd-gfx \
    && grep -qF 'gfx_graph_state "$graph" "$idx_path"' scripts/bd-gfx \
    && grep -q 'gfx_graph_state' hooks/bd-graphify-refresh-stale \
-   && grep -q 'gfx_graph_state' skills/graphify-wrapper-sync/SKILL.md; then
-  ok "the out-of-tree invariant is enforced, not just stated: a home inside the indexed tree is refused, and a graph another tree built is rebuilt rather than served"
+   && grep -q 'gfx_graph_state' skills/graphify-wrapper-sync/SKILL.md \
+   && grep -q '^gfx_discard_graph()' scripts/bd-gfx \
+   && grep -q 'gfx_discard_graph' hooks/bd-graphify-refresh-stale \
+   && grep -q 'gfx_discard_graph' skills/graphify-wrapper-sync/SKILL.md \
+   && ! grep -q 'rm -rf "\$out"' hooks/bd-graphify-refresh-stale \
+   && ! grep -q 'rm -rf "\$out"' skills/graphify-wrapper-sync/SKILL.md; then
+  ok "the out-of-tree invariant is enforced, not just stated: a home inside the indexed tree is refused, a graph another tree built is rebuilt rather than served, and all three discard sites route through the one helper that keeps retrieval memory"
 else
-  bad "bd-gfx states the out-of-tree invariant without enforcing it - gfx_out_dir does not refuse a home inside the indexed tree, or a graph is served without checking which tree built it"
+  bad "bd-gfx states the out-of-tree invariant without enforcing it - gfx_out_dir does not refuse a home inside the indexed tree, a graph is served without checking which tree built it, or a discard site bypasses gfx_discard_graph and rm -rf's retrieval memory with the graph"
 fi
 
 # The seed hook existed only to copy a multi-file output dir BETWEEN worktrees, which is the whole
