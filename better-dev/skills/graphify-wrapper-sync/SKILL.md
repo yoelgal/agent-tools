@@ -98,16 +98,13 @@ done
 
 - `update` is AST-only and free; `extract` runs the LLM backend. `claude-cli` is
   serial - a large `--semantic` domain is slow and consumes plan quota.
-- `extract` sends docs **and images** to the LLM as text. SVG markup and decoded
-  binary bytes are pure token noise (and the cause of oversized chunks that time
-  out), so semantic builds exclude image/asset globs by default - see
-  `gfx_extract_excludes`. Override per-repo with an `.extract_excludes` array in
-  the registry (replaces the default set; list every glob you want dropped).
-- The `claude-cli` backend's per-chunk subprocess timeout is a fixed 600s
-  (graphify hardcodes it; `--api-timeout` only affects HTTP API backends), so
-  large chunks fail. Semantic builds on this backend cap `--token-budget` (see
-  `gfx_cli_token_budget`, default 20000) so each chunk finishes in time.
-  Override with `.cli_token_budget` in the registry.
+- `extract` sends docs **and images** to the LLM as text; SVG markup and decoded
+  binary bytes are token noise and the cause of chunks that time out, so semantic
+  builds drop image/asset globs (`gfx_extract_excludes`; override per-repo with an
+  `.extract_excludes` array, which replaces the default set).
+- `claude-cli`'s per-chunk subprocess timeout is a hardcoded 600s (`--api-timeout`
+  only affects HTTP backends), so semantic builds on it cap `--token-budget`
+  (`gfx_cli_token_budget`, default 20000; override with `.cli_token_budget`).
 - A semantic build seeded onto a worktree is reconciled by AST `update` on later
   plain syncs; the named/semantic layer goes stale until the next `--semantic`
   run. Re-run with `--semantic` when you need fresh community naming.

@@ -638,20 +638,29 @@ echo "== graphify integration =="
 # requirement - were quietly dropped, which is the failure mode a policy gate exists to catch.
 # Anchor the range on "the next decision heading", not on D27 by name: D26 is currently last, so a
 # name anchor runs to EOF today and would swallow a later D28 added without a D27.
+# One distinctive literal per authorized write on both sides, because three loose words ('machine-global',
+# 'graphifyy', 'gitignore') stayed satisfied with half the Report's bullets deleted - including the one
+# for the highest-consequence write. The version+index pin is asserted in the skill, not just described
+# in D26: a documented exposure is not a bounded one.
 d26=$(awk '/^## D26 /{f=1} /^## D[0-9]/ && !/^## D26 /{f=0} f' docs/DECISIONS.md)
 setup_report=$(awk '/^## 5\./,0' skills/graphify-wrapper-setup/SKILL.md)
-d26_has() { printf '%s' "$d26" | grep -q "$1"; }
-if [ -n "$d26" ] && d26_has 'reversible' && d26_has 'non-secret' \
-   && d26_has 'specific named commands' && d26_has 'undo:' && d26_has 'recap' \
-   && d26_has 'uv tool install graphifyy' && d26_has 'uv tool upgrade graphifyy' \
+d26_has() { printf '%s' "$d26" | grep -qF -- "$1"; }
+rep_has() { printf '%s' "$setup_report" | grep -qF -- "$1"; }
+if [ -n "$d26" ] && d26_has '## D26 - a named list' && d26_has 'reversible' \
+   && d26_has 'non-secret' && d26_has 'specific named commands' \
+   && d26_has 'undo:' && d26_has 'recap' \
+   && d26_has "uv tool install 'graphifyy>=0.9.18'" && d26_has '--default-index' \
+   && d26_has 'uv tool upgrade graphifyy' && d26_has '~/.claude/graphify/' \
    && d26_has 'core.excludesfile' && d26_has 'unset' \
    && grep -q 'D26' skills/onboard/SKILL.md \
-   && printf '%s' "$setup_report" | grep -q 'machine-global' \
-   && printf '%s' "$setup_report" | grep -q 'graphifyy' \
-   && printf '%s' "$setup_report" | grep -q 'gitignore'; then
-  ok "graphify machine-global write policy is decided (D26), bounded, and announced by both consumers"
+   && grep -qF 'graphifyy>=' skills/graphify-wrapper-setup/SKILL.md \
+   && grep -qF -- '--default-index https://pypi.org/simple' skills/graphify-wrapper-setup/SKILL.md \
+   && rep_has 'machine-global' && rep_has 'uv tool uninstall graphifyy' \
+   && rep_has "uv tool install 'graphifyy==" && rep_has 'appended graphify-out/' \
+   && rep_has '--unset core.excludesfile' && rep_has 'registry: CREATED'; then
+  ok "graphify machine-global write policy is decided (D26), pinned, and announced write by write"
 else
-  bad "graphify machine-global write policy: D26 missing a safety clause (closed command list, per-command undo, recap requirement), or a consumer does not announce every write it makes"
+  bad "graphify machine-global write policy: D26 missing a safety clause (closed command list, per-command undo, recap requirement), the install missing its version/index pin, or setup's Report dropping the announce for a write it makes"
 fi
 
 # A chain that stops at -sync never reaches the only verb with user value. Both close-outs route on.
@@ -664,13 +673,18 @@ else
 fi
 
 # The carve /graphify-wrapper-map recommends is checked against the built graph rather than asserted.
-# The check belongs where a build actually happens, so the skill that builds is the one that must
-# name the helper - map registers domains and explicitly builds nothing.
-if grep -q 'gfx_cross_edges' skills/graphify-wrapper-sync/SKILL.md \
-   && grep -q 'gfx_cross_edges' scripts/bd-gfx; then
-  ok "the carve verification runs where the build runs (graphify-wrapper-sync names gfx_cross_edges)"
+# The check belongs where a build actually happens, so the skill that builds is the one that reports it
+# (DC5, amended 2026-08-02) - map registers domains and explicitly builds nothing. Assert the count
+# REACHES the operator, not that the identifier appears: with a bare `grep -q gfx_cross_edges`, the
+# echo, the Report clause, and map's pointer at it were each independently deletable, gate green.
+sync_report=$(awk '/^## Report/,0' skills/graphify-wrapper-sync/SKILL.md)
+if grep -qF 'cross=$(gfx_cross_edges' skills/graphify-wrapper-sync/SKILL.md \
+   && grep -q 'gfx_cross_edges.*&&.*echo.*cross' skills/graphify-wrapper-sync/SKILL.md \
+   && printf '%s' "$sync_report" | grep -q 'cross-subtree edge count' \
+   && grep -q 'cross-subtree edge count' skills/graphify-wrapper-map/SKILL.md; then
+  ok "the built graph's cross-subtree count is computed, printed, and reported where the build runs"
 else
-  bad "gfx_cross_edges is not reachable from the skill that builds - a carve check deferred to a step that never builds can never run"
+  bad "the carve check does not reach the operator - graphify-wrapper-sync must call gfx_cross_edges AND print it AND report it, and graphify-wrapper-map must point at that count"
 fi
 
 # /codebase-map already rebuts the never-indexed objection ("builds its index on first use").

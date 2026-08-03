@@ -37,19 +37,38 @@ gfx_default_branch() {
   printf '%s\n' "${b:-main}"
 }
 
-# Absolute path of the seed source - the first entry of `git worktree list
-# --porcelain` that is a real working tree. Deliberately not "the worktree on the
-# default branch": a staged repo defaults to main while its primary checkout
-# stands on staging, so that match found nothing and every consumer's
-# [ -n "$main" ] guard silently skipped seeding. Not entry 1 either: on a
-# bare-repo-plus-linked-worktrees layout entry 1 is the bare dir, which has a
-# `bare` marker, no working tree and no graphs to seed from.
+# Absolute path of the seed source: the primary checkout, which `git worktree list`
+# always lists first. Deliberately not "the worktree on the default branch": a
+# staged repo defaults to main while its primary checkout stands on staging, so
+# that match found nothing and every consumer's [ -n "$main" ] guard silently
+# skipped seeding.
+# A bare repo has no primary checkout - entry 1 is the bare dir (no working tree,
+# no graphs), and the linked worktrees behind it are peers in creation order, none
+# canonical. There the default-branch worktree is the seed source; with several
+# peers and none on it, the answer is nothing at all, because seeding a checkout
+# from whichever peer git listed first is worse than not seeding it.
 gfx_main_worktree() {
-  git worktree list --porcelain 2>/dev/null | awk '
-    /^worktree /  { wt = substr($0, 10); next }
-    /^bare$/      { wt = ""; next }
-    /^$/          { if (wt != "") { print wt; wt = ""; exit } }   # exit still runs END
-    END           { if (wt != "") print wt }'
+  git worktree list --porcelain 2>/dev/null | awk -v db="refs/heads/$(gfx_default_branch)" '
+    function flush() {
+      if (wt == "") return
+      rec++
+      if (bare) { if (rec == 1) barelayout = 1 }
+      else {
+        nonbare++
+        if (first == "") first = wt
+        if (br == db && best == "") best = wt
+      }
+      wt = ""; br = ""; bare = 0
+    }
+    /^worktree / { flush(); wt = substr($0, 10); next }
+    /^bare$/     { bare = 1; next }
+    /^branch /   { br = substr($0, 8); next }
+    END {
+      flush()
+      if (!barelayout)       { if (first != "") print first }
+      else if (best != "")     print best
+      else if (nonbare == 1)   print first
+    }'
 }
 
 # Path of the current worktree root.
@@ -166,6 +185,47 @@ gfx_ensure_graph() {
   fi
   jq -e . "$graph" >/dev/null 2>&1 || { printf 'graph still unusable after build: %s\n' "$graph" >&2; return 1; }
   printf '%s\n' "$graph"
+}
+
+# Never-commit guard: put `graphify-out/` in the gitignore git actually reads, and
+# print one status line naming what happened (the skill's recap keys off it).
+#
+# core.excludesFile REPLACES git's default resolution, so every scope is read
+# (system, global, local) and whatever git resolved is APPENDED to, never
+# re-pointed - re-pointing deactivates every rule the operator's real global ignore
+# carried, in every repo on the machine. Where no scope set it, the target is git's
+# own default, and the key is written only when a probe in a throwaway repo shows
+# git does not already reach the file just appended to: pinning the key freezes a
+# per-invocation resolution to this run's HOME/XDG_CONFIG_HOME, and an agent's
+# environment is not the operator's shell. A relative or ~user value is refused
+# rather than guessed - git resolves a relative one against the cwd, which is the
+# host repo. A failed append reports FAILED and never reaches the key write.
+gfx_ignore_guard() {
+  local gi had_key appended set_key p
+  gi=$(git config --get core.excludesfile 2>/dev/null || true)
+  if [ -n "$gi" ]; then had_key=yes
+  else gi="${XDG_CONFIG_HOME:-$HOME/.config}/git/ignore"; had_key=no; fi
+  case "$gi" in
+    "~/"*) gi="$HOME/${gi#\~/}" ;;   # git expands this; the shell does not
+    /*)    ;;
+    *)     printf 'core.excludesfile is not absolute (%s) - skipped, never guessed\n' "$gi"
+           return 1 ;;
+  esac
+  if   grep -qxF 'graphify-out/' "$gi" 2>/dev/null; then appended=no
+  elif mkdir -p "$(dirname "$gi")" 2>/dev/null \
+       && printf 'graphify-out/\n' >> "$gi" 2>/dev/null; then appended=yes
+  else appended=FAILED; fi
+  set_key=no
+  if [ "$had_key" = no ] && [ "$appended" != FAILED ]; then
+    p=$(mktemp -d 2>/dev/null) || p=
+    if [ -n "$p" ] && git -C "$p" init -q 2>/dev/null \
+       && ! git -C "$p" check-ignore -q graphify-out/x 2>/dev/null; then
+      git config --global core.excludesfile "$gi" && set_key=yes || set_key=FAILED
+    fi
+    [ -z "$p" ] || rm -rf "$p"
+  fi
+  printf 'global gitignore: %s (appended graphify-out/: %s; set core.excludesfile: %s)\n' \
+    "$gi" "$appended" "$set_key"
 }
 
 # Links whose two endpoints live in different top-level subtrees of the indexed
@@ -295,7 +355,7 @@ _gfx_selftest() {
   rm -rf "$lw"
 
   # main_worktree: bare-repo layout - entry 1 is the bare dir (no working tree,
-  # no graphs), so the seed source is the linked worktree behind it.
+  # no graphs), so the one linked worktree behind it is the seed source.
   local bw; bw=$(mktemp -d)
   ( cd "$bw" && git init -q src && cd src \
       && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init \
@@ -304,6 +364,74 @@ _gfx_selftest() {
   _eq "main_worktree on bare layout" \
       "$( cd "$bw/wt" && gfx_main_worktree )" "$( cd "$bw/wt" && gfx_this_worktree )"
   rm -rf "$bw"
+
+  # main_worktree: bare layout with SEVERAL linked worktrees. Creation order puts
+  # the feature worktree first, so "first working tree" seeds every peer from a
+  # feature branch - and from that peer itself returns itself, which reads as
+  # "nothing to seed from". The default-branch checkout is the answer from both.
+  local bm; bm=$(mktemp -d)
+  ( cd "$bm" && git init -q src && cd src && git symbolic-ref HEAD refs/heads/main \
+      && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init \
+      && cd "$bm" && git clone -q --bare src repo.git && cd repo.git \
+      && git worktree add -q ../feat -b feat/x HEAD \
+      && git worktree add -q ../mainwt main )
+  _eq "main_worktree on bare layout, from a feature worktree" \
+      "$( cd "$bm/feat" && gfx_main_worktree )" "$( cd "$bm/mainwt" && gfx_this_worktree )"
+  _eq "main_worktree on bare layout, from the default-branch worktree" \
+      "$( cd "$bm/mainwt" && gfx_main_worktree )" "$( cd "$bm/mainwt" && gfx_this_worktree )"
+  rm -rf "$bm"
+
+  # ignore_guard, hermetic: HOME and both git config scopes are sandboxed, so no
+  # case can reach the operator's real ~/.gitconfig or global ignore.
+  local ig; ig=$(mktemp -d); mkdir -p "$ig/home" "$ig/repo"
+  printf '.env\n' > "$ig/opignore"; : > "$ig/gcfg"
+  git config --file "$ig/scfg" core.excludesfile "$ig/opignore"
+  ( cd "$ig/repo" && git init -q )
+  # shellcheck disable=SC2317
+  _gfx_sandboxed() { local sb="$1"; shift; ( cd "$sb/repo" \
+      && HOME="$sb/home" XDG_CONFIG_HOME= GIT_CONFIG_GLOBAL="$sb/gcfg" \
+         GIT_CONFIG_SYSTEM="$sb/scfg" "$@" ); }
+  # a scope git actually reads is appended to, never re-pointed - so the operator's
+  # own rules keep matching and no key is written over them
+  _eq "ignore_guard appends to the scope git reads" \
+      "$( _gfx_sandboxed "$ig" gfx_ignore_guard )" \
+      "global gitignore: $ig/opignore (appended graphify-out/: yes; set core.excludesfile: no)"
+  _eq "ignore_guard leaves the operator's rule matching" \
+      "$( _gfx_sandboxed "$ig" git check-ignore .env )" ".env"
+  rm -rf "$ig"
+
+  # no scope set: the target is git's own default, the guard works, and the key
+  # stays unset because git already reaches that file without it.
+  local ix; ix=$(mktemp -d); mkdir -p "$ix/home" "$ix/repo"; : > "$ix/gcfg"; : > "$ix/scfg"
+  ( cd "$ix/repo" && git init -q )
+  _eq "ignore_guard on git's default path" \
+      "$( _gfx_sandboxed "$ix" gfx_ignore_guard )" \
+      "global gitignore: $ix/home/.config/git/ignore (appended graphify-out/: yes; set core.excludesfile: no)"
+  _eq "ignore_guard guard is live with no key" \
+      "$( _gfx_sandboxed "$ix" git check-ignore graphify-out/g.json )" "graphify-out/g.json"
+  _eq "ignore_guard wrote no core.excludesfile key" "$(cat "$ix/gcfg")" ""
+  rm -rf "$ix"
+
+  # a relative value resolves against the cwd - the host repo - so it is refused
+  local ir; ir=$(mktemp -d); mkdir -p "$ir/home" "$ir/repo"; : > "$ir/scfg"
+  git config --file "$ir/gcfg" core.excludesfile relignore
+  ( cd "$ir/repo" && git init -q )
+  _gfx_sandboxed "$ir" gfx_ignore_guard >/dev/null 2>&1 \
+    && _fail "ignore_guard relative value: expected non-zero"
+  _eq "ignore_guard writes nothing into the repo on a relative value" \
+      "$( _gfx_sandboxed "$ir" git status --porcelain )" ""
+  rm -rf "$ir"
+
+  # an append that cannot land is reported as FAILED, and never reaches the key
+  if [ "$(id -u)" != 0 ]; then
+    local iu; iu=$(mktemp -d); mkdir -p "$iu/home" "$iu/repo" "$iu/lock"; : > "$iu/scfg"
+    git config --file "$iu/gcfg" core.excludesfile "$iu/lock/sub/ignore"
+    ( cd "$iu/repo" && git init -q ); chmod 500 "$iu/lock"
+    _eq "ignore_guard reports a failed append as failed" \
+        "$( _gfx_sandboxed "$iu" gfx_ignore_guard 2>/dev/null )" \
+        "global gitignore: $iu/lock/sub/ignore (appended graphify-out/: FAILED; set core.excludesfile: no)"
+    chmod 700 "$iu/lock"; rm -rf "$iu"
+  fi
 
   # cross_edges: pkg/a -> pkg/b stays inside one subtree, the other two cross.
   # A root-level file (README.md) is in no subtree and an id with no node resolves
