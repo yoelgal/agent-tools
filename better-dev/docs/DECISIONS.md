@@ -570,7 +570,7 @@ authorize arbitrary package installs under agent authority. Four carry it today,
 - `uv tool upgrade graphifyy` with the same `--default-index`, run only below the version floor
   (undo: `uv tool install 'graphifyy==<the version the skill printed before upgrading>'`)
 - `git config --global core.excludesfile <file>` plus an append of `graphify-out/` to that file -
-  the never-commit guard, setup step 2, run on every setup (undo: drop the appended line, and
+  the never-commit guard, setup step 2, run on every setup that reaches it (undo: drop the appended line, and
   `git config --global --unset core.excludesfile` only where setup set the pointer; dropping the
   line alone leaves git's global ignore resolution re-pointed). This authorization is
   **provisional**: the follow-up work-item that moves graph output out of the indexed tree

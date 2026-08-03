@@ -105,8 +105,9 @@ echo "semantic backend: $b"
 Name what this run changed outside the repo, so a machine-global write is visible
 rather than silent (D26). Steps 1 and 3 each printed which branch they took: report
 a bullet for every line below that fired, with its undo, and none for the rest.
-Step 2's bullet fires on every run because that write is unconditional, so no run
-of this skill leaves the machine untouched and none claims it did.
+Step 2's bullet fires on every run that reaches step 2, because that write is
+unconditional once there - but both step-1 stops skip it, and a stopped run
+reports no bullet for a write it never made.
 
 - `global gitignore: <file>` - pointed git's **global** `core.excludesfile` at that
   file and added `graphify-out/` to it, so that path is ignored in every repo on
