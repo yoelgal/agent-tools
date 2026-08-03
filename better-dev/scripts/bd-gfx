@@ -47,9 +47,22 @@ gfx_repo_key() {
 # symlink, and the raw strings would read "outside" for a home provably inside.
 # The home need not exist yet, so its deepest existing ancestor answers it: the
 # worktree does exist, so an ancestor inside it is the same answer.
+#
+# An ABSOLUTE home is required, not preferred. A relative one has no ancestor to
+# walk to and cannot match an absolute worktree, so it walked straight past the
+# refusal below and then resolved against the caller's cwd - the indexed repo -
+# writing the registry inside it. The refusal message invites this: "a directory
+# outside it" reads as satisfied by `graphs` or `../elsewhere` from where the
+# operator is standing. So the requirement is named, and an unexpanded quoted
+# `~/graphs` is refused by the same test.
 gfx_home() {
   local home wt base
   home="${GRAPHIFY_HOME:-$HOME/.claude/graphify/$(gfx_repo_key)}"
+  case "$home" in /*) ;; *)
+    printf 'graphify home %s is not an absolute path - set GRAPHIFY_HOME to an absolute directory outside the tree it indexes\n' \
+      "$home" >&2
+    return 1 ;;
+  esac
   wt=$(gfx_this_worktree)
   if [ -n "$wt" ]; then
     base=$home
@@ -57,7 +70,10 @@ gfx_home() {
       case "$base" in */?*) base=${base%/*}; [ -n "$base" ] || base=/ ;; *) break ;; esac
     done
     base=$(cd "$base" 2>/dev/null && pwd -P) || base=$home
-    case "$base/" in "$wt/"*)
+    # `${wt%/}` so a repo whose toplevel IS `/` compares against `/`* rather than
+    # `//`*, which no ordinary absolute path matches: a repo containing everything
+    # has to contain every candidate home too.
+    case "$base/" in "${wt%/}/"*)
       printf 'graphify home %s is inside the tree it indexes (%s) - set GRAPHIFY_HOME to a directory outside it\n' \
         "$home" "$wt" >&2
       return 1 ;;
@@ -69,6 +85,24 @@ gfx_registry() { local h; h=$(gfx_home) || return 1; printf '%s/registry.json\n'
 
 # Path of the current worktree root.
 gfx_this_worktree() { git rev-parse --show-toplevel 2>/dev/null; }
+
+# A domain name is interpolated into a filesystem path, and it is what an `rm -rf`
+# of that path deletes, so every site that takes one checks it HERE - one
+# validator, because two copies of a pattern is how the register site came to
+# reject the empty name while the path helper accepted it.
+#   `/` or `..`   resolves the output back out of the home and into a repo.
+#   empty or `.`  resolves to the worktree's graph BASE, so `rm -rf` of one
+#                 domain took every domain for that worktree with it.
+#   non-ASCII     bash's [A-Za-z0-9] is locale-dependent and admits it, against
+#                 what the message says; LC_ALL pins the class to the bytes named.
+gfx_valid_domain() {
+  local LC_ALL=C
+  case "${1-}" in
+    ''|.|*[!A-Za-z0-9._-]*|*..*)
+      printf 'invalid domain name "%s" - letters, digits, dot, underscore and dash only, and not "." alone\n' "${1-}" >&2
+      return 1 ;;
+  esac
+}
 
 # Absolute output dir for one domain in THIS worktree, always OUTSIDE the indexed
 # tree:  gfx_out_dir [name]  ->  <home>/worktrees/<worktree key>[/<name>].
@@ -86,19 +120,16 @@ gfx_this_worktree() { git rev-parse --show-toplevel 2>/dev/null; }
 # NFS with the repo checked out at the same absolute path write to one dir and
 # refresh against each other's provenance forever. Give each machine its own
 # GRAPHIFY_HOME there.
+# Known limitation: a torn-down worktree's dir stays under the home forever, since
+# the key is a one-way hash of a path nothing can name once that path is gone.
+# Dirs accumulate; `rm -rf` of the home is safe and costs one AST rebuild.
 gfx_out_dir() {
   local wt home
   wt=$(gfx_this_worktree)
   [ -n "$wt" ] || return 1
-  # The domain name is interpolated into a filesystem path, so it is checked
-  # before it gets there: a name carrying `/` or `..` resolves the output back OUT
-  # of the home and possibly into a repo - the one thing this helper exists to
-  # prevent - and it is what the `rm -rf` of a foreign output dir would delete.
-  case "${1:-}" in
-    *[!A-Za-z0-9._-]*|*..*)
-      printf 'invalid domain name "%s" - letters, digits, dot, underscore and dash only\n' "$1" >&2
-      return 1 ;;
-  esac
+  # A name is only checked when one is passed: no argument at all asks for this
+  # worktree's graph base, which /graphify-wrapper-status prints.
+  if [ "$#" -gt 0 ]; then gfx_valid_domain "$1" || return 1; fi
   home=$(gfx_home) || return 1        # refuses outright when it is inside $wt
   printf '%s/worktrees/%s%s\n' "$home" \
     "$(printf '%s' "$wt" | shasum -a 256 | cut -c1-12)" "${1:+/$1}"
@@ -129,59 +160,37 @@ gfx_out_dir() {
 # operator reads an answer off. Identical trees at a different commit are still
 # this tree, and cost nothing to serve.
 #
-# An unborn HEAD compares equal to an unstamped graph, so a repo with no commits
-# converges on serving rather than rebuilding at every question.
+# ABSENCE IS NOT A MATCH. An unborn HEAD and an unstamped graph both read empty,
+# and comparing them equal made "no provenance at all" the strongest possible
+# answer: a greenfield project scrapped and re-created at the same path was served
+# the dead project's graph, silently, and a pre-first-commit repo froze its first
+# graph forever. So either side missing is discard, tested before equality. A repo
+# with no commits therefore rebuilds at every question; that is what having nothing
+# to vouch with costs, and it ends at the first commit.
+#
+# Accepted residue: provenance is commit-granular, and graphify indexes the
+# FILESYSTEM. A worktree torn down and re-created at the same path on the SAME
+# commit is served the previous occupant's untracked files as this tree's
+# structure. Closing it needs a stamp over the tree rather than the commit, which
+# graphify does not write; the exposure is one commit wide, same repo, untracked
+# and non-ignored files only, so it is documented rather than paid for.
 gfx_graph_state() {
-  local graph="$1" idx_path="${2:-.}" built head top
+  local graph="$1" idx_path="${2:-.}" built head top delta
   built=$(jq -r '.built_at_commit // empty' "$graph" 2>/dev/null) || return 2
   head=$(git rev-parse HEAD 2>/dev/null) || head=
-  [ "$built" = "$head" ] && return 0
   { [ -n "$built" ] && [ -n "$head" ]; } || return 2
+  [ "$built" = "$head" ] && return 0
   git rev-parse --verify -q "$built^{commit}" >/dev/null 2>&1 || return 2
   # Pathspec resolved from the worktree root, never from the caller's cwd, or a
   # question asked from a subdirectory reads "nothing changed" for the whole repo.
+  # Empty output has two causes that are not one thing - the domain did not change,
+  # and the comparison could not be made - so the exit status is kept: a diff that
+  # errors (a tree:0 partial clone offline, a damaged object store) is a graph this
+  # cannot vouch for, and fails closed to discard rather than open to serve.
   top=$(gfx_this_worktree)
-  [ -n "$(git -C "${top:-.}" diff --name-only "$built" "$head" -- "$idx_path" 2>/dev/null)" ] \
-    || return 0
+  delta=$(git -C "${top:-.}" diff --name-only "$built" "$head" -- "$idx_path" 2>/dev/null) || return 2
+  [ -n "$delta" ] || return 0
   return 1
-}
-
-# Reclaim output dirs whose worktree is gone:  gfx_reap
-#
-# The worktree key is a one-way hash of a path, so nothing can name an orphan dir
-# from outside the worktree that made it - and that worktree is exactly what has
-# been deleted. So the dir names itself, through the `.graphify_root` graphify
-# writes beside every graph: the absolute path it indexed. Without this, every
-# merged and torn-down feature branch leaves its whole output (graph, html,
-# report, cache, retrieval memory) under the home forever, unreferenced by any
-# registry entry and unlisted by any status verb.
-#
-# Liveness is git's answer, not the path's existence: a branch checked out in a
-# live worktree may simply not carry a domain's subtree today, and deleting that
-# domain's graph would cost a rebuild (plan-billed for a semantic one) for nothing.
-# Every dir under this home belongs to a worktree of THIS repo, so a recorded root
-# inside any worktree git still lists is in use. Removes nothing anywhere else.
-gfx_reap() {
-  local home d root w live alive
-  home=$(gfx_home) || return 0
-  [ -d "$home/worktrees" ] || return 0
-  live=$(git worktree list --porcelain 2>/dev/null | sed -n 's/^worktree //p')
-  [ -n "$live" ] || return 0                    # cannot tell what is live: reap nothing
-  for d in "$home"/worktrees/*/*; do
-    [ -d "$d" ] || continue
-    root=$(cat "$d/.graphify_root" 2>/dev/null) || continue
-    [ -n "$root" ] || continue
-    alive=0
-    while IFS= read -r w; do
-      [ -n "$w" ] || continue
-      case "$root/" in "$w/"*) alive=1; break ;; esac
-    done <<EOF
-$live
-EOF
-    [ "$alive" = 0 ] || continue
-    rm -rf "$d" && printf 'graphify: reaped %s (its worktree is gone)\n' "$d" >&2
-  done
-  rmdir "$home"/worktrees/*/ 2>/dev/null || true   # worktree keys left with no domain
 }
 
 # Backend for --semantic builds; defaults to claude-cli (no API key, plan-billed).
@@ -418,6 +427,21 @@ _gfx_selftest() {
   # a domain name is part of a path: traversal out of the home is refused, not walked
   ( cd "$w1" && GRAPHIFY_HOME="$d/home" gfx_out_dir '../../../escape' >/dev/null 2>&1 ) \
     && _fail "out_dir: a traversing domain name must be refused"
+  # An EMPTY name is not "no name": passed, it resolves to the worktree's graph
+  # base, and /graphify-wrapper-index's removal then rm -rf's every domain here.
+  # `.` reaches the same dir by the same route. Both are refused; passing NO
+  # argument still answers with the base, which is what -status prints.
+  ( cd "$w1" && GRAPHIFY_HOME="$d/home" gfx_out_dir '' >/dev/null 2>&1 ) \
+    && _fail "out_dir: an empty domain name must be refused, not resolved to the base dir"
+  ( cd "$w1" && GRAPHIFY_HOME="$d/home" gfx_out_dir . >/dev/null 2>&1 ) \
+    && _fail "out_dir: the domain name '.' must be refused, it resolves to the base dir"
+  gfx_valid_domain '' 2>/dev/null && _fail "valid_domain: the empty name must be refused"
+  gfx_valid_domain . 2>/dev/null  && _fail "valid_domain: '.' must be refused"
+  # The message promises ASCII; bash's [A-Za-z0-9] is locale-dependent and admitted
+  # non-ASCII bytes, so the validator has to mean what it says on every host shell.
+  gfx_valid_domain "$(printf 'caf\303\251')" 2>/dev/null \
+    && _fail "valid_domain: a non-ASCII name must be refused, as the message claims"
+  gfx_valid_domain api-v2.1_x 2>/dev/null || _fail "valid_domain: a legal name must be accepted"
   rm -rf "$w1" "$w2" "$ng"
 
   # The home must never sit INSIDE the tree being indexed: a dotfiles repo checked
@@ -440,6 +464,27 @@ _gfx_selftest() {
   _eq "a refused home leaves the indexed repo byte-unchanged" \
       "$( cd "$hr" && HOME="$hr" GRAPHIFY_HOME= gfx_ensure_graph >/dev/null 2>&1
           cd "$hr" && git -c core.excludesFile=/dev/null status --porcelain )" ""
+  # A RELATIVE home has no ancestor to walk and cannot match an absolute worktree,
+  # so it walked past the containment refusal and then resolved against the
+  # caller's cwd - the indexed repo - writing the registry inside it. Refused, with
+  # the requirement named, and nothing written on the way.
+  local rmsg
+  ( cd "$hr" && GRAPHIFY_HOME=graphs gfx_home >/dev/null 2>&1 ) \
+    && _fail "home: a relative GRAPHIFY_HOME must be refused, not resolved against the repo"
+  ( cd "$hr" && GRAPHIFY_HOME=../elsewhere gfx_out_dir api >/dev/null 2>&1 ) \
+    && _fail "out_dir: a relative GRAPHIFY_HOME must be refused there too"
+  ( cd "$hr" && GRAPHIFY_HOME='~/graphs' gfx_home >/dev/null 2>&1 ) \
+    && _fail "home: an unexpanded quoted tilde is not an absolute path"
+  rmsg=$( cd "$hr" && GRAPHIFY_HOME=graphs gfx_home 2>&1 >/dev/null )
+  case "$rmsg" in *absolute*) ;; *) _fail "home: the refusal must name the absolute-path requirement, got '$rmsg'" ;; esac
+  _eq "a relative home leaves the indexed repo byte-unchanged" \
+      "$( cd "$hr" && GRAPHIFY_HOME=graphs gfx_ensure_graph >/dev/null 2>&1
+          cd "$hr" && git -c core.excludesFile=/dev/null status --porcelain )" ""
+  # A repo whose toplevel IS `/` contains every candidate home, so every one must be
+  # refused: the raw prefix was `//`*, which no ordinary absolute path matches.
+  ( gfx_this_worktree() { printf '/\n'; }
+    GRAPHIFY_HOME=/var/tmp/anywhere gfx_home >/dev/null 2>&1 ) \
+    && _fail "home: a repo rooted at / contains every home, so every home is refused"
   rm -rf "$hr"
 
   # Provenance against the tree that is here now, not the location it was found
@@ -468,72 +513,94 @@ _gfx_selftest() {
   # A question asked from a subdirectory must see the whole domain's delta.
   _st=0; ( cd "$pv/api" && gfx_graph_state "$pv/older.json" "." ) || _st=$?
   _eq "graph_state: pathspec is repo-relative, not cwd-relative" "$_st" "1"
-  rm -rf "$pv"
 
-  # Reaping: a domain dir whose worktree git no longer lists is reclaimed. A live
-  # worktree keeps its dirs even for a subtree the current branch does not carry -
-  # that is a checkout, not a teardown, and rebuilding it would cost for nothing.
-  local rp rlive
-  rp=$(mktemp -d); rlive="$rp/live"
-  mkdir -p "$rlive" && ( cd "$rlive" && git init -q )
-  rlive=$( cd "$rlive" && git rev-parse --show-toplevel )
-  mkdir -p "$rp/home/worktrees/aaa/api" "$rp/home/worktrees/bbb/api" "$rp/home/worktrees/ccc/api"
-  printf '%s\n' "$rlive"              >"$rp/home/worktrees/aaa/api/.graphify_root"
-  printf '%s\n' "$rlive/never/built"  >"$rp/home/worktrees/bbb/api/.graphify_root"
-  printf '%s\n' "$rp/removed-wt"      >"$rp/home/worktrees/ccc/api/.graphify_root"
-  ( cd "$rlive" && GRAPHIFY_HOME="$rp/home" gfx_reap ) 2>/dev/null
-  [ -d "$rp/home/worktrees/aaa/api" ] || _fail "reap: removed a live worktree's graph"
-  [ -d "$rp/home/worktrees/bbb/api" ] \
-    || _fail "reap: removed a graph for a subtree absent on this branch, not a dead worktree"
-  [ -d "$rp/home/worktrees/ccc/api" ] && _fail "reap: left the graph of a worktree that is gone"
-  rm -rf "$rp"
+  # Absence on both sides is not agreement. An unborn HEAD reads empty and so does
+  # an unstamped graph, and comparing them EQUAL served a scrapped project's graph
+  # to the greenfield repo re-created at its path, silently and with no build.
+  local ub
+  ub=$(mktemp -d); ( cd "$ub" && git init -q && printf 'x\n' >a.py )
+  cp "$pv/unstamped.json" "$ub/unstamped.json"
+  cp "$pv/older.json"     "$ub/foreign.json"
+  _st=0; ( cd "$ub" && gfx_graph_state "$ub/unstamped.json" "." ) || _st=$?
+  _eq "graph_state: no commits and no stamp is absent provenance, not a match" "$_st" "2"
+  _st=0; ( cd "$ub" && gfx_graph_state "$ub/foreign.json" "." ) || _st=$?
+  _eq "graph_state: no commits, a stamp from another tree, is another tree's" "$_st" "2"
+  rm -rf "$ub"
+
+  # A comparison that could not be MADE is not "nothing changed". Delete the tree
+  # object behind the older build: the commit still resolves, so the guard above
+  # passes, and the diff then exits non-zero with empty output - which must
+  # discard, never serve.
+  local bk bt0
+  bk="$d/broken"; cp -R "$pv" "$bk"
+  bt0=$( cd "$bk" && git rev-parse "$pc0^{tree}" )
+  rm -f "$bk/.git/objects/${bt0:0:2}/${bt0:2}"
+  _st=0; ( cd "$bk" && gfx_graph_state "$pv/older.json" "api" ) || _st=$?
+  _eq "graph_state: a diff that errors fails closed, it does not read as unchanged" "$_st" "2"
+  rm -rf "$bk"
+  rm -rf "$pv"
 
   # The invariant itself: a cold build through gfx_ensure_graph heals registry,
   # domain and graph, writes the graph OUTSIDE the repo, and leaves the indexed
-  # repo byte-unchanged. Needs the CLI, so it cannot run where graphify is absent
-  # (CI installs none) - and there it SAYS SO, in the summary line as well as
-  # here. A silent skip reads exactly like a pass, which is the failure this whole
-  # case exists to prevent: a green run must never be mistakable for a proof that
-  # never ran.
-  local skipped=
-  if command -v graphify >/dev/null 2>&1; then
-    local bt btr bhome bgraph
-    bt=$(mktemp -d); bhome="$d/bhome"
-    ( cd "$bt" && git init -q && printf 'def a():\n    return 1\n' > a.py \
-        && git add -A && git -c user.email=t@t -c user.name=t commit -q -m init ) \
-      || _fail "cold build: could not init the fixture repo"
-    btr=$( cd "$bt" && pwd -P )
-    bgraph=$( cd "$bt" && GRAPHIFY_HOME="$bhome" gfx_ensure_graph 2>/dev/null )
-    # Where the graph landed, asserted against the TREE and the HOME - not against
-    # gfx_out_dir, which is where it came from: both sides of that comparison move
-    # together, so it could not see an out dir pointing back inside the repo.
-    case "$bgraph" in "$btr"/*) _fail "cold build landed inside the indexed tree: $bgraph" ;; esac
-    case "$bgraph" in "$bhome"/*) ;; *) _fail "cold build landed outside the graphify home: $bgraph" ;; esac
-    _eq "cold build returns the path gfx_out_dir derives" "$bgraph" \
-        "$( cd "$bt" && GRAPHIFY_HOME="$bhome" gfx_out_dir repo )/graph.json"
-    jq -e . "$bgraph" >/dev/null 2>&1 || _fail "cold build: graph.json missing or torn"
-    # Global excludes neutralised: every machine that ran the retired never-commit
-    # guard still carries `graphify-out/` in its global gitignore, which makes a
-    # plain `git status` blind to exactly the write this asserts is absent.
-    _eq "cold build leaves the indexed repo byte-unchanged" \
-        "$( cd "$bt" && git -c core.excludesFile=/dev/null status --porcelain )" ""
-    [ -z "$(find "$bt" -name graphify-out -print -quit 2>/dev/null)" ] \
-      || _fail "cold build wrote graphify-out inside the indexed repo"
-    # A graph left by a DIFFERENT tree at this path is discarded, never served:
-    # the out dir outlives the worktree, and a foreign graph is valid JSON.
-    local other
-    other=$( cd "$bt" && GRAPHIFY_HOME="$bhome" gfx_out_dir repo )
-    jq '.built_at_commit="0000000000000000000000000000000000000000"' "$bgraph" >"$d/foreign.json" \
-      && cp "$d/foreign.json" "$bgraph"
-    ( cd "$bt" && GRAPHIFY_HOME="$bhome" gfx_ensure_graph >/dev/null 2>&1 )
-    _eq "a foreign graph at this path is rebuilt, not served" \
-        "$( jq -r '.built_at_commit' "$other/graph.json" 2>/dev/null )" \
-        "$( cd "$bt" && git rev-parse HEAD )"
-    rm -rf "$bt"
-  else
-    skipped=' (SKIPPED: the cold-build invariant case - no graphify on PATH)'
-    printf 'bd-gfx selftest SKIPPED: cold-build invariant case, graphify is not installed here\n' >&2
+  # repo byte-unchanged.
+  #
+  # This used to need the CLI, so on the one machine that gates a merge (CI installs
+  # no graphify) it never ran at all. What this file OWNS is the wiring - which
+  # directory it hands the builder, and what it does with what comes back - so a
+  # stub that writes where GRAPHIFY_OUT points exercises every assertion below, and
+  # the case now runs everywhere. The real CLI's own honouring of GRAPHIFY_OUT is
+  # proven wherever it is installed, and the summary line names which of the two ran:
+  # a silent stand-in reads exactly like the real proof, which is the failure this
+  # whole case exists to prevent.
+  local stubbed=
+  if ! command -v graphify >/dev/null 2>&1; then
+    mkdir -p "$d/stub"
+    cat >"$d/stub/graphify" <<'GFXSTUB'
+#!/usr/bin/env bash
+# bd-gfx selftest stand-in for the graphify CLI: writes an AST-shaped graph where
+# GRAPHIFY_OUT points, and nowhere else.
+[ "${1:-}" = update ] || exit 0
+mkdir -p "$GRAPHIFY_OUT" || exit 1
+printf '{"built_at_commit":"%s","nodes":[],"links":[]}\n' "$(git -C "$2" rev-parse HEAD)" \
+  >"$GRAPHIFY_OUT/graph.json"
+GFXSTUB
+    chmod +x "$d/stub/graphify"
+    PATH="$d/stub:$PATH"
+    stubbed=' (cold-build invariant proven against a graphify stub - no CLI on PATH)'
   fi
+  local bt btr bhome bgraph
+  bt=$(mktemp -d); bhome="$d/bhome"
+  ( cd "$bt" && git init -q && printf 'def a():\n    return 1\n' > a.py \
+      && git add -A && git -c user.email=t@t -c user.name=t commit -q -m init ) \
+    || _fail "cold build: could not init the fixture repo"
+  btr=$( cd "$bt" && pwd -P )
+  bgraph=$( cd "$bt" && GRAPHIFY_HOME="$bhome" gfx_ensure_graph 2>/dev/null )
+  # Where the graph landed, asserted against the TREE and the HOME - not against
+  # gfx_out_dir, which is where it came from: both sides of that comparison move
+  # together, so it could not see an out dir pointing back inside the repo.
+  case "$bgraph" in "$btr"/*) _fail "cold build landed inside the indexed tree: $bgraph" ;; esac
+  case "$bgraph" in "$bhome"/*) ;; *) _fail "cold build landed outside the graphify home: $bgraph" ;; esac
+  _eq "cold build returns the path gfx_out_dir derives" "$bgraph" \
+      "$( cd "$bt" && GRAPHIFY_HOME="$bhome" gfx_out_dir repo )/graph.json"
+  jq -e . "$bgraph" >/dev/null 2>&1 || _fail "cold build: graph.json missing or torn"
+  # Global excludes neutralised: every machine that ran the retired never-commit
+  # guard still carries `graphify-out/` in its global gitignore, which makes a
+  # plain `git status` blind to exactly the write this asserts is absent.
+  _eq "cold build leaves the indexed repo byte-unchanged" \
+      "$( cd "$bt" && git -c core.excludesFile=/dev/null status --porcelain )" ""
+  [ -z "$(find "$bt" -name graphify-out -print -quit 2>/dev/null)" ] \
+    || _fail "cold build wrote graphify-out inside the indexed repo"
+  # A graph left by a DIFFERENT tree at this path is discarded, never served:
+  # the out dir outlives the worktree, and a foreign graph is valid JSON.
+  local other
+  other=$( cd "$bt" && GRAPHIFY_HOME="$bhome" gfx_out_dir repo )
+  jq '.built_at_commit="0000000000000000000000000000000000000000"' "$bgraph" >"$d/foreign.json" \
+    && cp "$d/foreign.json" "$bgraph"
+  ( cd "$bt" && GRAPHIFY_HOME="$bhome" gfx_ensure_graph >/dev/null 2>&1 )
+  _eq "a foreign graph at this path is rebuilt, not served" \
+      "$( jq -r '.built_at_commit' "$other/graph.json" 2>/dev/null )" \
+      "$( cd "$bt" && git rev-parse HEAD )"
+  rm -rf "$bt"
 
   # cross_edges: pkg/a -> pkg/b stays inside one subtree, the other two cross.
   # A root-level file (README.md) is in no subtree and an id with no node resolves
@@ -553,7 +620,7 @@ _gfx_selftest() {
   rm -rf "$cg"
 
   rm -rf "$d"
-  [ "$rc" = 0 ] && printf 'bd-gfx selftest OK%s\n' "$skipped"
+  [ "$rc" = 0 ] && printf 'bd-gfx selftest OK%s\n' "$stubbed"
   return "$rc"
 }
 

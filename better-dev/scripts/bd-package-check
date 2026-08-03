@@ -298,18 +298,30 @@ for s in scripts/bd-*; do
   "$s" selftest >/dev/null 2>&1 && ok "$b" || bad "$b selftest FAILED"
 done
 
-echo "== shell parses (sh -n) =="
+echo "== shell parses (bash -n) =="
 # A selftest is not a parse check. `<script> selftest` returns before bash ever reads the rest of the
 # file, so a syntax error in the MAIN path runs green through the selftest runner below - which is
 # exactly how an unparseable hook reached a commit here, caught only by the repo's pre-commit hook.
 # CI and a --no-verify commit both skip that hook, so the gate has to parse every shipped script
-# itself. The recorded verify rule always said sh -n over these three trees; only this makes it true.
+# itself.
+#
+# `bash -n`, not `sh -n`: every file here declares an interpreter and 13 of the 15 declare bash, so
+# the parser has to be the one they name. macOS /bin/sh IS bash 3.2, which hid this - on the only
+# machine that gates a merge (runs-on: ubuntu-latest) /bin/sh is dash, and `dash -n scripts/bd-mem`
+# rejects a herestring at PARSE time, turning CI red on untouched, correct code. Measured with the
+# real dash, not reasoned.
+#
+# The glob is the whole of each shipped tree, not `bd-*` within it, so the label is true rather than
+# true by accident: hosts/ is shipped shell that install.sh SOURCES (a broken adapter is a broken
+# installer) and carries no shebang, and any future helper not named bd-* would otherwise ship
+# unparsed under a label claiming it was checked.
 unparseable=""
-for s in scripts/bd-* hooks/bd-* install.sh; do
+for s in scripts/* hooks/* hosts/* install.sh; do
   [ -f "$s" ] || continue
-  sh -n "$s" 2>/dev/null || unparseable="$unparseable $s"
+  case "$s" in *.json) continue ;; esac
+  bash -n "$s" 2>/dev/null || unparseable="$unparseable $s"
 done
-[ -z "$unparseable" ] && ok "every shipped script parses under sh -n" || bad "shell syntax error in:$unparseable - a selftest cannot see this, it exits before the parse" # prove-new: regression-guard every shipped script parses at base, as it does after any change that did not break one; this catches the later edit that does, which the selftest runner structurally cannot see
+[ -z "$unparseable" ] && ok "every shipped script under scripts/, hooks/, hosts/ and install.sh parses under bash -n" || bad "shell syntax error in:$unparseable - a selftest cannot see this, it exits before the parse" # prove-new: regression-guard every shipped script parses at base, as it does after any change that did not break one; this catches the later edit that does, which the selftest runner structurally cannot see
 
 echo "== hook scripts (selftest) =="
 for s in hooks/bd-*; do

@@ -75,7 +75,6 @@ GFX_LIB="$GFX_LIB" nohup bash -c '
   cd "$this" 2>/dev/null || exit 0                      # gfx_/git resolve to this worktree
   head=$(git rev-parse HEAD 2>/dev/null) || exit 0
   [ -n "$head" ] || exit 0
-  gfx_reap >/dev/null 2>&1 || true          # orphan dirs of worktrees that are gone
   for name in "$@"; do
     idx_path=$(gfx_index_field "$name" path); [ -n "$idx_path" ] || continue
     out=$(gfx_out_dir "$name") || continue               # outside the indexed tree
