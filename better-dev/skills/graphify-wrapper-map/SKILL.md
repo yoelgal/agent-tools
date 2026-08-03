@@ -101,4 +101,8 @@ echo "registered domains:"; jq '.indexes' "$reg"
 Point the operator at `/graphify-wrapper-sync` to build all registered domains
 (AST, plus semantic where marked), or `/graphify-wrapper-sync <name>` for one.
 For a large first domain, suggest an AST-only sync to gauge build time before a
-`--semantic` pass.
+`--semantic` pass. Then `/graphify-wrapper-query <name> "<question>"`.
+
+Sync reports each domain's cross-subtree edge count - that checks one half of this
+carve, whether a domain wants splitting further. The other half, whether two
+domains should have been one, is in neither graph and stays a judgment call.

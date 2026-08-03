@@ -66,8 +66,8 @@ that uncovers an epic routes to `/groundwork`.
 A feature is built on assumptions - "X doesn't exist yet", "the flow works like Y and we'll extend
 it". Grilling a false premise wastes the whole loop, so verify the premise at `file:line` first, in
 one bounded observation pass. Locate the code path in the touched area, read what it does *today*,
-and look for anything that already provides the capability - `/codebase-map` gives you the callers and
-dependents to answer that from the best structural map available.
+and look for anything that already provides the capability - run `/codebase-map` for the callers and
+dependents that answer it.
 
 Land on a verdict backed by receipts (`file:line`, a command run and its output). If the baseline
 maps as assumed, proceed. If the capability **already exists**, or a core assumption is plainly

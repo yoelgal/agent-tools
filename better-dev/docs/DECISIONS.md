@@ -544,3 +544,52 @@ was missing was a predicate, not a vocabulary. Also rejected: resolving same-key
 specificity (makes "which is narrower" a judgment call at the moment a safety gate fires) and surfacing
 them for the operator to resolve (adds a stop, in the safety class). Deferred, not refused: a
 library-wide closed list of never-ask actions.
+
+## D26 - a named list of machine-global writes is agent-run (2026-08-02; user-ratified)
+
+A machine-global write **on the list below** is an agent write, and the running skill names it in
+its recap with its undo, so the change is visible rather than silent.
+**Reversible** (one command undoes it) and **non-secret** (it carries no credential) is what
+qualifies a command for the list, never what authorizes a command that is not on it: a
+machine-global write this list does not name stays operator-run, handed over as a paste block.
+Settings-class writes are untouched: host settings and permission files stay operator-run per D22.
+D22's block is a **capability** limit (agent writes to `.claude/settings.json` are
+classifier-blocked, observed 2026-07-16), not a consequence rule, and over-reading it as a general
+ban on machine-global writes is the misreading that produced the drift this entry ends.
+
+The exception authorizes **specific named commands**, never an open class: an open class would
+authorize arbitrary package installs under agent authority. Four carry it today, all made by
+`/graphify-wrapper-setup` except where the fourth says otherwise:
+
+- `uv tool install 'graphifyy>=0.9.18' --default-index https://pypi.org/simple` (undo: `uv tool
+  uninstall graphifyy`). The version floor is pinned in the command itself, so no install lands
+  below it. The index pin is best-effort and bounds nothing: `--default-index` sets uv's
+  lowest-priority index, and `UV_INDEX` / `UV_EXTRA_INDEX_URL` are searched first (measured, uv
+  0.11.7), so this authorization does not bound whose build backend runs under the operator's
+  account.
+- `uv tool upgrade graphifyy` with the same `--default-index`, run only below the version floor
+  (undo: `uv tool install 'graphifyy==<the version the skill printed before upgrading>'`)
+- `git config --global core.excludesfile <file>` plus an append of `graphify-out/` to that file -
+  the never-commit guard, setup step 2, run on every setup that reaches it (undo: drop the appended line, and
+  `git config --global --unset core.excludesfile` only where setup set the pointer; dropping the
+  line alone leaves git's global ignore resolution re-pointed). This authorization is
+  **provisional**: the follow-up work-item that moves graph output out of the indexed tree
+  (upstream takes an absolute `GRAPHIFY_OUT`) deletes the write, and this item goes with it.
+- `mkdir -p ~/.claude/graphify/<repo key>/` and the `registry.json` written inside it - the
+  per-repo registry home (undo: `rm -rf` the registry home). Made by setup step 3, and by
+  `gfx_ensure_graph` when `/graphify-wrapper-query` heals a missing registry - the one write on
+  this list a second skill makes, so that skill names it too.
+
+Two costs no reversible undo erases. `uv tool uninstall` reverses the installed files, not the
+code the install already ran; the version floor bounds what may run, not that something ran. And
+the install is not a one-time execution: at every SessionStart `hooks/bd-graphify-refresh-stale`
+spawns a background child that runs `graphify update` on each registered domain whose graph is
+stale against HEAD and whose path the delta touched, so the package keeps running on that machine
+until the domains or the tool go.
+
+A fifth command joins by being added here, not by resembling these four.
+
+Evidence: `/graphify-wrapper-setup` has made these writes on every run since it shipped, while
+`/onboard` forbade silent global machine changes in the same phase that hands the operator a
+settings paste block; neither `docs/DECISIONS.md` nor `docs/TRAPS.md` carried a single graphify
+entry, so the contradiction survived by nobody having decided it (audit, 2026-08-02).

@@ -628,5 +628,87 @@ if [ -f "$CB" ]; then
   rm -rf "$gt"
 fi
 
+echo "== graphify integration =="
+
+# The operator-gate policy has to be written down and obeyed by both consumers. Graphify's setup
+# makes machine-global changes; onboard forbids silent ones. Before D26 neither DECISIONS.md nor
+# TRAPS.md mentioned graphify at all, so the contradiction survived by nobody having decided it.
+# The entry's safety clauses are asserted individually: a heading plus two adjectives would pass
+# while the clauses that bound the exception - the closed command list, the undo, the recap
+# requirement - were quietly dropped, which is the failure mode a policy gate exists to catch.
+# Anchor the range on "the next decision heading", not on D27 by name: D26 is currently last, so a
+# name anchor runs to EOF today and would swallow a later D28 added without a D27.
+# One distinctive literal per authorized write on both sides, because three loose words ('machine-global',
+# 'graphifyy', 'registry') stayed satisfied with half the Report's bullets deleted - including the one
+# for the highest-consequence write. The floor's VALUE is asserted in the skill, not just its `>=` shape
+# and not just D26's prose: `grep -qF 'graphifyy>='` stayed green with the skill's floor lowered to
+# 0.0.1, so it certified a bound that was gone. The index pin is deliberately NOT asserted - it is
+# best-effort (`--default-index` is uv's lowest-priority index, `UV_INDEX` wins), so gating on it would
+# lock in a closure the command does not enforce. The ok label names D26's four writes and no more:
+# four literals cannot see a fifth write that shipped with no bullet, and claiming they can is the same
+# defect - a label asserting what its checks do not establish - that the checks themselves catch.
+# The reversibility clause is matched by its whole capitalised phrase: bare 'reversible' also matches
+# the lowercase "no reversible undo erases" caveat, so the clause could be deleted with the gate green.
+d26=$(awk '/^## D26 /{f=1} /^## D[0-9]/ && !/^## D26 /{f=0} f' docs/DECISIONS.md)
+setup_report=$(awk '/^## 5\./,0' skills/graphify-wrapper-setup/SKILL.md)
+d26_has() { printf '%s' "$d26" | grep -qF -- "$1"; }
+rep_has() { printf '%s' "$setup_report" | grep -qF -- "$1"; }
+if [ -n "$d26" ] && d26_has '## D26 - a named list' \
+   && d26_has '**Reversible** (one command undoes it)' \
+   && d26_has 'non-secret' && d26_has 'specific named commands' \
+   && d26_has 'undo:' && d26_has 'recap' \
+   && d26_has "uv tool install 'graphifyy>=0.9.18'" \
+   && d26_has 'uv tool upgrade graphifyy' && d26_has '~/.claude/graphify/' \
+   && d26_has 'git config --global core.excludesfile' \
+   && grep -q 'D26' skills/onboard/SKILL.md \
+   && grep -qF 'floor=0.9.18;' skills/graphify-wrapper-setup/SKILL.md \
+   && grep -qF 'graphifyy>=$floor' skills/graphify-wrapper-setup/SKILL.md \
+   && rep_has 'machine-global' && rep_has 'uv tool uninstall graphifyy' \
+   && rep_has "uv tool install 'graphifyy==" && rep_has 'registry: CREATED' \
+   && rep_has 'global gitignore:' \
+   && rep_has 'git config --global --unset core.excludesfile'; then
+  ok "graphify machine-global write policy is decided (D26), the 0.9.18 floor is pinned in the skill, and each of D26's four writes has its announce bullet"
+else
+  bad "graphify machine-global write policy: D26 missing a safety clause (closed command list, per-command undo, recap requirement), the skill's install missing the 0.9.18 floor, or setup's Report missing the announce for one of D26's four writes"
+fi
+
+# A chain that stops at -sync never reaches the only verb with user value. Both close-outs route on.
+map_tail=$(awk '/^## 5\./,0' skills/graphify-wrapper-map/SKILL.md)
+if printf '%s' "$setup_report" | grep -q 'graphify-wrapper-query' \
+   && printf '%s' "$map_tail" | grep -q 'graphify-wrapper-query'; then
+  ok "both graphify close-outs route on to /graphify-wrapper-query"
+else
+  bad "a graphify close-out does not route to /graphify-wrapper-query - the chain ends before the question"
+fi
+
+# The carve /graphify-wrapper-map recommends is checked against the built graph rather than asserted.
+# The check belongs where a build actually happens, so the skill that builds is the one that reports it
+# (DC5, amended 2026-08-02) - map registers domains and explicitly builds nothing. Assert the count
+# REACHES the operator, not that the identifier appears: with a bare `grep -q gfx_cross_edges`, the
+# echo, the Report clause, and map's pointer at it were each independently deletable, gate green.
+sync_report=$(awk '/^## Report/,0' skills/graphify-wrapper-sync/SKILL.md)
+if grep -qF 'cross=$(gfx_cross_edges' skills/graphify-wrapper-sync/SKILL.md \
+   && grep -q 'gfx_cross_edges.*&&.*echo.*cross' skills/graphify-wrapper-sync/SKILL.md \
+   && printf '%s' "$sync_report" | grep -q 'cross-subtree edge count' \
+   && grep -q 'cross-subtree edge count' skills/graphify-wrapper-map/SKILL.md; then
+  ok "the built graph's cross-subtree count is computed, printed, and reported where the build runs"
+else
+  bad "the carve check does not reach the operator - graphify-wrapper-sync must call gfx_cross_edges AND print it AND report it, and graphify-wrapper-map must point at that count"
+fi
+
+# /codebase-map already rebuts the never-indexed objection ("builds its index on first use").
+# A delegating skill that re-opens it with a "when one's installed" hedge undoes that rebuttal.
+# ok-branch first, matching every other check here: prove-new pairs an OK token with the BAD that
+# follows it, so a bad-first check splits into two orphans and its ok label reports UNPROVEN.
+# The -f guards keep a renamed file from passing this vacuously - a grep over a missing file is
+# silently "no match", which reads identically to "hedge removed".
+if [ -f skills/diagnose/SKILL.md ] && [ -f skills/plan-grill/SKILL.md ] \
+   && ! grep -q "when one's installed" skills/diagnose/SKILL.md \
+   && ! grep -q 'best structural map available' skills/plan-grill/SKILL.md; then
+  ok "no structural-consult escape hatch in /diagnose or /plan-grill"
+else
+  bad "structural-consult escape hatch still present in /diagnose or /plan-grill (or a delegating skill was renamed out from under this check)"
+fi
+
 echo
 [ $fail = 0 ] && echo "package-check: PASS ($(ls skills/ | wc -l | tr -d ' ') skills)" || { echo "package-check: FAIL"; exit 1; }
