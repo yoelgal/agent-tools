@@ -87,6 +87,7 @@ Upsert each approved domain. One path per index.
 # repeat per approved domain (name, idx_path, sem in {true,false}):
 # NB: idx_path, never `path` - zsh ties a `path` variable to PATH, and every
 # command after the assignment would fail with "command not found".
+gfx_valid_domain "$name" || exit 1   # same validator as /graphify-wrapper-index
 tmp=$(mktemp)
 jq --arg n "$name" --arg p "$idx_path" --argjson s "$sem" \
    '.indexes[$n]={path:$p, semantic:$s}' "$reg" > "$tmp" && mv "$tmp" "$reg"

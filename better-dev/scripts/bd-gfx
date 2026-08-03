@@ -69,7 +69,11 @@ gfx_home() {
     while [ ! -d "$base" ]; do
       case "$base" in */?*) base=${base%/*}; [ -n "$base" ] || base=/ ;; *) break ;; esac
     done
-    base=$(cd "$base" 2>/dev/null && pwd -P) || base=$home
+    # `cd -P`, not `cd`: bash collapses `..` LOGICALLY, so `<repo>/link/../graphs`
+    # with `link` a symlink out of the tree resolves to somewhere outside while the
+    # write lands at `<repo>/graphs`. The guard has to see the same path the write
+    # will, or a symlink plus `..` walks a home straight back into the repo.
+    base=$(cd -P "$base" 2>/dev/null && pwd -P) || base=$home
     # `${wt%/}` so a repo whose toplevel IS `/` compares against `/`* rather than
     # `//`*, which no ordinary absolute path matches: a repo containing everything
     # has to contain every candidate home too.
@@ -119,7 +123,10 @@ gfx_valid_domain() {
 # The key carries no machine component either: two machines sharing one home over
 # NFS with the repo checked out at the same absolute path write to one dir and
 # refresh against each other's provenance forever. Give each machine its own
-# GRAPHIFY_HOME there.
+# GRAPHIFY_HOME there. That is an ACCEPTED limitation, not an oversight: a machine
+# component in the key would re-key every worktree on a hostname change and buy a
+# rebuild for everyone to fix a layout almost nobody runs, and the one-line remedy
+# above already closes it for those who do.
 # Known limitation: a torn-down worktree's dir stays under the home forever, since
 # the key is a one-way hash of a path nothing can name once that path is gone.
 # Dirs accumulate; `rm -rf` of the home is safe and costs one AST rebuild.
@@ -310,7 +317,14 @@ gfx_ensure_graph() {
   else
     gfx_graph_state "$graph" "$idx_path" || state=$?
     case "$state" in
-      2) why='a different tree built the graph here'; rm -rf "$out" ;;
+      # Discard the graph and its caches, never `memory/`. That dir is accumulated
+      # by the operator through `save-result` and cannot be rebuilt from anything;
+      # graphify's own `reflect` already drops nodes a graph no longer has, so
+      # carrying it across is a soft cost where destroying it is a hard loss. The
+      # unborn-HEAD case reaches state 2 as "cannot vouch for this", not as proof
+      # another tree built it, and a pre-first-commit repo asks on every question.
+      2) why='a different tree built the graph here'
+         find "$out" -mindepth 1 -maxdepth 1 ! -name memory -exec rm -rf {} + 2>/dev/null ;;
       1) why='stale for commits that touched this domain' ;;
     esac
   fi
