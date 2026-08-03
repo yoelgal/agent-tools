@@ -659,17 +659,40 @@ if [ -n "$d26" ] && d26_has '## D26 - a named list' \
    && d26_has 'undo:' && d26_has 'recap' \
    && d26_has "uv tool install 'graphifyy>=0.9.18'" \
    && d26_has 'uv tool upgrade graphifyy' && d26_has '~/.claude/graphify/' \
-   && d26_has 'git config --global core.excludesfile' \
    && grep -q 'D26' skills/onboard/SKILL.md \
    && grep -qF 'floor=0.9.18;' skills/graphify-wrapper-setup/SKILL.md \
    && grep -qF 'graphifyy>=$floor' skills/graphify-wrapper-setup/SKILL.md \
    && rep_has 'machine-global' && rep_has 'uv tool uninstall graphifyy' \
    && rep_has "uv tool install 'graphifyy==" && rep_has 'registry: CREATED' \
-   && rep_has 'global gitignore:' \
-   && rep_has 'git config --global --unset core.excludesfile'; then
-  ok "graphify machine-global write policy is decided (D26), the 0.9.18 floor is pinned in the skill, and each of D26's four writes has its announce bullet"
+   && ! d26_has 'core.excludesfile' \
+   && ! rep_has 'global gitignore:'; then
+  ok "graphify machine-global write policy is decided (D26), the 0.9.18 floor is pinned in the skill, and each of D26's three writes has its announce bullet"
 else
-  bad "graphify machine-global write policy: D26 missing a safety clause (closed command list, per-command undo, recap requirement), the skill's install missing the 0.9.18 floor, or setup's Report missing the announce for one of D26's four writes"
+  bad "graphify machine-global write policy: D26 missing a safety clause, the skill's install missing the 0.9.18 floor, setup's Report missing an announce bullet, or the deleted never-commit guard's authorization still standing"
+fi
+
+# The out-of-tree invariant, and the whole reason this relocation exists: graphify's default writes
+# graphify-out/ INSIDE the tree it indexes, which is why a never-commit guard had to exist at all.
+# That guard produced a live CRITICAL in three consecutive review passes, the third introduced by the
+# second's hardening, defending a placement whose only justification was four words in a comment.
+# Assert the invariant at its source: one helper derives every output path, and no site reconstructs
+# an in-tree one behind its back. A relocation that leaves one hardcoded `$dst/graphify-out` writes
+# into the repo on exactly the path that skipped the helper.
+if grep -q '^gfx_out_dir()' scripts/bd-gfx \
+   && ! grep -q '\$dst/graphify-out\|\$this/\$idx_path/graphify-out\|\$root/graphify-out' scripts/bd-gfx \
+   && ! grep -q 'graphify-out' skills/graphify-wrapper-sync/SKILL.md \
+   && ! grep -q '^## 2\. Never-commit guard' skills/graphify-wrapper-setup/SKILL.md; then
+  ok "graphify output is derived out of tree by one helper (gfx_out_dir) and the never-commit guard is gone"
+else
+  bad "graphify still resolves an in-tree output path, or the never-commit guard section survives - the relocation is incomplete and a build can still write inside a repo"
+fi
+
+# The seed hook existed only to copy a multi-file output dir BETWEEN worktrees, which is the whole
+# torn-graph temp+mv dance. Under one central home per worktree there is no cross-tree copy to make.
+if ! grep -q 'cp -R' hooks/bd-graphify-seed-worktree 2>/dev/null; then
+  ok "the graphify seed path no longer copies graph output across worktrees"
+else
+  bad "hooks/bd-graphify-seed-worktree still copies graph output tree-to-tree - the machinery the relocation retires"
 fi
 
 # A chain that stops at -sync never reaches the only verb with user value. Both close-outs route on.
