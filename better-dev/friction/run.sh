@@ -175,8 +175,11 @@ run_fixture() {
   BRIEF=""; OPENING=""; FOLLOWUP=""
   # shellcheck disable=SC1090
   . "$ROOT/fixtures/$name.sh"
-  [ -n "$BRIEF" ] && [ -n "$OPENING" ] || die "fixture $name must set BRIEF and OPENING"
-  ( fixture_build "$repo" ) >"$tdir/build.log" 2>&1 || die "fixture $name failed to build - see $tdir/build.log"
+  # These two return rather than die: `die` exits the whole script, which --keep-going could never catch,
+  # and a malformed or unbuildable fixture is exactly what it exists to skip past.
+  [ -n "$BRIEF" ] && [ -n "$OPENING" ] || { warn "fixture $name sets no BRIEF/OPENING"; return 1; }
+  ( fixture_build "$repo" ) >"$tdir/build.log" 2>&1 \
+    || { warn "fixture $name failed to build - see $tdir/build.log"; return 1; }
   ( cd "$repo" && find . -not -path './.git/*' -not -name .git | sort ) > "$tdir/before.txt"
 
   say "fixture $name - opening: $OPENING"
