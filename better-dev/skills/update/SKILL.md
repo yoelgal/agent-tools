@@ -71,6 +71,16 @@ across the BSD/GNU userlands this runs on. A pending `install` flag that step 2'
 already surface still means a one-time `install.sh` re-run; a pending `reonboard` flag goes to
 step 4, and so does a pending `offer` flag - collect its summary line, it is the question's text.
 
+The stamp is not this repo's version of the tool, and the gap between the two is not a pending
+update. `plugin.json` says which version this machine runs; `wired-version` says which version's
+**repo surface** was last wired in, so it only has to move when a release changed something inside
+the repo - which is exactly what a `reonboard` flag marks. A pull-only release therefore leaves the
+stamp behind the manifest on purpose, and nothing is owed. Answering "what version is better-dev
+here" by diffing the two numbers reports a top-up that no flag asked for; read the flags between
+the stamp and the manifest instead, and where none are pending, say so rather than prescribing a
+run. Step 5 still re-stamps on any run that gets there, so a synced number is a side effect of
+updating, never the reason to.
+
 ## 4. Top up this repo only
 
 When a reonboard flag is pending, run the `/onboard` top-up for the current repo - a re-run is
