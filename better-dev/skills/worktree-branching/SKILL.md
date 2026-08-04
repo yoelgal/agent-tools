@@ -230,7 +230,8 @@ port/URL are you looking at?") before any re-diagnosis.
 Bash cwd persists across tool calls, so a bare `cd` to the primary checkout silently re-points every
 git command that follows it, in this call and every later one. Reach primary-checkout state without
 moving: read and write it with `git -C "$primary" ...`, and run its tooling by absolute path
-(`"$primary"/.better-dev/bin/...`, which also keeps a hook's cwd walk-up landing on the right store).
+(`"$primary"/.better-dev/bin/...`, because the `bin` bridge exists only in the primary checkout, so
+the relative path is simply a missing file from here).
 Where a session does cd out anyway - the merge `/pr-and-verify` runs from the primary checkout - cd
 back to the worktree before any further git work, and re-read `git rev-parse --abbrev-ref HEAD` before
 trusting a diff. Getting this wrong does not raise an error; it reports a false green, an empty diff

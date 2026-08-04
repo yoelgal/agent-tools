@@ -140,9 +140,16 @@ overwriting a published tag:
 if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
   echo "tag $version already exists - promote already ran, or the version wasn't bumped; stop and reconcile"
 else
-  git tag -a "$version" -m "release $version" && git push origin "$release" "$version"
+  git tag -a "$version" -m "release $version"
+  git push origin "$release"
+  git push origin "$version"
+  git ls-remote --tags origin "$version"   # the authority: the tag is pushed only if this prints it
 fi
 ```
+
+One command per line here, not a `&&` chain, for the same reason the paragraph above gives: chained,
+the push echo is the only thing you would read, and a tag that never left the machine looks
+identical to one that did.
 
 Record the promote so a later session can see what shipped. The `deploy:` and `health:` values
 come from the deploy-verify pass in the next section - write the receipt once that pass settles

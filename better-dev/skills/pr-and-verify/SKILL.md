@@ -224,7 +224,10 @@ change:
   primary checkout, not from inside the work-item's worktree: the recorded merge allowance's host
   grant (e.g. the Claude-family allow rule in `.claude/settings.local.json`) is personal local state
   of the primary checkout and does not follow the agent into a worktree, so a merge attempted from
-  the worktree hits the host's permission gate even with the policy recorded and green earned. The
+  the worktree hits the host's permission gate even with the policy recorded and green earned. Reach
+  it with `git -C "$primary"`, never a bare `cd` - Bash cwd persists across calls, so a cd here
+  silently re-points every later git command and reports a false green rather than an error
+  (`/worktree-branching` carries the rule). The
   remote branch belongs to that same teardown order: attempt `git push origin --delete <branch>` there
   like the local delete, and fall back to a paste-ready command in the close-out only where the host
   actually refuses it on this run - never on the assumption that it will. Either way, hand the

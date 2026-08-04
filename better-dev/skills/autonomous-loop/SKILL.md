@@ -356,10 +356,8 @@ a finding answered with silence re-blocks at re-review. Cap that cycle: after a 
 standing findings - two failed rounds means the plan or the seam is wrong, not that a third try lands it.
 The cap counts rounds, not findings, so the opposite shape trips it too: two consecutive rounds that each
 clear their finding while their own fix opens the next `CRITICAL` in the same seam carry the same signal
-as two failed rounds. Instead of a third harden, ask what the underlying tool intends - read its config
-surface, not the defaults it happens to ship - and whether the thing being defended was ever a decision or
-just an unexamined line someone justified in a comment. Deleting the guarded thing is a legitimate answer
-to the finding.
+as two failed rounds, and settle `EXHAUSTED` the same way. `/review`'s `reception.md` owns that read - it
+holds the per-cycle statuses the shape is visible in, and carries what to do instead of a third harden.
 Match the review's effort to the diff's blast radius:
 a change that crossed a human-gate class or the scope tripwire calls for `/review` at deep effort, a small
 in-scope diff earns light. (The adversarial spec-and-standards review is judgment - top tier. A mechanical
