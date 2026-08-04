@@ -173,6 +173,22 @@ link_nudge() {
 # missing stamp is a repo wired before 0.6.0, so any reonboard entry fires.
 # Pure local reads - no network, no fetch; anything missing or unparsable
 # stays silent, per the hook's best-effort contract.
+# The version /update would move this repo TO: the installed clone's manifest.
+# Deliberately not the newest RELEASES.md entry - a pull-only release carries no
+# line at all, so the newest FLAGGED version can sit arbitrarily far behind what
+# the clone actually holds. Naming the flagged one in the one-line mark reads as
+# "the tool is at 0.9.7" when it is at 0.9.8, which is how this was noticed.
+# Empty on any failure; every caller falls back rather than printing nothing.
+clone_version() {
+  local clone
+  clone="$(normalize_clone "${CLAUDE_PLUGIN_ROOT:-}")"
+  [ -n "$clone" ] && [ -f "$clone/.claude-plugin/plugin.json" ] \
+    || clone="$(normalize_clone "$(resolve_clone_via_symlink)")"
+  [ -n "$clone" ] && [ -f "$clone/.claude-plugin/plugin.json" ] || return 0
+  sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([0-9][0-9.]*\)".*/\1/p' \
+    "$clone/.claude-plugin/plugin.json" 2>/dev/null | head -1
+}
+
 reonboard_nudge() {
   local root="$1" clone releases wired newest
   # Same retry rule as update_nudge: fall back when the plugin root fails THIS
@@ -298,7 +314,15 @@ emit() {
   # ^[0-9]+\.[0-9]+\.[0-9]+$ - no JSON-special characters to escape.
   mark=""
   if [ -n "$rnb" ]; then
-    ver="${rnb#*; }"; ver="${ver%% *}"
+    # The version /update moves this repo TO, not the newest flagged release: a
+    # pull-only release has no RELEASES.md line, so the flagged one lags the clone
+    # and the mark read as staleness while the tool was already current. Fall back
+    # to the flagged version if the manifest cannot be read, so the nudge still
+    # names something rather than an empty pair of brackets.
+    ver="$(clone_version)"
+    if ! printf '%s' "$ver" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+      ver="${rnb#*; }"; ver="${ver%% *}"
+    fi
     mark=" - update pending ($ver), run /update"
   else
     case "$upd" in *'update available'*) mark=" - update available, run /update" ;; esac
@@ -584,6 +608,27 @@ if [ "${1:-}" = "selftest" ]; then
   printf '0.6.0\n' > "$tmp/proj/.better-dev/wired-version"
   out="$(cd "$tmp/proj" && HOME="$home3" CLAUDE_PLUGIN_ROOT="$rclone" "$SELF")"
   printf '%s' "$out" | grep -q "changed the repo surface" && fail "reonboard nudge fired on a newer install-only release"
+  rm -f "$tmp/proj/.better-dev/wired-version"
+
+  # The one-line mark names the version /update moves TO (the clone's manifest),
+  # not the newest flagged release. A pull-only release carries no RELEASES.md
+  # line, so the two diverge and the mark read as staleness while the tool was
+  # already current - observed live at wired 0.9.6, flagged 0.9.7, manifest 0.9.8.
+  mkdir -p "$rclone/.claude-plugin"
+  printf '%s\n' '0.9.7 reonboard - a surface change' > "$rclone/docs/RELEASES.md"
+  printf '{"version": "0.9.8"}\n' > "$rclone/.claude-plugin/plugin.json"
+  printf '0.9.6\n' > "$tmp/proj/.better-dev/wired-version"
+  out="$(cd "$tmp/proj" && HOME="$home3" CLAUDE_PLUGIN_ROOT="$rclone" "$SELF")"
+  printf '%s' "$out" | grep -q 'update pending (0.9.8)' \
+    || fail "mark must name the manifest version /update moves to, not the newest flagged release"
+  printf '%s' "$out" | grep -q '0.9.7 changed the repo surface' \
+    || fail "the long sentence must still name the FLAGGED release whose surface change is owed"
+
+  # Unreadable manifest -> fall back to the flagged version, never empty brackets.
+  rm -f "$rclone/.claude-plugin/plugin.json"
+  out="$(cd "$tmp/proj" && HOME="$home3" CLAUDE_PLUGIN_ROOT="$rclone" "$SELF")"
+  printf '%s' "$out" | grep -q 'update pending (0.9.7)' \
+    || fail "with no readable manifest the mark must fall back to the flagged version"
   rm -f "$tmp/proj/.better-dev/wired-version"
 
   echo "bd-session-start selftest: ok"
