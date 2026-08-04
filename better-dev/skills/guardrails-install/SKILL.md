@@ -197,6 +197,14 @@ After wiring, record each check you mapped as a durable rule so the rest of bett
 The autonomous loop and `/pr-and-verify` recall these to run the same checks the hook and CI enforce -
 one detection, reused everywhere, no guessing downstream.
 
+Where a CI workflow exists, it is the authority on what each invocation is: copy the command verbatim
+from what CI runs, flags and mode included, not from the matching `scripts` entry that looks like it
+(`npm run test:ci`, not `npm test`; `pytest -m integration`, not `pytest`). Where CI runs more than one
+mode of the same command, record every mode - a green from a mode CI does not run is not a verify, and
+it reads downstream as one. An invocation that cannot run locally (a matrix leg, one needing secrets or
+a container) is recorded as it appears in CI with `(CI-only)` appended, never quietly substituted with
+the plain script name.
+
 **Record the deploy surface.** Deploy commands travel exactly like the verify commands above - detected
 once, premise-verified, recorded, never guessed downstream. Detect the platform from files that exist
 (`fly.toml`, `render.yaml`, `vercel.json` / `.vercel/`, `netlify.toml`, `Procfile`, `railway.json` /

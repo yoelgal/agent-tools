@@ -224,10 +224,13 @@ change:
   primary checkout, not from inside the work-item's worktree: the recorded merge allowance's host
   grant (e.g. the Claude-family allow rule in `.claude/settings.local.json`) is personal local state
   of the primary checkout and does not follow the agent into a worktree, so a merge attempted from
-  the worktree hits the host's permission gate even with the policy recorded and green earned. Where
-  the host also blocks remote branch deletion (observed: both `git push --delete` and the API route
-  are classifier-gated), the merged branch's cleanup is a paste-ready command handed to the operator
-  in the close-out, never a retried write. Either way, hand the
+  the worktree hits the host's permission gate even with the policy recorded and green earned. Reach
+  it with `git -C "$primary"`, never a bare `cd` - Bash cwd persists across calls, so a cd here
+  silently re-points every later git command and reports a false green rather than an error
+  (`/worktree-branching` carries the rule). The
+  remote branch belongs to that same teardown order: attempt `git push origin --delete <branch>` there
+  like the local delete, and fall back to a paste-ready command in the close-out only where the host
+  actually refuses it on this run - never on the assumption that it will. Either way, hand the
   merged (or green mergeable) PR to `/release-promotion` for the promote-and-tag.
 - **`DONE_WITH_CONCERNS`** - the same, with non-blocking flags named in the PR body.
 - **`BLOCKED`** - an external block. When it is a single waitable condition (a base going green, an infra
@@ -267,7 +270,7 @@ On merge or close, run the close-out - six lines, each written explicitly. The n
 never an omission; a close-out with a line missing is unfinished:
 
 - **Lesson** - the one keyed lesson this PR's verification taught (`.better-dev/bin/bd-mem learn
-  "<lesson>" <confidence> "<key>"`), or `no durable lesson: <why>` - an event of this run ("PR merged
+  "<lesson>" <0..1> "<key>"`), or `no durable lesson: <why>` - an event of this run ("PR merged
   cleanly") is a receipt, not a lesson. Promote to a rule (`bd-mem remember`) only per the confidence
   law in `bd-mem`. That law is a test you apply, never a question you put to the operator: a fact
   verified once this run is a `learn` (scored, reversible), one you have now watched hold more than

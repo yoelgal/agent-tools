@@ -76,7 +76,7 @@ and read `LESSONS.md` before a long stretch of work in that domain.
 answered well and dies with the graph. `bd-mem` remains the project's durable
 store, and exactly one class crosses over: a `corrected` outcome whose correction
 is a fact about the **codebase** rather than about the graph being stale gets
-promoted with `.better-dev/bin/bd-mem learn "<the corrected fact>" <confidence>
+promoted with `.better-dev/bin/bd-mem learn "<the corrected fact>" <0..1>
 "<key>"`. Everything else - node preference, dead ends, staleness corrections -
 stays graphify-side, where it means something and nowhere else does.
 

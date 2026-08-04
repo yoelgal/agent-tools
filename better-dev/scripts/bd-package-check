@@ -422,6 +422,26 @@ path_hits="$(printf '%s\n' $path_hits | sed '/^[[:space:]]*$/d' | sort -u | tr '
 [ -z "$path_hits" ] && ok "no bare 'path' variable in skill blocks or sourced helpers" \
   || bad "zsh path-trap: a bare 'path' variable clobbers PATH in:$path_hits (use idx_path/wt_path)"
 
+# A prescribed `bd-mem learn "<x>" <confidence>` teaches the call that corrupts the store: `learn`
+# takes a number in 0..1, and a word there used to write a line jq rejects - stored-looking, scored
+# 0.00, printed as a guess forever. Six skills shipped the bare placeholder at once, which is why
+# this is a gate and not a review note: it drifted back into three more files than anyone counted.
+conf_hits="$(grep -rl '<confidence>' skills/ 2>/dev/null | tr '\n' ' ')"
+[ -z "$conf_hits" ] && ok "no bare '<confidence>' placeholder - prescribed learn calls say <0..1>" \
+  || bad "bare '<confidence>' placeholder in:$conf_hits - write <0..1>, or the prescribed call writes a line jq rejects"
+
+# A falsified host observation shipped as background fact outlives the run that disproved it: this
+# one claimed remote branch deletion was classifier-gated, was contradicted on every run from
+# 2026-07-24, and survived only because a house rule in one repo cancelled it - which no adopter can
+# write. Pin the specific dead claim; a general "no observed: notes" rule would be wrong.
+# ok-branch first, like every check here: prove-new pairs an OK token with the BAD that follows it,
+# so a bad-first check splits into two orphans and its ok label reports UNPROVEN.
+if ! grep -q 'observed: both `git push --delete`' skills/pr-and-verify/SKILL.md 2>/dev/null; then
+  ok "no falsified remote-deletion observation in pr-and-verify"
+else
+  bad "pr-and-verify carries the falsified 'remote deletion is classifier-gated' observation - disproved since 2026-07-24"
+fi
+
 echo "== vendored daemons (lint-shape only) =="
 # The vendored daemon trees (browse/, ios-qa/) are NOT behaviorally CI-gated here: this lints their dir
 # shape only. Each must carry its provenance (UPSTREAM), license (LICENSE-upstream), and README.md, and

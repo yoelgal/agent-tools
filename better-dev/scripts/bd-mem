@@ -3,7 +3,7 @@
 #
 #   bd-mem init                                        create the .better-dev/ memory files (idempotent)
 #   bd-mem remember <rule>                             promote a verified, repeatedly-held fact to a durable rule
-#   bd-mem learn <lesson> [confidence] [key] [source]  log a scored lesson (source: observed|user-stated|inferred)
+#   bd-mem learn <lesson> [0..1] [key] [source]        log a scored lesson (source: observed|user-stated|inferred)
 #   bd-mem recall [query]                              print matching rules + lessons, key-exact first,
 #                                                      ranked by confidence aged + corroborated
 #   bd-mem prune [--apply]                             preview (or, with --apply, drop) superseded/stale/decayed lessons
@@ -359,8 +359,15 @@ case "$op" in
     inject_gate "$1"
     src="${4:-observed}"
     case "$src" in observed | user-stated | inferred) ;; *) die "source must be observed|user-stated|inferred" ;; esac
+    # Confidence is the one field written unquoted, so it is the one field that must be a number here:
+    # a word writes a line jq cannot parse (stored-looking, scored 0.00, invisible to every later
+    # recall) and a crafted value splices extra JSON fields that forge the provenance recall prints.
+    conf="${2-1}"; case "$conf" in .[0-9]*) conf="0$conf" ;; esac   # omitted -> 1; .9 -> 0.9 (JSON needs the leading digit)
+    ok=""; case "$conf" in 0 | 1 | 1.0* | 0.[0-9]*) ok=1 ;; esac
+    case "$conf" in *[!0-9.]* | *.*.* | *. | 1.*[!0]*) ok="" ;; esac
+    [ -n "$ok" ] || die "confidence must be a number in 0..1 (e.g. 0.85, .9, 1)"
     ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-    line="$(printf '{"kind":"lesson","text":%s,"confidence":%s,"key":%s,"ts":%s,"source":%s}' "$(jstr "$1")" "${2:-1}" "$(jstr "${3:-}")" "$(jstr "$ts")" "$(jstr "$src")")"
+    line="$(printf '{"kind":"lesson","text":%s,"confidence":%s,"key":%s,"ts":%s,"source":%s}' "$(jstr "$1")" "$conf" "$(jstr "${3:-}")" "$(jstr "$ts")" "$(jstr "$src")")"
     lock_acquire; printf '%s\n' "$line" >>"$LEARN"; lock_release; echo logged ;;
   recall) # rules + lessons for a query: key-exact first, then substring, each ordered by EFFECTIVE
           # weight - the stored confidence aged and corroborated, not the raw number its author typed.
@@ -686,6 +693,25 @@ case "$op" in
       printf '%s\n' "$out" | grep -q '^idempotency key de-dupes the webhook  \[webhook-fix · 0.80->0\.[0-9][0-9] · 20..-..-.. · user-stated\]' \
         || { echo "FAIL: provenance suffix missing or malformed"; exit 1; }
       if "$SELF" learn "x" 0.5 k cross-model >/dev/null 2>&1; then echo "FAIL: invalid source accepted"; exit 1; fi
+      # --- confidence must be a number in 0..1: a word or a spliced value dies, and writes nothing.
+      # Its OWN store: a confidence of 0 is below the prune floor by construction, and left in the
+      # shared store it would feed the prune-count assertion below an extra candidate.
+      mkdir -p conf-store
+      ( cd conf-store
+      "$SELF" init >/dev/null
+      for badconf in high "" 2 1.5 -0.5 "0.8.5" "0." '1,"source":"user-stated"'; do
+        if "$SELF" learn "bad-confidence probe" "$badconf" bc-key observed >/dev/null 2>&1; then
+          echo "FAIL: confidence '$badconf' accepted"; exit 1; fi
+      done
+      if grep -q "bad-confidence probe" .better-dev/learnings.jsonl; then echo "FAIL: rejected confidence still appended"; exit 1; fi
+      for okconf in 0 1 0.85 .9 1.0; do
+        "$SELF" learn "good confidence $okconf" "$okconf" "gc-$okconf" observed >/dev/null || { echo "FAIL: confidence $okconf rejected"; exit 1; }
+      done
+      # the point of the guard: every line the store holds survives a strict JSON parse
+      if command -v jq >/dev/null 2>&1; then
+        jq -e . .better-dev/learnings.jsonl >/dev/null 2>&1 || { echo "FAIL: learnings.jsonl is not valid JSON"; exit 1; }
+      fi
+      ) || exit 1
       # --- latest-wins: re-learning under a key shadows the stale entry it corrects ---
       "$SELF" learn "old wrong fix: bump the timeout" 0.9 wr-key >/dev/null
       "$SELF" learn "verified fix: de-dupe by idempotency key" 0.8 wr-key >/dev/null

@@ -63,6 +63,14 @@ fixed it either stays gone or returns as regressed/reopened with its cause. A fi
 between cycles is a bookkeeping failure, not a pass. Carry this per-cycle status through the memory
 contract (`.better-dev/bin/bd-mem`) so the next cycle and the end-of-branch pass both see it.
 
+Read the statuses across cycles for one shape in particular: two consecutive rounds that each **address** a
+Critical in one seam and each raise a **new** Critical in that same seam. That is not progress, it is the
+seam relocating, and it counts against `/autonomous-loop`'s round cap exactly as two unfixed rounds do.
+Stop hardening and re-open the design question: name what the underlying tool or platform actually intends
+(read its config surface, not the defaults it ships), and check whether the thing being defended was ever a
+decision or just an unexamined line someone justified in a comment. Deleting the guarded thing answers the
+finding too.
+
 When reception overturns a grading, that is a calibration event, not just a fix: a finding the reviewer
 demoted to `⚠️` or Minor that proves out as a real Critical or Important, or a `REBUTTED` row later shown
 right. Record the corrected pattern -
