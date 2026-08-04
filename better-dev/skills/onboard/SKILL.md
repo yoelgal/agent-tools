@@ -43,11 +43,18 @@ Three rules carry the whole skill:
   matters - no integration branch to base worktrees on, or an entry file that's truly ambiguous.
   Don't batch a wall of questions, and don't ask about a default you can safely pick and record.
 
-You can't drive interactive UIs (a plugin installer, an auth login); settings and permission files,
-and any machine-global change D26's list does not name, stay operator-run. For those, **emit a
-paste-ready command block** and let the operator run it (`! <cmd>` runs in-session). Do file ops
-yourself after confirming, and the reversible, non-secret machine-global writes D26 does name -
-each one named in the recap.
+You can't drive interactive UIs (a plugin installer, an auth login); a host settings or permission
+file at either scope, and any machine-global change D26's list does not name, stay operator-run. That
+class is exactly those. Everything else you run yourself after confirming: writes under the working
+tree, git operations on the branch already recorded, and the reversible, non-secret machine-global
+writes D26 does name - each one named in the recap. Git is never in the operator-run class; handing
+back a `git merge` or a `git commit` you are allowed to run spends the operator's turn on your work.
+
+For the operator-run class, **emit a paste-ready command block** and let the operator run it
+(`! <cmd>` runs in-session) - then **read the effect back before building on it**: the config re-read,
+the hook fired once against a probe, the file stat'd. An operator's "ran it" is a report, not a
+result; observed 2026-08-04, two pasted blocks failed silently in one run and the repo was reported
+wired on the strength of the reply.
 
 ---
 
@@ -138,6 +145,13 @@ recorded as an override rather than overwritten:
   `main` has recorded a convention it is not standing on, and the operator's next commit lands on the
   wrong base; a `git branch -f staging main` used to drag the branch along afterwards is the tell that
   the commits went to the wrong place. Phase 5 names the checked-out branch in the recap.
+- **A wiring commit carries wiring.** `.better-dev/`, the entry file's discovery block, and the ignore
+  and attributes files this run wrote - that is the whole contents. Anything else the run wants to
+  land (a lockfile, a lint config, a new dependency, a formatter) is the operator's call, asked before
+  the write and committed separately if they say yes. A repo the operator described as green and
+  committed is one they expect to find that way; observed 2026-08-04, a run put a lockfile, an eslint
+  config and a devDependency into the wiring commit on the integration branch, and the operator's next
+  turn was spent taking it back rather than on the work they came for.
 - Installed skills stay installed. better-dev complements them.
 
 Present real decisions one at a time; skip the ones you can default.
