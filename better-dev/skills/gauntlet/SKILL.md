@@ -92,8 +92,19 @@ on their behalf.
 Check the drafted prompt for both words before handing it over. They are the two the drafting most
 often loses, because the prose reads complete without them.
 
+**Open the block with a line that names what it is**, before the goal sentence: a Gauntlet Loop
+prompt, to be executed in this session, not routed through a planning front-end. Everything else in
+this step keeps the route out of the prompt, and this line is not an exception to that - it is a
+dispatch guard, not build guidance. Without it the prompt is a bare greenfield build ask, and a
+practices-wired repo reads it exactly that way: the paste lands in a fresh session whose own routing
+hands it to a planning skill, which then offers the one-shot route back to `/gauntlet` for a prompt
+the user is already holding. The line costs a sentence and closes that loop.
+
 One filled example - a non-game, mixed visual and mechanical bar:
 
+> This is a Gauntlet Loop prompt - run it here, directly; do not route it into a planning or
+> foundation skill, the method it needs is below.
+>
 > Build a local-first personal-finance dashboard: CSV import from any bank export, monthly
 > spending breakdowns, and budget alerts, as a web app I run on my own machine. Two bars, judged
 > separately: the UI must win a blind side-by-side against the attached Copilot Money screenshots,
