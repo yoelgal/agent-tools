@@ -119,5 +119,5 @@ skill's terminal state is the handoff - a run started, watched, or debugged afte
 new work, and a wired repo's loop items still route through `/plan-grill` and `/autonomous-loop`.
 
 Close out in one line: record the keyed lesson if the grill taught one
-(`.better-dev/bin/bd-mem learn "<lesson>" <confidence> "<key>"` where a repo is wired), else say
+(`.better-dev/bin/bd-mem learn "<lesson>" <0..1> "<key>"` where a repo is wired), else say
 `no durable lesson` and why.

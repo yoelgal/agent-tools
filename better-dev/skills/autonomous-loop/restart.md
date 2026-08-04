@@ -52,7 +52,7 @@ The steps:
 1. **Keep the map.** `contract.md`, `progress.md`, and `receipts.md` stay - they live in the primary
    checkout, untouched by anything that happens in the feature worktree. Read what the stalled attempt
    learned. Fold any durable lesson into `contract.md` and record it (`.better-dev/bin/bd-mem learn
-   "<lesson>" <confidence> "<signature-key>"`) so the rebuild doesn't re-enter the same dead end; a
+   "<lesson>" <0..1> "<signature-key>"`) so the rebuild doesn't re-enter the same dead end; a
    failure diagnosed but not yet fixed goes in as a low-confidence open lesson under its signature key,
    so the next session's recall surfaces it as unfinished rather than as settled fact. Append a line to
    `progress.md` naming the restart and why.

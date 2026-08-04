@@ -106,12 +106,22 @@ gate to get past it.
 
 ## Promote, then tag
 
+Run this section one command at a time and read the result back from the authority, never from a
+script's own echo: `git log --oneline -1` for the branch head, `git status --porcelain` for a clean
+tree, `git ls-remote --tags origin` for the pushed tag, `gh pr view <n> --json state,mergedAt` for a
+merge. Batched into one `set -e` script the chain lies: a failure that is not the last command of an
+`&&`/`||` list is exempt from the abort, and so is one inside a pipeline without `pipefail`, so a
+refused fast-forward scrolls past and the run still prints its final success line - on the one step of
+the model that cannot be taken back.
+
 With every gate green, move the release branch onto the integration head. Because the ancestor check
 passed, this is a clean fast-forward; refusing anything that *isn't* a fast-forward keeps a stray
 local commit from riding along:
 
 ```bash
-git switch "$release" && git merge --ff-only "origin/$integration"
+git switch "$release"
+git merge --ff-only "origin/$integration"
+git log --oneline -1          # the release head must now BE the integration head
 ```
 
 Then tag the release at that commit. Take the version from the project's scheme (a bumped

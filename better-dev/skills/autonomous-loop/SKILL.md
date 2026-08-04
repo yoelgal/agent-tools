@@ -354,6 +354,12 @@ accept-or-rebut table `/review`'s reception owns - `ACCEPTED` with the fix or `R
 a finding answered with silence re-blocks at re-review. Cap that cycle: after a small fixed number of rounds
 (default 2) that don't clear the same findings, stop re-dispatching and settle `EXHAUSTED` with the
 standing findings - two failed rounds means the plan or the seam is wrong, not that a third try lands it.
+The cap counts rounds, not findings, so the opposite shape trips it too: two consecutive rounds that each
+clear their finding while their own fix opens the next `CRITICAL` in the same seam carry the same signal
+as two failed rounds. Instead of a third harden, ask what the underlying tool intends - read its config
+surface, not the defaults it happens to ship - and whether the thing being defended was ever a decision or
+just an unexamined line someone justified in a comment. Deleting the guarded thing is a legitimate answer
+to the finding.
 Match the review's effort to the diff's blast radius:
 a change that crossed a human-gate class or the scope tripwire calls for `/review` at deep effort, a small
 in-scope diff earns light. (The adversarial spec-and-standards review is judgment - top tier. A mechanical
@@ -419,7 +425,7 @@ Teardown removes the boundary with the worktree once the item is truly done (`/w
 
 Closing the ledger is part of `DONE`, not a courtesy after it: a non-trivial work-item that solved
 something durable and left no note is unfinished. On `DONE`/`DONE_WITH_CONCERNS`, record the reusable
-core keyed for recall - `.better-dev/bin/bd-mem learn "<lesson>" <confidence> "<signature-key>"` - or
+core keyed for recall - `.better-dev/bin/bd-mem learn "<lesson>" <0..1> "<signature-key>"` - or
 write an explicit `no durable lesson` line saying why; promote a recurring one with `.better-dev/bin/bd-mem
 remember "<rule>"`. On a team adoption (`.better-dev/bin/bd-mem recall "adoption"`), the close-out also
 commits the memory delta its learn/remember calls left in the primary checkout - one `mem: <work-item>`

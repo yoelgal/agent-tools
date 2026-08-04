@@ -15,6 +15,10 @@ Three ordering facts, each of which git enforces the hard way if ignored:
   primary=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
   cd "$primary"
   ```
+  This `cd` is the one place the library asks for one, and it is **terminal**: the tree you came from
+  is gone a step later, so nothing cds back. Everywhere else, cwd persists across tool calls and a
+  bare `cd` re-points every later git command - reach the primary checkout with `git -C "$primary"`
+  or an absolute path instead (`SKILL.md`, Step 3).
 - **Remove the worktree before deleting its branch.** `git branch -d` refuses while a worktree still
   has the branch checked out.
 - **Prune afterwards.** `git worktree prune` clears any stale registration left behind.

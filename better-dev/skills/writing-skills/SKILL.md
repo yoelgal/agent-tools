@@ -145,7 +145,7 @@ exact spot the excuse shows up.
 
 A skill whose run can settle something durable ends with a close-out at its terminal moment - `DONE`, a
 fresh diagnosis, an incident, an adoption - never mid-run. The close-out is one call or one sentence:
-record the single keyed lesson (`.better-dev/bin/bd-mem learn "<lesson>" <confidence> "<key>" [<source>]`)
+record the single keyed lesson (`.better-dev/bin/bd-mem learn "<lesson>" <0..1> "<key>" [<source>]`)
 or write an explicit `no durable lesson` line saying why. Two tests gate the write, and failing either
 means the `no durable lesson` line is the correct output: the line names a cause, technique, or standing
 fact - an event of this run ("fixed the typo", "CI was slow today", "PR merged") is a ledger receipt, not
