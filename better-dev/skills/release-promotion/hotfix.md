@@ -32,10 +32,19 @@ Branch names come from the overrides read in the main body (`release` defaults t
    green on the fix, then fast-forward or merge into `main` and tag the patch release.
 
    ```bash
-   git switch "$release" && git merge --no-ff "hotfix/$slug" -m "hotfix: $slug"
+   git switch "$release"
+   git merge --no-ff "hotfix/$slug" -m "hotfix: $slug"
+   git log --oneline -1                     # read the merge back before tagging it
    hotfix_sha=$(git rev-parse HEAD)
-   git tag -a "$version" -m "hotfix $version" && git push origin "$release" "$version"
+   git tag -a "$version" -m "hotfix $version"
+   git push origin "$release"
+   git push origin "$version"
+   git ls-remote --tags origin "$version"   # a tag that never left looks identical to one that did
    ```
+
+   One command per line, for the reason the promote section gives: under incident pressure a chained
+   list reports only its last status, and a hotfix tag that never reached the remote is the rollback
+   target you will go looking for at the worst moment.
 
    Incident pressure is exactly when `--no-verify` and `--force` start to look reasonable; they
    aren't. A hook that fails or a push that's rejected here is a gate catching something while you
@@ -47,7 +56,9 @@ Branch names come from the overrides read in the main body (`release` defaults t
    history into integration so the fix survives the next promote:
 
    ```bash
-   git switch "$integration" && git merge --no-ff "origin/$release" -m "back-merge hotfix $version"
+   git switch "$integration"
+   git merge --no-ff "origin/$release" -m "back-merge hotfix $version"
+   git log --oneline -1                     # the back-merge is what stops the next promote reverting the fix
    git push origin "$integration"
    ```
 
