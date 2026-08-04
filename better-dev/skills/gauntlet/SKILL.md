@@ -39,7 +39,7 @@ is either filled or deliberately delegated to the run, not when the user stops a
 | House rules | The handful of always-true fences (stack constraints, "no hard-coded special cases", licensing) - an empty list is a valid, deliberate answer. Asset provenance belongs here whenever the artifact has assets: nobody is around to fetch a mesh or hand over a logo, so default to generating them - textures, meshes, and sounds for a game, logo and icons for an app, real copy over lorem - and name the few the run may fetch instead. |
 | Harness | Which agentic harness runs it, and whether subagents and looping are available there - the prompt leans on both. A plain chat window fails this slot - the run needs an agent that can open files, run code, render output, and spawn workers - so when the user has only a chat surface, name a harness they could run it in and hold the prompt until one is settled. |
 | Stop condition | Who stops the run and on what: a spend ceiling, a wall-clock bound, or "user stops it when satisfied". The loop never decides it is finished. |
-| Progress surface | Where the human watches without interrupting: a live HTML page or a running markdown doc the agent keeps updating with screenshots, drafts, and test results. |
+| Progress surface | Where the human watches without interrupting: default to a self-refreshing HTML page - one left open in a browser tab that pulls its own new state without the human reloading (a meta-refresh tag or a few lines of polling; no framework, no server the run has to babysit) - updated with screenshots, drafts, and test results as the run produces them. "Live" is the word the drafting most often under-delivers: a static page the agent rewrites is a file, not a surface, because the human only sees the rewrite if they happen to hit reload. A running markdown doc is the fallback where the harness renders one live. |
 
 Predict the user's answer before asking a slot's question; ask only where the prediction is
 genuinely uncertain. Six questions fired as a form is a worse grill than two aimed ones.
@@ -75,7 +75,8 @@ smallest units the loop can better and grade on their own; it **fans those units
 one builder and one separate fresh-context critic each - rather than working them itself; the critic
 inspects the real artifact - rendered pixels, a running binary, actual test output - never the
 builder's summary, compares it against the bar blind where possible, and names the biggest remaining
-gap; loop with no fixed round count; keep the progress surface updated; optionally, one fresh
+gap; loop with no fixed round count; keep the progress surface updated *and self-refreshing*, so the
+tab the human left open shows the latest round without a reload; optionally, one fresh
 smoothing agent per major wave to make separately improved pieces feel like one thing.
 
 **Two things the prompt does not get to leave out: subagents and the harness's heavy mode.** Neither
@@ -92,8 +93,19 @@ on their behalf.
 Check the drafted prompt for both words before handing it over. They are the two the drafting most
 often loses, because the prose reads complete without them.
 
+**Open the block with a line that names what it is**, before the goal sentence: a Gauntlet Loop
+prompt, to be executed in this session, not routed through a planning front-end. Everything else in
+this step keeps the route out of the prompt, and this line is not an exception to that - it is a
+dispatch guard, not build guidance. Without it the prompt is a bare greenfield build ask, and a
+practices-wired repo reads it exactly that way: the paste lands in a fresh session whose own routing
+hands it to a planning skill, which then offers the one-shot route back to `/gauntlet` for a prompt
+the user is already holding. The line costs a sentence and closes that loop.
+
 One filled example - a non-game, mixed visual and mechanical bar:
 
+> This is a Gauntlet Loop prompt - run it here, directly; do not route it into a planning or
+> foundation skill, the method it needs is below.
+>
 > Build a local-first personal-finance dashboard: CSV import from any bank export, monthly
 > spending breakdowns, and budget alerts, as a web app I run on my own machine. Two bars, judged
 > separately: the UI must win a blind side-by-side against the attached Copilot Money screenshots,
@@ -105,7 +117,8 @@ One filled example - a non-game, mixed visual and mechanical bar:
 > critic per unit, the critic starting from a clean context; the critic looks at the real rendered UI
 > or the real test run, compares against the bar side by side while blind to which one is ours, names
 > the biggest gap, and sends it back. Keep looping - there is no final round; I stop the run. Use
-> ultracode. Maintain a live progress page with screenshots and test results as you go.
+> ultracode. Maintain a progress page that refreshes itself - I leave it open in a tab and it shows
+> each round's screenshots and test results without me reloading.
 
 ## 4. Hand it off
 
