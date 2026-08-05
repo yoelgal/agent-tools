@@ -192,12 +192,15 @@ done-criteria will turn on and skip exhaustive branch-walking.
   or behave, whose options read the same written down, gets a cheap concrete artifact to react to
   instead of a fourth paraphrase - for a look-question, several radically different variants rendered
   on one route and toggled by a URL param, so the user reacts to each in place rather than one mockup
-  at a time; for a logic question, a terminal run of the state machine or a filled example. The
-  artifact is throwaway from its first line and marked so, runs with one command, and persists
-  nothing. When it answers, keep the answer, not the code: the decision goes to `decisions.md`, the
-  decision-rich snippet may inline into the contract (the step-4 exception), and the artifact is
-  deleted, absorbed, or - when re-deriving it would cost real time, a multi-variant UI set being the
-  usual case - parked as evidence on a throwaway `prototype/<slug>` branch, its pointer recorded
+  at a time; for a logic question, a filled example - or, when the person who has to answer is the
+  third party below rather than someone who reads code, one self-contained HTML file that renders the
+  whole relevant state after every click, with a button per action so they can drive the model in any
+  order. Keep the logic itself a pure module the page only calls into, so the answer survives the page
+  being thrown away. The artifact is throwaway from its first line and marked so, runs with one
+  command, and persists nothing. When it answers, keep the answer, not the code: the decision goes to
+  `decisions.md`, the decision-rich snippet may inline into the contract (the step-4 exception), and
+  the artifact is deleted, absorbed, or - when re-deriving it would cost real time, a multi-variant UI
+  set being the usual case - parked as evidence on a throwaway `prototype/<slug>` branch, its pointer recorded
   beside the decision in `decisions.md`. Whichever way, the working tree is clean of it before the
   gate closes - a prototype still sitting in the tree at contract seal is an
   unfinished decision. UI direction still belongs to `/design-brief`; this move

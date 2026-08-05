@@ -35,9 +35,10 @@ guardrails wired after the fact.
 Read `.better-dev/overrides.md` first (`.better-dev/bin/bd-mem read overrides`) - if the project has
 already recorded a guardrail preference, honor it before applying any default here.
 
-You cannot drive an interactive installer. When one is needed (a package manager add, `husky init`),
-emit a paste-ready command block and let the operator run it (`! <cmd>` runs it in-session); do the
-file writes yourself after confirming.
+Interactive installers stay operator-run, with the rest of the class `/onboard` names (host settings
+and permission files at either scope, and any machine-global change D26's list does not name): emit a
+paste-ready command block and let the operator run it (`! <cmd>` runs it in-session); do the file
+writes yourself after confirming.
 
 ### A repo with no stack gets the stack-agnostic half, and nothing else
 

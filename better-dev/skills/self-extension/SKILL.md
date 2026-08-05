@@ -144,4 +144,7 @@ Record what the run taught through the memory contract: `.better-dev/bin/bd-mem 
 durable technique, and `.better-dev/bin/bd-mem remember "authored <skill> for <capability>"` so the next time that gap
 surfaces the choice is reused instead of re-created. Separately and optionally, a skill that proves broadly
 useful can be shared to the wider ecosystem for others to source (`/tool-sourcing` in reverse) - a distinct,
-deliberate choice, never automatic and unrelated to the local/global scoping above.
+deliberate choice, never automatic and unrelated to the local/global scoping above. Before it leaves this
+machine, read it once for what travels badly: a path under your own home, a vault or notes directory, a
+hostname, an org name. A shared skill runs against a stranger's tree as if it were yours, and a
+model-invoked one fires there without anyone typing it.

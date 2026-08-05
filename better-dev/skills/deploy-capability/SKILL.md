@@ -45,6 +45,19 @@ hosting."
    step the operator runs, premise-verify the outcome (the project lists, the deploy triggered, the
    URL answers) before moving to the next - a walkthrough graded on the operator's "done" instead of
    an observed probe inherits every typo.
+
+   Past a handful of steps, what the payload really is decides the walkthrough's shape:
+
+   | Condition | Artifact shape |
+   |---|---|
+   | Payload is values the operator transcribes - keys, connection strings, DSNs, CI secrets | One script: it opens each URL in turn, captures each value (hidden entry for a secret), writes it where it belongs, and confirms before anything irreversible |
+   | Payload is an end state you can probe - a project created, a domain answering | Block-by-block, because the probe is the point |
+
+   That trades your per-step observation for the transcription errors a long block sequence invites,
+   so it is the right trade only where captured values outnumber checkable end states; author only the
+   steps, ship no chrome. And never run the script end to end, since it opens browsers and blocks on
+   input - trace it statically instead: every value the scoping step named is captured and lands where
+   that step said, and every CI secret name matches a `secrets.*` reference in the workflow.
 3. **Source a fallback.** When the host wires nothing and the walkthrough stalls on a missing tool (no
    CLI for the chosen platform, an API-only step), hand the step-1 gap line to `/tool-sourcing` and
    let it run its course - discover, vet, try ephemerally, risk-gate, adopt. Don't reimplement its
