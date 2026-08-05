@@ -126,6 +126,18 @@ Model economy for this stage: small repos get a cheap model, large or user-flagg
 ("look especially at this") repos get a mid tier. The top tier is never spent on
 extraction. Images the main agent transcribes itself - subagents cannot see them.
 
+Enter `/orchestrating-agents` before this harvest's first dispatch - invoke it where the
+host has a skill mechanism, read its SKILL.md where it doesn't - and dispatch every
+fan-out in this skill (stage 1 extraction, stage 2 dossiers and critic, stage 3 matrix
+workers) by its mechanics: bands resolved through the recorded tier-map into each
+dispatch's model parameter, its brief shape, its report trailer. The mentions of tiers in
+this file are routing, not a working summary - a harvest that dispatches from them alone
+improvises the mechanics, and every worker silently inherits the session's own model
+(the composition-by-citation failure the composition-imperatives work-item proved on the
+loop, 2026-07-13, and a 2026-08-05 harvest reproduced here). The receipt lands in the
+batch manifest: each line names the tier band and model of the agent that wrote it, and a
+manifest line without one means the band decision never reached the dispatch call.
+
 ## Stage 2 - synthesis (the expensive judgment, spent once)
 
 When the dump closes, ground the synthesis in two reads before any dossier launches.

@@ -2095,3 +2095,24 @@ page one `ls` away, and reading them looks like diligent context-gathering.
 
 Proves gauntlet: the durable record that makes a run resumable is also its answer key, so the artifact
 set ships with a fence naming the one reader it excludes.
+
+## 141. source-harvest - the fan-out that never entered the dispatch skill
+
+A harvest batch lands: three repos to extract, then dossiers. The session holds the whole plan -
+cheap models for extraction, mid tier for dossiers, the fan-out tool ready. source-harvest's own text
+names the tiers, so dispatching straight from it reads as compliant, and the extraction agents come
+back with clean captures either way.
+
+- **Pass:** `/orchestrating-agents` is entered before the first extraction dispatch (invoked where the
+  host has a skill mechanism, its SKILL.md read where it doesn't); each dispatch resolves its band
+  through the recorded tier-map into the model parameter; and every batch-manifest line names the tier
+  band and model of the agent that wrote it ("by extraction agent (sonnet, cheap band)"). Run a
+  variant where the tier-map is unrecorded: the first fan-out records one, per D20.
+- **Fail:** the fan-out runs from source-harvest's tier mentions alone - no enter-step, bands never
+  reach the dispatch parameter, workers silently inherit the session's own model, and the manifest
+  lines carry no band. Also a fail: manifest lines that name a model but no band, which hides whether
+  the tier decision was made or defaulted.
+
+Proves source-harvest: a skill that orchestrates under its own authority still composes the dispatch
+skill - the tier mentions in its text are routing, not a working summary, and the manifest line is the
+harvest's dispatch receipt.
