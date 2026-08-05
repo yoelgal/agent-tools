@@ -138,13 +138,28 @@ If `$wt_path` already exists or the branch is already checked out somewhere, thi
 at the existing worktree rather than forcing a duplicate. If `git worktree add` fails on a sandbox
 permission error, say so and work in place - `edge-cases.md` covers that fallback.
 
-A fresh worktree also has none of the primary checkout's gitignored local state - the runtime
-config the app needs (`.env*` files and the like). Copy that class from the primary
-checkout at creation - copy, never symlink: build tools reject symlinks and a symlink turns
-teardown into a two-step dance - so the first dev-server run doesn't die mid-task on missing env. It
-is personal, gitignored state, so the copies never enter a PR. The copy happens at creation, not
-lazily on first failure: a fresh worktree whose first `bd-mem` or dev-server call dies on missing
-gitignored state (a missing bin bridge, an absent `.env`) is the tell this step was skipped.
+A fresh worktree also has none of the primary checkout's gitignored local state, and it comes in two
+kinds that need different handling.
+
+**The `bin` bridge is re-linked, never copied.** Every skill downstream reaches its helpers by the
+repo-relative path `.better-dev/bin/bd-mem`, and that path does not exist in a new worktree - where
+`.better-dev/` is gitignored in full, the whole directory is absent. Re-link it at creation:
+
+```bash
+.better-dev/bin/bd-link link "$(cd "$wt_path" && pwd -P)"    # from the primary checkout
+```
+
+Copying it would freeze a stale snapshot of the global scripts, because the primary's `.better-dev/bin`
+is itself a symlink into the installed clone. The bridge is all the worktree needs: `bd-mem` resolves
+rules, overrides, and the ledger through `git rev-parse --git-common-dir` to the primary checkout, so
+one memory and one ledger serve every worktree.
+
+**Runtime config is copied.** The `.env*` files and the like the app needs: copy that class from the
+primary checkout at creation - copy, never symlink here: build tools reject symlinks and a symlink
+turns teardown into a two-step dance - so the first dev-server run doesn't die mid-task on missing env.
+It is personal, gitignored state, so the copies never enter a PR. Both happen at creation, not lazily
+on first failure: a fresh worktree whose first `bd-mem` or dev-server call dies on missing gitignored
+state (a missing bin bridge, an absent `.env`) is the tell this step was skipped.
 Settings-class files - a `.claude/settings.local.json` allowlist, or the host's equivalent - are
 operator-owned and never copied here: the agent never writes them, so there is nothing of that
 class for this step to carry forward. Where a noisier fresh worktree keeps re-prompting on actions
