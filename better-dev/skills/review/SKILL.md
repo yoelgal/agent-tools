@@ -62,7 +62,10 @@ Ask that structurally rather than grepping for the symbol name -
 callers the diff never touched and a name-grep would miss on an aliased import or a re-export. Run it
 for each exported or cross-module symbol the diff changes or deletes; unreviewed ripple is where the
 regressions this gate exists to catch actually live. The index builds on first use, and a graph reflects
-its last build, so confirm each hit at `file:line` before it becomes a finding.
+its last build, so confirm each hit at `file:line` before it becomes a finding. Where the work-item fans
+out from a `/groundwork` epic, that record already names the frozen shared surface
+(`.better-dev/bin/bd-mem ledger read <epic> groundwork.md`): a new `--affected` edge into a do-not-modify
+interface is architecture drift, and lands on the shortlist as at least Important.
 
 Close the walkthrough with a ranked **scrutiny shortlist**: the 3-5 spots likeliest to be wrong, each a
 `file:line` and one sentence, hardest-hitting first. Head the shortlist by naming which fingerprint
@@ -243,6 +246,17 @@ finding (the cited seam touched and the defect no longer holding), confirms no r
 delta, and records the verdict keyed to the post-fix HEAD. A rebutted finding, a new fingerprint-surface
 touch, a delta beyond the listed findings, or a delta that crosses the scope tripwire escalates to a full
 re-review.
+
+A full re-review is a rotated round, not a repeat of the last one. Open it by naming in one line the
+angle it runs, taken from outside the exclusion set the brief carries: the prior rounds' channel focuses
+and lens surfaces. An angle line that is missing, or that names an angle already in that set, means the
+round did not run - re-dispatch it under a different angle before reading its verdict. Its candidates
+dedupe against every candidate the prior rounds *saw*, `REFUTED` ones included; the recorded counts
+blocks and `reception.md`'s disposition table are that record, so a rejected candidate cannot return as a
+fresh finding. Close the round with one line beside the counts block -
+`ROUND: <n> ANGLE: <one line> NEW: <count of candidates no prior round saw>` - and read `NEW: 0` under a
+repeated angle as a rubber stamp rather than a clean verdict. The fix-confirm pass is exempt: it is
+scoped to the delta by design and rotates nothing.
 
 Persist reviewer-accepted `REBUTTED` rows and unresolved ⚠️ items through the memory contract
 (`.better-dev/bin/bd-mem remember "<finding>"`) so the end-of-branch pass sees them - fixed findings

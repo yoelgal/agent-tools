@@ -70,6 +70,13 @@ ledger receipts, or a negative control; absent both, report it as an Important f
   the severity ladder; the table is where it is discovered, not a second verdict. These are per-criterion
   markers, one layer below the verdict - they never appear as a loop state.
 
+  Before a row reads `DONE`, spend one attempt on the opposite claim: name the input, state, or path that
+  would make that criterion fail, and check that path in the diff. The Evidence cell then carries two
+  things - the behaviour at `file:line`, and the attack that failed
+  (`tried: empty list -> guarded at parse.ts:88`). Produce a failure instead and the row is not `DONE`;
+  it is a finding carrying its trigger. One attempt per criterion, never a matrix - the point is that
+  presence alone stops being enough for the row.
+
   With no contract findable (a standalone "review since X"), look before declaring: issue references in
   the package's commit list, a spec or plan file matching the branch or feature name. Found, it is the
   contract. Not found, the completion audit is skipped - say "no spec available" and name where you
@@ -213,6 +220,10 @@ The first line of your output is the axis verdict token, exactly one of `complia
 no process narration, no closing summary. Every line is a verdict, a finding with `file:line`, or a check
 you ran. In a finding's "how to fix", naming the deletion of the guarded or unused thing is a legitimate
 fix - the smallest correct change may be removal, not a guard.
+
+When your brief hands you a rotation angle and its exclusion set, run that angle, dedupe your candidates
+against the seen-set the brief carries, and close the report with
+`ROUND: <n> ANGLE: <one line> NEW: <count of candidates no prior round saw>`.
 
 ```
 compliant | issues-found | cannot-verify
