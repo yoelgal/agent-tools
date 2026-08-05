@@ -28,11 +28,15 @@ One or two lines placing it on the chain (front-end -> loop -> PR -> release), w
 composes, and what composes it.
 
 ## Prerequisites
-Only where one exists (a wired repo, a recorded key, an installed capability). Absent
-otherwise - an empty section is noise.
+Only where one exists (a wired repo, a recorded key, an installed capability, a hard
+entry state like a sealed contract or a clean review verdict). A hard precondition
+lives here, not inside "When to reach for it". Absent otherwise - an empty section is
+noise.
 
 ## Common questions
-Sourced, never invented - see the evidence rule below.
+Sourced, never invented - see the evidence rule below. Each entry is a bold question
+line ("**Question?**") followed by its answer as prose, a blank line between entries -
+never a bullet list of questions.
 
 ## It's working if
 A few bullets naming what the reader sees when the skill is doing its job - see the bar
@@ -57,7 +61,8 @@ below.
   never omitted and never claimed fixed. The trap record is the library's own memory; the
   page is where a user meets the edge before it meets them.
 - **No page writes an install command.** Installation has one canonical story,
-  `BOOTSTRAP.md` - link it. Two copies of an install command is drift waiting to happen.
+  `BOOTSTRAP.md` - link it as a real relative link (`[BOOTSTRAP.md](../../BOOTSTRAP.md)`).
+  Two copies of an install command is drift waiting to happen.
 - **No page restates what one file or one command answers.** A `--help` surface, a
   frontmatter description, a recorded key's value - name the lookup, don't cache the value.
   A page carries what the reader cannot get by looking: the reason behind a choice, the
