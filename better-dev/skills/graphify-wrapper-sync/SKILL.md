@@ -51,8 +51,9 @@ for name in $names; do
   # as missing rather than complete - graphify's shrink guard would otherwise
   # refuse `update` on an unparsable graph.
   if [ -f "$out/graph.json" ] && ! jq -e . "$out/graph.json" >/dev/null 2>&1; then
-    echo "[$name] removing unparsable graph.json (will rebuild)"
-    rm -f "$out/graph.json"
+    echo "[$name] trashing unparsable graph.json (will rebuild)"
+    trash="$out/.trash-$(date +%s)"; mkdir -p "$trash"
+    mv "$out/graph.json" "$trash/"  # rm on a just-created path trips destructive-action gates on hardened hosts
   # A graph left by a DIFFERENT tree at this worktree path parses fine, so only
   # provenance catches it (state 2). Refreshing on top of one would carry a dead
   # codebase forward, so the graph and every cache go - but `memory/` stays, which
@@ -86,6 +87,21 @@ for name in $names; do
   # it parses, so a count off it reads as a fresh measurement.
   [ "$built" = 0 ] || { echo "[$name] build failed (rc=$built) - no carve check"; continue; }
   cross=$(gfx_cross_edges "$out/graph.json") && echo "[$name] cross-subtree edges: $cross"
+
+  # One-time callflow page, default filename only - never --output. The default
+  # name sits on graphify's *-callflow.html auto-regen glob, so every later sync
+  # refreshes the page for free; a custom name is correct once, then silently stale.
+  if ! ls "$out"/*-callflow.html >/dev/null 2>&1; then
+    if GRAPHIFY_OUT="$out" graphify export callflow-html --graph "$out/graph.json"; then
+      echo "[$name] callflow page created"
+    else
+      echo "[$name] callflow export refused (semantic-only build, or zero-node/single-community graph) - page skipped"
+    fi
+  fi
+
+  # bd-atlas isn't on graphify's auto-regen glob (deliberately) - re-render it
+  # here or the atlas page goes silently stale after this sync.
+  ls "$out"/*-atlas.html >/dev/null 2>&1 && better-dev/scripts/bd-atlas "$out/graph.json" >/dev/null
 done
 ```
 
@@ -110,11 +126,16 @@ done
 
 ## Report
 
-One line per index - action taken (refresh/scratch, AST/semantic), node+edge
-counts from the build output, the `graph.json` path the loop printed, and the
-cross-subtree edge count - in this shape:
+Two lines per index, page first - the page is what a human opens, the JSON is
+what an agent reads:
 
+    [api] page: ~/.claude/graphify/acme__mono/worktrees/9f2c1a7b40de/api/graph.html (+ api-callflow.html)
     [api] refresh, AST - 812 nodes / 3104 edges - ~/.claude/graphify/acme__mono/worktrees/9f2c1a7b40de/api/graph.json - cross-subtree edges: 1
+
+graph.html and the callflow page are serverless single-file pages whose
+renderer is fetched from a CDN on first open - call them that, never
+self-contained: that word is earned only by a page that opens with the
+network disabled, and graphify's own output doesn't (bd-atlas does).
 
 For a domain spanning several subtrees that count is the carve check
 `/graphify-wrapper-map` deferred here: zero means the carve bought no
