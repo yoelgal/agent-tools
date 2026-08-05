@@ -73,8 +73,8 @@ pre-drive check reads that mismatch as "un-agreed again" rather than advancing o
 sign-off. The re-opened gate shows the diff since your last approved version, so re-confirming is
 a judgment on what changed, not a re-read of the whole thing.
 
-**Known sharp edge:** the contract's `gated paths:` line - the record of which safety-gated paths
-and out-of-worktree writes this item expects to touch - has no mechanical enforcement. `bd-mem
+**Is the contract's `gated paths:` line - the record of which safety-gated paths and
+out-of-worktree writes this item expects to touch - mechanically enforced?** No. `bd-mem
 ledger approve` refuses to seal a contract missing its `merge:` line, but it does not check for
 `gated paths:` at all; only the pre-seal checklist, read by whoever is sealing the contract,
 catches its absence. A rushed seal can skip straight past it. The merge-time gate is the backstop

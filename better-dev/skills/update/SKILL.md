@@ -48,7 +48,8 @@ operator's behalf. A pull that fails offline: report it and stop; never guess wh
 
 Where the resolved clone is a host-managed plugin checkout rather than your own clone, a refused
 or unavailable pull is the channel working as designed, not local work in the way - say so and
-move to step 3 rather than reporting a dirty clone.
+move to step 3 rather than reporting a dirty clone. The full channel contract lives in
+`/packaging`'s "Two ways in".
 
 ## 2. Reconcile links only when needed
 

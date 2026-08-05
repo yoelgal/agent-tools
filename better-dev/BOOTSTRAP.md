@@ -46,7 +46,7 @@ where you installed the plugin. A session started after the pull picks up the ne
 session already running keeps what it loaded at start. A pull that adds or removes skills
 needs a re-run of `./install.sh` too, so new ones link and orphans prune. You can't drive an
 interactive plugin installer as the agent; when one is needed, hand the operator a paste-ready command
-and continue once they confirm.
+and continue once they confirm. The full channel contract lives in `/packaging`'s "Two ways in".
 
 ## 2b. Offer the communication style, machine-wide (ask once)
 

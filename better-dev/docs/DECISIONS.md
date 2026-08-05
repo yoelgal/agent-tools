@@ -930,6 +930,8 @@ Rejected-with-reasons (one row each; full grounds in the batch dossiers):
 - Vendored template.sh / wizard sidecar doc - see ruling 6.
 - The five-option phase-boundary tree as a shipped artifact - four rows covered by existing owners; /clear declined because the ledger IS the durable why its primary-source argument protects; their /handoff-was-oversold correction is a check worktree-branching/handoff.md passes.
 - provisioning.md pointer sentence - a cache under the batch's own cache rule.
+- Branch-table conversion of comms-block.md's "Override when" line - the block is read whole every turn by an agent, not scanned by a reader who knows their situation; the branch rule's own boundary excludes it.
+- The narrative changeset style as a DECISIONS.md format upgrade - these rulings already read in that shape (what changed, what it replaced, the failure that drove it); nothing to add.
 
 Covered, not re-filed (so the next harvest does not re-litigate): #747 is a second independent
 same-day field report of the #683 self-authorization class - validates D27 rulings 5 and 9 with

@@ -5,8 +5,9 @@
 # tool ONCE per machine: it links this clone's skills/ dir into each detected host's native global skills
 # dir, ONE LEVEL DEEP (~/.claude/skills/<skill>, ~/.codex/skills/<skill>) - hosts discover a skill only at
 # <skills-dir>/<name>/SKILL.md, never nested under a namespace folder - so every repo you open sees the
-# practices, and nothing is ever vendored per project. Update with a plain `git pull` in this clone; the
-# per-skill symlinks mean a session started after the pull picks up the new text - a session already
+# practices, and nothing is ever vendored per project. Update with /update - a git pull in the clone
+# underneath, or the host's plugin refresh. The per-skill symlinks mean a session started after the
+# pull picks up the new text - a session already
 # running keeps the text it loaded at start. A pull that adds or removes a skill needs a re-run of
 # ./install.sh too: it links the new one and prunes a link whose skill was removed upstream, and also
 # reclaims a moved clone's stale links.

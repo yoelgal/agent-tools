@@ -40,8 +40,8 @@ consequence and the move to make instead, never a shout and never a hedge.
 genuinely expensive or unwritten elsewhere. A recorded trap (`docs/TRAPS.md` #143) shows why not by
 default: a skill body once copied in a verify command that a manifest already named, passed the
 "does this change what the reader does" deletion test, and then went stale six weeks later when the
-project switched test runners. The standard treats that as a second, separate filter - the cache rule
-- that a sentence has to clear even after it clears the deletion test.
+project switched test runners. The standard treats that as a second, separate filter - the cache rule -
+that a sentence has to clear even after it clears the deletion test.
 
 **Does a five-line skill that just lists an existing flow's steps deserve its own file?** Only if
 people invoke it by name repeatedly (`docs/TRAPS.md` #86) - a flow that is only ever read for

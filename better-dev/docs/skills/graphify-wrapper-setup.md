@@ -30,9 +30,9 @@ composes it in turn - it sits at the bottom of that chain.
 **Does the version pin actually stop an untrusted package index from running here?** No. The
 `--default-index` pin is best-effort and bounds nothing: it only sets uv's lowest-priority
 index, so a `UV_INDEX` or `UV_EXTRA_INDEX_URL` already in the environment is searched first and
-still decides whose build backend runs the install. The version floor itself is real (below
-0.9.18, graph writes are non-atomic) - it is only the index pin that does not bound what runs
-under the operator's account.
+still decides whose build backend runs the install. The version floor itself is real (below it,
+graph writes are non-atomic - see the version floor the skill pins) - it is only the index pin
+that does not bound what runs under the operator's account.
 
 **Is the CLI install and registry write really something the agent can do on its own,
 unannounced?** It is agent-run, but never silent: the install (`uv tool install`/`upgrade

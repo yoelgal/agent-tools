@@ -48,8 +48,8 @@ share. Pick-up re-runs the most recently recorded green before trusting it and r
 unmet if it comes back red; the sender's approval is evidence of what was approved there, never a
 substitute for this machine's own consent pin.
 
-**Sharp edge - parallel worktrees can share one live datastore even with zero file overlap.** Runtime
-config (`.env` and the like) is copied into each fresh worktree, and that config typically points every
+**Sharp edge - can parallel worktrees share one live datastore even with zero file overlap?** Yes.
+Runtime config (`.env` and the like) is copied into each fresh worktree, and that config typically points every
 lane at the same database, cache, or object store. Two lanes with disjoint branches can still interfere
 through shared data, and a failure born in another lane's writes surfaces as unexplained flake rather
 than a traceable diff. The stopgap: where the stack allows it, namespace the copy per lane (a suffixed

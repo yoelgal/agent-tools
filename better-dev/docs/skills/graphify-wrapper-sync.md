@@ -45,8 +45,9 @@ current.
 
 - A first sync on a freshly registered domain reports "build from scratch," and every sync after
   that reports "refresh" instead
-- The report line for each domain names the action taken (refresh or scratch, AST or semantic),
-  node and edge counts, and the `graph.json` path it wrote - never a bare "done"
+- The report line for each domain names the action taken (refresh or scratch, AST or semantic) and
+  node and edge counts, and a query against that domain right after answers without triggering a
+  rebuild - never a bare "done"
 - A domain that spans more than one top-level subtree gets a cross-subtree edge count in the
   report, so a carve that bought nothing is visible without opening the graph
 - A build that fails is reported as a failure with no count attached, never papered over with a

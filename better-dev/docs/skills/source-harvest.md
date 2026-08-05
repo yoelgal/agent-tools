@@ -43,8 +43,9 @@ in the dump hands its captured brief onward to `/plan-grill`.
   an operator-exported browser cookie jar. Exporting it is an operator-run step the skill
   hands back as a paste-ready command each batch - it is never something an agent can pull
   from the browser itself.
-- The extraction tooling (Playwright/chromium, pandoc, yt-dlp, whisper) - see
-  [BOOTSTRAP.md](../../BOOTSTRAP.md) for how this host gets set up.
+- The extraction tooling (Playwright/chromium, pandoc, yt-dlp, whisper) - see the skill's own
+  `extraction-recipes.md` sidecar for the recipes; [BOOTSTRAP.md](../../BOOTSTRAP.md) covers
+  installation only.
 
 ## Common questions
 
@@ -64,14 +65,19 @@ leverage are different questions. The frontier read (the target's own roadmap an
 turn a corpus that clears parity into a leverage-ranked extends-us finding the parity lenses alone would
 have missed.
 
+**Does a finding a prior batch surfaced but no ruling ever adopted or rejected just get lost?** No.
+The frontier read sweeps recent prior batches' FEEDS lists against the rulings record, and anything
+neither adopted, rejected, nor covered becomes this batch's input, named with its owner in the
+dossier briefs - a capture without an execution trace is not a done finding.
+
 **Harvesting in a repo that isn't the one this skill lives in, with no existing archive - where does
 material go?** It is discovered or created-and-recorded per target repo, never inherited from a prior
 harvest's path. A fresh archive gets its own conventions README and a recorded key before the first
 item lands.
 
-**Sharp edge - the operator's cookie jar goes stale silently.** A page renders logged-out (small
-capture, no reply pane) with no error to flag it. The stopgap is manual: compare capture size against
-what a logged-in read should produce, and re-export the jar when a capture looks thin.
+**Sharp edge - does the operator's cookie jar go stale silently?** Yes. A page renders logged-out
+(small capture, no reply pane) with no error to flag it. The stopgap is manual: compare capture size
+against what a logged-in read should produce, and re-export the jar when a capture looks thin.
 
 ## It's working if
 
