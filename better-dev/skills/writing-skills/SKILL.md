@@ -51,7 +51,10 @@ Never put `version`, `license`, or prose in frontmatter.
   value - a threshold, a duration, a command - the pointer says to load the sibling whenever a finding
   needs that value; never restate the number inline from memory.
 - Keep any always-loaded block lean - a skill body, a routing table, a discovery block is read on every
-  turn, so cut a row before you add one.
+  turn, so cut a row before you add one. The standing test against additive drift, applied to a line you
+  are adding and to one already there: does this sentence change what a reader *does*? A sentence that
+  only reassures, restates the sentence above it, or names a value the reader could look up spends its
+  read cost every run and moves nothing - delete it.
 - Depend on another skill by **naming it in prose** ("run `/grill` first"), never by reaching into its
   files. Shared knowledge lives inside the skill that owns it and is reached by invoking that skill.
   A cross-skill reference is one of three kinds, and the sentence must show which: **routing** sends
@@ -65,6 +68,13 @@ Never put `version`, `license`, or prose in frontmatter.
   paraphrase satisfies the need the reference was meant to create, and the referenced text never
   loads (observed: a loop whose every worker inherited the session's model because the tier rule
   lived one un-taken hop away).
+- Every stage boundary a skill ships names three moves. Where a run ends by handing to another stage - a
+  carve to a front-end, a contract to the loop, a prompt to a fresh session - the text names an **audit
+  gate**, the checks the receiving stage confirms before it proceeds; a **hydration step**, that stage
+  re-reading the decisions from the durable artifact rather than trusting a summary of them; and an
+  **explicit stop** on a failed audit that reports exactly what keeps the boundary closed. Read a
+  finished handoff against all three - the one it leaves out is where the receiving stage acts as if the
+  work had arrived on its own.
 - Voice: firm and precise, never maximalist. State a gate as a plain declarative that names its
   consequence and the move to make instead ("a committed test's assertion stays load-bearing - edit
   the code under test, not the test's expectation; editing a test to reach green hides the very

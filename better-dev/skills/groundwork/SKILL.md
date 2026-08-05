@@ -223,6 +223,16 @@ discussion would rebuild the same substrate from it - the third condition of the
 work-item still gets its own contract when its front-end runs; this record is the higher-level plan that
 ties them together.
 
+**Re-entered on an epic that already has a record, groundwork reports before it reshapes.** Read the
+record back (`.better-dev/bin/bd-mem ledger read "<epic>" groundwork.md`) alongside
+`.better-dev/bin/bd-mem ledger status`, and open with one line per carved work-item and its state -
+before anything else. Then exactly one of three moves: graduate a fog signpost the finished wave has
+made statable into a new carved item, through the carve gate asked again for the new items only; close
+a signpost or item that now sits past the epic's differentiating idea, recorded in the record's
+out-of-scope section with its one-line why; or state that the list is complete and name the next wave's
+base. A second run that reports the epic already finished while unstarted waves sit in the record is
+the failure this clause prevents.
+
 ## Composability
 
 Groundwork adds a front-end above `/plan-grill`; it never replaces it or the per-feature grilling. It
