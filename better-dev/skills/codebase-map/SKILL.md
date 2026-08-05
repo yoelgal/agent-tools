@@ -46,10 +46,9 @@ table `Z`. Carry the answer into whatever you're doing with `file:line` receipts
 
 A structural map reflects its last build, not the live working tree, so treat its answer as a lead to
 confirm at the source, not gospel - and if a symbol looks moved or renamed, refresh the index before
-you trust it. The receipts are what keep a lagging graph honest. If the tool records the commit each graph
-was built at, that's a concrete freshness signal: compare it to `HEAD` to see whether the graph is current
-or behind, and when it's behind, refresh only the areas the diff since then actually touched rather than
-rebuilding the whole thing.
+you trust it. The receipts are what keep a lagging graph honest. Run `/graphify-wrapper-status` to see
+where the graph stands: fresh, proceed; stale, sync the affected domain first; absent, build one or
+say why not.
 
 ## 2. Source one on a real gap
 
