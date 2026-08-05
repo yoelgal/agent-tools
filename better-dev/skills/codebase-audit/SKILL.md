@@ -102,6 +102,15 @@ The output is a report to the human, in three parts:
   goal). A sweep that returns no `cut` rows on a mature codebase is worth a second look - deletion
   findings are the ones category-thinking under-surfaces.
 
+  A `cut` row clears one check the others don't: name what still references the thing, from evidence
+  already in hand. CI config, build scripts, and the dependency manifest are read earlier in this sweep
+  anyway - a component one of them exercises is early, not dead, and proposing its deletion tells the
+  reader you did not cross the two facts you already had. Observed 2026-08-04: an audit offered "drop
+  `web/`" while the same run had read the `ci.yml` job that runs `web/`'s tests. Unreferenced anywhere
+  you looked is a `cut` at high confidence; referenced by a runner is not a `cut` row at all; looks
+  unused but you could not check the runners is `cut` at low confidence, saying so in the Evidence
+  column.
+
   Leverage-ordered, highest first.
 
 - **Direction suggestions, separately** - options for the human to weigh, not problems ranked against

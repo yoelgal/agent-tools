@@ -27,6 +27,19 @@ for hours with almost no interaction. Put it to the user in one question, descri
 rather than by skill name. A recorded override settles the route without asking, and so does a user who
 named one themselves - `/gauntlet` reached directly is not re-litigated here.
 
+One question means one question. The shape, whatever the epic's size:
+
+> Two ways to build this. **Steered** - I land the foundation, then carve the rest into items you
+> review one at a time; you're in it throughout. **One-shot** - we settle what "done" means up front,
+> then it builds for hours unattended. Small project like this, steered is maybe 3-5 touchpoints.
+> Which?
+
+Everything the reader needs is in those four lines: both routes in their own terms, the cost to them,
+and a size read where one is worth having. Expanding it into labelled option blocks, effort tables and
+a paragraph of framing turns a fork into a consultation - observed 2026-08-04, an operator answered a
+200-word version of this with "A, and stop asking me to pick things". Judging the size and skipping
+the ask is still the worse failure; a size read belongs *inside* the question, not in place of it.
+
 Ask the fork rather than judging it. Firing it only where the ask already carries a nameable external
 bar and a visible appetite for one long autonomous run puts the choice behind a judgement the user
 never sees made, and a user who does not know the word "gauntlet" cannot correct it. A missing bar is

@@ -457,7 +457,14 @@ and both blocks read correctly at their destinations.
 
 Recap what changed, then list any phase the operator skipped or deferred (tool not yet installed
 globally, no integration branch, a memory backend left on files, an unmapped test command) so they can
-come back with `/onboard <phase>`. Anything still waiting on the operator's own hands **leads** the
+come back with `/onboard <phase>`.
+
+Scale the recap to what actually varies. Where every deferred item traces to one absent thing - a repo
+with no stack yet defers guardrails, the verify command, the graph and the enforcement hook for the
+same reason - say that reason once and name the one step that closes it, instead of four entries
+repeating it. And this recap is read by someone meeting better-dev for the first time, over a folder
+they created minutes ago: a term this skill introduces (a *pending decision*, a *red-capable signal*)
+carries a half-line of plain gloss at first use, or the close reads as private vocabulary. Anything still waiting on the operator's own hands **leads** the
 recap - "ready", "armed", or "fully wired" is claimable only when that list is empty; a pending
 operator action is the headline, not a footnote under a victory banner. Each parked decision is also
 recorded where downstream skills trip over it, because a recap line scrolls away:
