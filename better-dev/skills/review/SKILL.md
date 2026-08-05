@@ -250,7 +250,8 @@ re-review.
 A full re-review is a rotated round, not a repeat of the last one. Open it by naming in one line the
 angle it runs, taken from outside the exclusion set the brief carries: the prior rounds' channel focuses
 and lens surfaces. An angle line that is missing, or that names an angle already in that set, means the
-round did not run - re-dispatch it under a different angle before reading its verdict. Its candidates
+round did not run - re-dispatch it under a different angle before reading its verdict (the loop counts
+at most one such re-dispatch per round, so bookkeeping can never unbound its ceiling). Its candidates
 dedupe against every candidate the prior rounds *saw*, `REFUTED` ones included; the recorded counts
 blocks and `reception.md`'s disposition table are that record, so a rejected candidate cannot return as a
 fresh finding. Close the round with one line beside the counts block -

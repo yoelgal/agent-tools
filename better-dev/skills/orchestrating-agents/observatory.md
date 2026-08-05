@@ -8,8 +8,9 @@ unattended work-item, `/pr-and-verify` for the landed evidence.
 ## The record
 
 One append-only file, one block per round, written before the page is regenerated. A block carries the
-round number, one state word per unit, the critic's named gap quoted rather than summarized, and the
-spend so far against the ceiling the stop condition named. Earlier blocks are never rewritten: a
+round number, one state word per unit, the critic's named gap quoted rather than summarized, the
+spend so far against the ceiling the stop condition named, and any proposed bar amendment with its
+reason - the record is where an amendment waits for the human, never an edit to the bar itself. Earlier blocks are never rewritten: a
 compaction then costs the page's markup and nothing else, and the finished run reads in order instead
 of showing whatever the last round happened to overwrite.
 
