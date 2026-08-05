@@ -31,14 +31,18 @@ One question means one question. The shape, whatever the epic's size:
 
 > Two ways to build this. **Steered** - I land the foundation, then carve the rest into items you
 > review one at a time; you're in it throughout. **One-shot** - we settle what "done" means up front,
-> then it builds for hours unattended. Small project like this, steered is maybe 3-5 touchpoints.
-> Which?
+> then it builds for hours unattended. Which?
 
-Everything the reader needs is in those four lines: both routes in their own terms, the cost to them,
-and a size read where one is worth having. Expanding it into labelled option blocks, effort tables and
-a paragraph of framing turns a fork into a consultation - observed 2026-08-04, an operator answered a
-200-word version of this with "A, and stop asking me to pick things". Judging the size and skipping
-the ask is still the worse failure; a size read belongs *inside* the question, not in place of it.
+Everything the reader needs is in those three lines: both routes in their own terms, and the cost to
+them in attention. Expanding it into labelled option blocks, effort tables and a paragraph of framing
+turns a fork into a consultation - observed 2026-08-04, an operator answered a 200-word version of
+this with "A, and stop asking me to pick things". Judging the size and skipping the ask is still the
+worse failure.
+
+The fork fires before shaping, so no work-item count exists yet to quote - a touchpoint number here
+would be invented, and it is the number the user weighs the routes on. Where the establishing read
+already turned up a real size fact - an existing epic's item count, a scope the user stated - one
+clause of it belongs inside the question; otherwise the three lines stand as they are.
 
 Ask the fork rather than judging it. Firing it only where the ask already carries a nameable external
 bar and a visible appetite for one long autonomous run puts the choice behind a judgement the user

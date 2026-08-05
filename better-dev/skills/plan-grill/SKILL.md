@@ -102,14 +102,14 @@ build nothing. A proxy with a cheaper direct path, or a do-nothing cost nobody c
 
 If the intent is still rough, sketch two or three distinct ways to satisfy it - a sentence each,
 with the trade-off that separates them - and let the user pick one (or blend). Sketch them as a
-verbalized distribution - each option with a stated probability that a typical solution lands there,
-at least one under ~0.10 - or the "distinct ways" arrive as the default design plus paraphrases of
-it (the *verbalized candidates* shape in `/orchestrating-agents`). Of the sketched options, one is
-the minimal build that satisfies the intent and one is the ambitious build that would make it
-excellent - both present, equal weight, your pick stated with its reason. The distribution is how you
-*reach* options that differ; it is not what you show. What the user reads is the options, the
-trade-off between them, and which you would take - a printed `~0.45` invites them to audit a number
-they have no way to check, and reads as arithmetic standing in for a recommendation. The user's choice sets
+verbalized distribution - place each option yourself on how likely a typical solution lands there,
+and keep sketching until one sits under ~0.10 - or the "distinct ways" arrive as the default design
+plus paraphrases of it (the *verbalized candidates* shape in `/orchestrating-agents`). That placing is
+how you reach options that differ, and it stays yours: what the user reads is the options, the
+trade-off between them, and which you would take. A printed `~0.45` asks them to audit a number they
+have no way to check, and reads as arithmetic standing in for a recommendation. Of the sketched
+options, one is the minimal build that satisfies the intent and one is the ambitious build that would
+make it excellent - both present, equal weight, your pick stated with its reason. The user's choice sets
 the scope posture the rest of the grill holds; any expansion surfaced later is offered individually
 and opted into, never absorbed - the scope-growth rule in step 3 polices the drift. Skip this when the
 user already arrives with a specific design; grilling *is* the work then. The point is to enter the
@@ -222,15 +222,22 @@ done-criteria will turn on and skip exhaustive branch-walking.
 
 Synthesize what the grill settled - no fresh interview, just write down what you already know.
 
-The contract is the one artifact the user has to read and approve, so it is written for them, not for
-the skills downstream. Better-dev's own key names - `human-gate`, `merge-policy`, `pending-decision`,
-`attack pass`, `red-capable signal` - carry the exact meaning a later skill recalls, and none of it to
-someone meeting the words for the first time. Keep the keys in the record where a skill reads them,
-and say the thing in plain words where the user reads it: "you approve before this merges", not
-`merge-policy: human`. Observed 2026-08-05, an operator met four of these terms in a contract for a
-~50-line endpoint and answered "I just wanted 'here's what I'll build, ok?'". Match the contract's
-weight to the change too - a small feature earns a short contract, and the sections that would be
-empty are left out rather than filled with the reason they are empty. The
+The contract is the one artifact the user has to read and approve, so it is written for them as well
+as for the skills downstream. Better-dev's own vocabulary - `human-gate`, `pending-decision`, *attack
+pass*, *red-capable signal* - carries the exact meaning a later skill recalls, and none of it to
+someone meeting the words for the first time. Observed 2026-08-05, an operator met four of these in a
+contract for a ~50-line endpoint and answered "I just wanted 'here's what I'll build, ok?'".
+
+Two things stay put while you fix that. The **typed lines keep their key form** - `merge: auto | hold`
+and the rest of `done-contract.md`'s fields are read by script, and `bd-mem ledger approve` refuses a
+contract missing the `merge:` line, so a field rewritten into prose blocks the seal it was meant to
+clarify. And a **section whose emptiness is a finding keeps its explicit marker** - "no contribution
+guide found", an Open-concerns section carrying its refutation, a gated-paths line reading
+`none expected`: those exist so a reader can tell "ran the pass, nothing there" from "never ran the
+pass", and dropping them erases exactly that distinction.
+
+What changes is the prose around them: gloss the term in plain words on the line where the user meets
+it, and let a small feature earn a short contract rather than a full-dress one. The
 contract's spine is its **done-criteria**: each one is a *runnable check* (a command or test) plus
 the **seam** it attaches to, phrased so it is red now and goes green exactly when the criterion is
 met. "Done" is a check going green, never a claim - this is what the loop drives to and refuses to
