@@ -39,7 +39,11 @@ verdict that nothing exists:
   installable by direct ref yet never indexed.
 - Look for an RFC-8615 `.well-known/agent-skills/index.json` on the project's or vendor's own domain; the CLI
   can source from there with no central index involved.
-- Fall back to a web search for the capability plus "agent skill" / "SKILL.md".
+- Fall back to a web search for the capability plus "agent skill" / "SKILL.md" - but treat a hit here as a
+  lead, not a find. Search results now include templated "X vs Y 2026" comparison domains, several built
+  off the same underlying data, that read as independent coverage but aren't. A hit counts only once it
+  resolves to a real repo or a real `SKILL.md` you can read - the same provenance check step 3 already
+  runs before adopting anything.
 
 If every channel comes back empty, say so explicitly and distinguish the two cases before concluding: a real
 gap in the ecosystem, versus discovery being down (network blip, rate limit, index outage). Retry once

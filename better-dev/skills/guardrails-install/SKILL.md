@@ -97,7 +97,9 @@ the tooling or leave it out of the hook. Do not wire a hook to a command the rep
 
 The guardrails above catch a broken commit. The autonomous loop needs a second map: **where this repo keeps
 what is costly to get wrong**, so it escalates instead of auto-editing there, and stops for a human on the
-change classes that warrant one. The canonical defaults below are the starting point; the same
+change classes that warrant one. A capability that *can* act autonomously - a connector with write scope, a
+tool that can call out - is not thereby *authorized* to; the denylist and gated classes below are exactly
+where that line is drawn. The canonical defaults below are the starting point; the same
 premise-not-fact discipline applies - locate each at `file:`level from the repo's real layout, and record a
 class as absent rather than guessing a home for it.
 
