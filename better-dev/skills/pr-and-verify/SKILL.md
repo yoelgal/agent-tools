@@ -139,6 +139,20 @@ one that genuinely can't run there (it needs local instrumentation) still runs l
 but records no rule falls back to current behavior and names the gap once as a `/guardrails-install`
 re-run pointer - never an improvised platform command.
 
+The captures then land where the operator reads them rather than in a worker's transcript. Splice a
+second bounded region into the body beside the brief, holding one row per done-criterion: the
+criterion, the command or flow that was driven, the observed result (the output line, the row count,
+the screenshot path), and its `PASS / FAIL / BLOCKED / SKIP` token. A criterion whose row has no
+observation behind it reads the literal `unverified` in the result column - never a blank cell, and
+never prose standing in for a capture:
+
+```
+printf '%s' "<rows>" | .better-dev/bin/bd-block /tmp/pr-body pr-evidence
+```
+
+Same body file and same write-only-when-it-changed rule as the brief, so a re-run over unchanged rows
+edits nothing.
+
 ## 4. Drive red back to the loop - never patch it here
 
 When CI is RED or a done-criterion fails, this skill does not fix it. It hands the failing signal - the
@@ -250,7 +264,11 @@ change:
 Announce the terminal state before anything else: the settle report leads with one line - the state, the
 PR URL, merged or held (when held: who merges and why - the `merge: hold` line, the missing policy, or
 branch protection), and the worktree's disposition - so the operator never has to ask whether the work
-landed. Where the integration branch auto-deploys, the announcement waits for and includes that
+landed. The line after it names what the operator can now do that they could not before, as the
+capability rather than the activity: "you can now import a Chase CSV and see a monthly breakdown",
+never "implemented the importer" or "updated six files". A file path, a count of files, or a verb
+describing this session's own work is the inventory failure that line replaces - rewrite it.
+Where the integration branch auto-deploys, the announcement waits for and includes that
 deployment reporting healthy - a health confirmation on the merged head, not a second QA pass: the
 preview carried the feature QA, and the deep post-release verification stays `/release-promotion`'s.
 Confirm it per the recorded deploy rules (the deployments API keyed to the merged head, or the recorded
