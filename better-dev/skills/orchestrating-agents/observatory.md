@@ -54,7 +54,8 @@ declines to keep.
 ## The atlas is a different surface
 
 The RUN OBSERVATORY above renders a record that accumulates within one run. The CODEBASE ATLAS - the
-rendered code-graph page `better-dev/scripts/bd-atlas` emits, and graphify's own graph.html and callflow
+rendered code-graph page `.better-dev/bin/bd-atlas` (dev: `better-dev/scripts/bd-atlas`) emits, and
+graphify's own graph.html and callflow
 pages - is a pure function of the graph and its commit and holds no history: delete it and rebuild it
 losslessly. The two never share a store, a page, or the word "observatory." A fact about the run goes on
 the record; a fact about the code is recomputed from the graph. This is the deletion test that keeps

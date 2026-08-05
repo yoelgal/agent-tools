@@ -328,7 +328,7 @@ for s in scripts/* hooks/* hosts/* install.sh; do
     bash -n "$s" 2>/dev/null || unparseable="$unparseable $s"
   fi
 done
-[ -z "$unparseable" ] && ok "every shipped script under scripts/, hooks/, hosts/ and install.sh parses (bash -n, or py_compile per shebang)" || bad "syntax error in:$unparseable - a selftest cannot see this, it exits before the parse" # prove-new: regression-guard every shipped script parses at base, as it does after any change that did not break one; this catches the later edit that does, which the selftest runner structurally cannot see
+[ -z "$unparseable" ] && ok "every shipped script under scripts/, hooks/, hosts/ and install.sh parses (bash -n, or ast.parse per shebang)" || bad "syntax error in:$unparseable - a selftest cannot see this, it exits before the parse" # prove-new: regression-guard every shipped script parses at base, as it does after any change that did not break one; this catches the later edit that does, which the selftest runner structurally cannot see
 
 echo "== hook scripts (selftest) =="
 for s in hooks/bd-*; do

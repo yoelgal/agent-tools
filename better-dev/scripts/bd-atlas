@@ -9,13 +9,18 @@
 # layout is computed here in Python, the page ships SVG plus a little vanilla JS for
 # pan/zoom/expand/inspect. Regenerate it after `graphify update`; never commit the rendered page.
 #
+# This is the CODE side of the two-surface firewall in skills/orchestrating-agents/observatory.md:
+# a fact about the run belongs on the run observatory's record, a fact about the code is recomputed
+# from the graph here, and neither surface borrows the other's name or store.
+#
 # Data contract: everything the page draws is embedded once in
 # <script id="atlas-data" type="application/json"> and mirrored to window.ATLAS_DATA, so an agent
 # or a console can read the same numbers the pixels came from.
 #
 # Flows are computed, never invented: flows.json declares [{name, from, to}] and the steps are a
-# BFS shortest path over the embedded graph at generation time. Every rendered step is checked to
-# exist in the graph before the page is written; a mismatch is a generator bug and exits non-zero.
+# BFS shortest path over the embedded graph at generation time. Every rendered step is checked
+# against the graph's own edges - each consecutive pair has to be a real edge - before the page is
+# written; a step that is not is a generator bug or hand-injected data, and exits non-zero.
 #
 # Stdlib only, no network, no pip deps.
 
@@ -51,6 +56,10 @@ def load_graph(path):
             raw = json.load(fh)
     except FileNotFoundError:
         die("no such graph: %s" % path)
+    except OSError as exc:
+        # a directory, a permission denial, a dead symlink - all operator-fixable, so they
+        # get the `bd-atlas: <message>` channel rather than a traceback
+        die("cannot read %s (%s)" % (path, exc))
     except json.JSONDecodeError as exc:
         die("%s is not valid JSON (%s)" % (path, exc))
     if not isinstance(raw, dict):
@@ -471,6 +480,11 @@ def check_data(data, graph):
         1 for c in data["communities"] for x in c["xedges"] if x[3] == "out")
     if embedded_edges != len(graph["edges"]):
         die("embedded %d edges but the graph has %d" % (embedded_edges, len(graph["edges"])))
+    # Every hop against the graph's own edges, not just id existence. `compute_flows` builds steps
+    # by BFS over that same adjacency, so this can only fire on a future edit to the generator or on
+    # hand-injected data - which is exactly the fabricated-but-plausible path R6 and trap 145 name:
+    # real ids, the right endpoints, steps that no edge connects.
+    pairs = {(src, dst) for src, dst, _rel in graph["edges"]}
     for flow in data["flows"]:
         missing = [s for s in flow["steps"] if s not in ids]
         if missing:
@@ -480,6 +494,10 @@ def check_data(data, graph):
                               or flow["steps"][-1] != flow["to"]):
             die('flow "%s": rendered path does not run from %s to %s'
                 % (flow["name"], flow["from"], flow["to"]))
+        for a, b in zip(flow["steps"], flow["steps"][1:]):
+            if (a, b) not in pairs:
+                die('flow "%s": no edge %s -> %s, so the rendered path is not a path in the graph'
+                    % (flow["name"], a, b))
     for nid in data["highlight"]:
         if nid not in ids:
             die("highlight node %s is not in the graph" % nid)
@@ -546,7 +564,10 @@ svg#view.drag { cursor: grabbing; }
 .n rect { fill: var(--panel-2); stroke: var(--line); rx: 5; }
 .n text { fill: var(--ink); font-size: 11.5px; font-family: var(--font); }
 .n.entry rect { stroke-width: 1.6; }
-.n.lit rect { stroke-width: 2; }
+/* the lit accent has to be a rule, not a presentation attribute: `.n rect`'s stroke above would
+   outrank an attribute (specificity 0), so setting stroke="..." on the rect draws nothing. The
+   per-community entry colour goes on `rect.style` in paint()'s sibling for the same reason. */
+.n.lit rect { stroke: var(--accent); stroke-width: 2; }
 .n.dim { opacity: .22; }
 .n.sel rect { stroke: var(--ink); stroke-width: 2; }
 .e { stroke: #33414f; stroke-width: 1.1; fill: none; }
@@ -744,7 +765,7 @@ function drawCommunity(c) {
     wrap.dataset.id = n.id;
     var r = document.createElementNS(svg.namespaceURI, 'rect');
     r.setAttribute('width', NODE_W); r.setAttribute('height', NODE_H);
-    r.setAttribute('stroke', n.entry ? c.color : '');
+    if (n.entry) r.style.stroke = c.color;   // inline style, so the .n rect rule cannot outrank it
     wrap.appendChild(r);
     var tx = document.createElementNS(svg.namespaceURI, 'text');
     tx.setAttribute('x', 8); tx.setAttribute('y', NODE_H / 2 + 4);
@@ -772,7 +793,6 @@ function paint() {
     g.classList.toggle('lit', on);
     g.classList.toggle('dim', any && !on);
     g.classList.toggle('sel', g.dataset.id === state.sel);
-    if (on) g.querySelector('rect').setAttribute('stroke', 'var(--accent)');
   });
   Array.prototype.forEach.call(el.view.querySelectorAll('.e'), function (p) {
     var on = !!(lit[p.dataset.a] && lit[p.dataset.b]);
@@ -954,9 +974,11 @@ def render_page(data):
                      % chips)
     guard_note = ""
     if data["aggregated"]:
-        guard_note = ('<div class="bar"><span class="note">aggregated overview: %d nodes is above '
-                      'the %d-node guard, so the overview shows community aggregates only and '
-                      'every sub-view carries just its own community.</span></div>'
+        # Says only what the guard actually changes. The drill-down is per-community at every size
+        # (there is no whole-graph SVG to thin out), so the one whole-graph surface is this strip.
+        guard_note = ('<div class="bar"><span class="note">%d nodes is above the %d-node guard, '
+                      'so the whole-graph "most depended on" strip is dropped; drill into a '
+                      'community for its nodes.</span></div>'
                       % (counts["nodes"], data["guard"]))
 
     return "".join([
@@ -1022,12 +1044,22 @@ def generate(graph_path, flows_path=None, highlight=None, out_path=None):
     out = out_path or os.path.join(parent, "%s-atlas.html" % domain)
     page = render_page(data)
     verify_page(page, data)
-    with open(out, "w", encoding="utf-8") as fh:
-        fh.write(page)
+    try:
+        with open(out, "w", encoding="utf-8") as fh:
+            fh.write(page)
+    except OSError as exc:
+        die("cannot write %s (%s)" % (out, exc))
     return out, data
 
 
-REMOTE_REF = re.compile(r'(?:src|href)\s*=\s*"(?!#)([a-zA-Z]+:)?//|(?:src|href)\s*=\s*"https?:')
+# Every way a page can ask the network for something: an attribute (either quote style), a CSS
+# url(), or an @import. Narrower than this and the check backs a claim it does not cover.
+REMOTE_REF = re.compile(
+    r"""(?:src|href)\s*=\s*['"](?!\#)(?:[a-zA-Z][a-zA-Z0-9+.\-]*:)?//"""
+    r"""|(?:src|href)\s*=\s*['"]https?:"""
+    r"""|url\(\s*['"]?(?:[a-zA-Z][a-zA-Z0-9+.\-]*:)?//"""
+    r"""|url\(\s*['"]?https?:"""
+    r"""|@import""")
 
 
 def verify_page(page, data):
@@ -1047,9 +1079,23 @@ def verify_page(page, data):
     hit = REMOTE_REF.search(page)
     if hit:
         die("rendered page references a remote resource: %s" % hit.group(0))
+    # An absolute URL in the stylesheet or the script is a fetch waiting to happen, so the
+    # network-off claim gets checked at generation time and not only in the selftest. Scoped to the
+    # two static chunks on purpose: a node label or a domain name is data the graph is allowed to
+    # carry and data fetches nothing, while a fetchable reference anywhere in the page - either
+    # quote style, a CSS url(), an @import - is what REMOTE_REF above already refuses.
+    for chunk, what in ((CSS, "stylesheet"), (JS, "script")):
+        if "http://" in chunk or "https://" in chunk:
+            die("the %s carries an absolute URL - the page must open with the network off" % what)
 
 
 # ---------------------------------------------------------------- selftest
+
+# One hostile node in the fixture, so the gate exercises embed_json's escaping - the script's only
+# injection path - instead of asserting "</script> not in blob" over data with no `<` in it at all.
+HOSTILE_ID = 'hostile</script><b id="x">'
+HOSTILE_LABEL = '</script><img src=x onerror=alert(1)> & "quoted" \'single\''
+HOSTILE_DIR = '</script>&"\'<dir>'
 
 SYNTH_NODES = [
     # community 0: a small pipeline, cli -> parse -> plan -> emit
@@ -1063,6 +1109,8 @@ SYNTH_NODES = [
     # community 2: an island nothing in 0/1 reaches
     ("island_a", "island/a.py", 2, "island_entry"),
     ("island_b", "island/b.py", 2, "island_leaf"),
+    # community 3: markup in the id, the label and (via its first path segment) the community name
+    (HOSTILE_ID, HOSTILE_DIR + "/x.py", 3, HOSTILE_LABEL),
 ]
 SYNTH_EDGES = [("cli", "parse", "calls"), ("parse", "plan", "calls"),
                ("plan", "emit", "calls"), ("plan", "util_log", "calls"),
@@ -1103,9 +1151,20 @@ def selftest():
         blob = re.search(r'<script id="atlas-data" type="application/json">(.*?)</script>',
                          page, re.S).group(1)
         embedded = json.loads(blob)
-        assert embedded["counts"] == {"nodes": 8, "edges": 6, "communities": 3}, embedded["counts"]
+        assert embedded["counts"] == {"nodes": 9, "edges": 6, "communities": 4}, embedded["counts"]
         assert "window.ATLAS_DATA" in page
         assert "</script>" not in blob, "embedded blob can break out of its script element"
+
+        # a-hostile. the fixture's markup-carrying node: nothing raw survives into the blob, the
+        # label still round-trips through json.loads, and no live tag reaches the page
+        for raw in ("<", ">", "&"):
+            assert raw not in blob, "raw %r survived embed_json" % raw
+        hostile = [n for c in embedded["communities"] for n in c["nodes"]
+                   if n["id"] == HOSTILE_ID]
+        assert len(hostile) == 1, [n["id"] for c in embedded["communities"] for n in c["nodes"]]
+        assert hostile[0]["label"] == HOSTILE_LABEL, hostile[0]["label"]
+        assert "<img src=x" not in page, "hostile label reached the page as live markup"
+        assert "hostile</script>" not in page, "hostile id reached the page as live markup"
 
         # offline: no remote src/href anywhere in the page
         assert not REMOTE_REF.search(page), "page references a remote resource"
@@ -1135,7 +1194,7 @@ def selftest():
         assert flows["cli to output"]["steps"] == ["cli", "parse", "plan", "emit", "util_fs"], flows
         assert flows["cli to island"]["found"] is False, flows["cli to island"]
         assert flows["cli to island"]["steps"] == [], "a missing path must render no steps"
-        # the arithmetic check refuses a fabricated step
+        # the check refuses a step that is not in the graph at all
         bogus = dict(data2)
         bogus["flows"] = [{"name": "fake", "from": "cli", "to": "ghost",
                            "steps": ["cli", "ghost"], "found": True}]
@@ -1144,6 +1203,18 @@ def selftest():
             raise AssertionError("check_data accepted a step that is not in the graph")
         except AtlasError as exc:
             assert "fake" in str(exc) and "ghost" in str(exc), exc
+        # and the one trap 145 actually describes: real ids, the right endpoints, steps no edge
+        # connects - what a model authoring a plausible path produces. Id existence cannot see it.
+        for steps, hop in ((["cli", "island_a", "util_fs"], "island_a"),
+                           (["cli", "parse", "util_log", "plan", "emit", "util_fs"], "util_log")):
+            invented = dict(data2)
+            invented["flows"] = [{"name": "invented", "from": "cli", "to": "util_fs",
+                                  "steps": steps, "found": True}]
+            try:
+                check_data(invented, load_graph(gpath))
+                raise AssertionError("check_data accepted a fabricated path of real ids: %s" % steps)
+            except AtlasError as exc:
+                assert "invented" in str(exc) and hop in str(exc), exc
 
         # f. highlight: path, blast radius, substring match, refusals
         _o, dpath = generate(gpath, highlight="cli,util_fs")
@@ -1170,7 +1241,7 @@ def selftest():
             guarded = generate(gpath, out_path=os.path.join(tmp, "guarded.html"))[1]
             assert guarded["aggregated"] is True
             assert guarded["top_nodes"] == [], "guarded overview still embeds per-node content"
-            assert sum(len(c["nodes"]) for c in guarded["communities"]) == 8, "guard lost nodes"
+            assert sum(len(c["nodes"]) for c in guarded["communities"]) == 9, "guard lost nodes"
         finally:
             SIZE_GUARD = 3000
 

@@ -804,9 +804,10 @@ accumulates.
 4. **Flows are computed, never invented.** A flow is a named pair of endpoints a human or skill
 declares in `flows.json` (`[{name, from, to}]`, config beside `graph.json`, not history); the
 steps are whatever the embedded graph traversal yields at render time, recomputed per render so
-they cannot go stale independently of the graph. bd-atlas validates every rendered flow step's
-node id against the embedded graph (arithmetic check: steps rendered == steps resolved). A model
-never authors a flow's steps.
+they cannot go stale independently of the graph. bd-atlas checks every rendered flow against the
+graph's own edges before a byte is written - endpoints, every step's node id, and every consecutive
+pair as a real edge - so a fabricated path of real ids is refused by name, not just an unknown id.
+A model never authors a flow's steps.
 5. **Pedagogy is a sort order, not a narration.** bd-atlas orders what it shows (entry point
 first, then fan-in rank within layer/community) and never generates per-step prose - no LLM call
 in any render path, so the page can never drift from the graph.
@@ -828,8 +829,22 @@ JS, no CDN); drill-down goes community/layer cards to member nodes to a node car
 surface. `--highlight "<a>[,<b>]"` re-emits the page with a precomputed highlight set, and the page
 also accepts `#highlight=<id-list>` at open time. Above roughly 3000 nodes the page embeds the
 community-aggregated graph plus per-community drill-down instead of every raw node in one SVG.
+10. **Pipeline-hygiene folds are surgical, not a rewrite (R9).** Two land here, both one edit each:
+`/graphify-wrapper-sync`'s torn-graph repair moves the unparsable `graph.json` into a timestamped
+`.trash-<epoch>/` instead of `rm -f`-ing it, because an `rm` on a just-created path trips
+destructive-action gates on hardened hosts and left the repair unable to run where it was needed
+most; and `orchestrating-agents/briefs-and-reviews.md` gains one sentence requiring an output
+naming contract to be stated together with its failure mode ("files not matching batch-N.json are
+silently dropped by the merge" binds a worker where "filenames must match" does not). The larger
+emission-contract upgrades that came with them in the dossier - arithmetic self-checks and ordered
+deterministic repair for `orchestrating-agents` - are recorded as an opportunity rather than ridden
+along: they change how every dispatch reports, so they earn their own grill and their own
+verification pass, not a slot in a visualization harvest.
 
 Rejected-with-reasons (one row each):
+- Attendance-style run knobs (per-run dials over what the observatory records, filed with ruling 3's
+  naming call) - what the run record holds is a ruling, not a per-run preference, and a dial over it
+  is the first step back toward a series compared across runs, which D27 already rejected.
 - Log overlay on the atlas - would make the atlas a run-fact surface and start the metrics-store
   slide; a fenced permission is still a permission, and run facts stay on the run observatory's
   record.

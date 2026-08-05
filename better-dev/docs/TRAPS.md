@@ -2159,7 +2159,8 @@ at a CDN-hosted library. The page opens fine on a machine with internet, so the 
 every time it gets checked.
 
 - **Pass:** before "self-contained" is used, the page is opened with the network disabled, or its
-  markup is grepped for an external `src=` or `href=` - either check catches the CDN load, and the
+  markup is grepped for every way it can fetch - an external `src=` or `href=` in either quote style,
+  a CSS `url(`, an `@import` - either check catches the CDN load, and the
   word is withheld or the page is rewritten to embed the renderer itself before it is used.
 - **Fail:** the claim is repeated on the strength of the page having rendered once, on a connected
   machine, which is not a network-off test at all.
@@ -2174,11 +2175,12 @@ sequences between two named endpoints - the kind of steps that read right and ma
 actual graph.
 
 - **Pass:** the flow is declared as a named pair of endpoints only (`{name, from, to}` in
-  `flows.json`); the steps are whatever the graph traversal computes at render time, and the
-  arithmetic check (steps rendered == steps resolved against the embedded graph) has to hold before
-  the panel counts as correct.
+  `flows.json`); the steps are whatever the graph traversal computes at render time, and the check
+  that has to hold before the panel counts as correct is the graph's own edges - endpoints, every
+  step's id, and every consecutive pair a real edge. Id existence alone is not the check: a
+  fabricated path made of real ids passes that and is exactly what this trap is about.
 - **Fail:** a model authors the intermediate steps directly, the panel renders them without checking
   a single one against the graph, and the flow is fiction that happens to look like a diagram.
 
-Proves bd-atlas: a flow is a claim about the graph, and only the graph gets to answer it - the
-steps-resolved arithmetic check is what turns "computed" from a promise into something enforced.
+Proves bd-atlas: a flow is a claim about the graph, and only the graph gets to answer it - walking
+every hop against the edge set is what turns "computed" from a promise into something enforced.
