@@ -37,6 +37,8 @@ run /onboard to wire this repo. Ask me only if something is genuinely ambiguous.
 <details>
 <summary>Locked-down environment (no fetch)? Paste this self-contained version instead.</summary>
 
+<!-- regenerated from BOOTSTRAP.md - change it there first -->
+
 ```
 Set up better-dev in this repo. It's a portable set of dev practices packaged as skills, in two layers: the
 TOOL (skills + bd-* scripts + hooks) installs GLOBALLY once per machine and every repo shares it; a repo's
@@ -45,11 +47,16 @@ TOOL (skills + bd-* scripts + hooks) installs GLOBALLY once per machine and ever
 1. Detect which coding agent I'm in (Claude Code ~/.claude, Codex ~/.codex, or other) - that decides the
    install command and the global skills directory.
 2. Install the tool globally, once per machine. If it's already installed (a better-dev entry in the host's
-   global skills dir, or an existing clone), run `git pull` in the clone and skip to step 3. Otherwise: on
+   global skills dir, or an existing clone), run `git pull` in the clone and skip to step 4. Otherwise: on
    Claude Code install it as a plugin (add this repo as a marketplace, then install better-dev); on any host,
    `git clone https://github.com/yoelgal/agent-tools ~/agent-tools && ~/agent-tools/better-dev/install.sh`, which links the
    tool into the host's global skills dir. Update later with /update (a `git pull` in the clone underneath).
-3. Run /onboard in this repo to wire it: create .better-dev/ for DATA only (rules.md, overrides.md,
+3. Offer, once, to allow better-dev's own memory scripts (bd-mem, bd-guard) to run without prompting on
+   every repo this machine wires - without it the operator is prompted by better-dev's own memory spine on
+   nearly every step, forever. On yes, add the two allow rules to the host's global settings.json
+   (operator-run, since a permissions-file write is a settings-class mutation); on no, write nothing -
+   /onboard still offers the repo-local grant.
+4. Run /onboard in this repo to wire it: create .better-dev/ for DATA only (rules.md, overrides.md,
    learnings.jsonl committed; ledger/ gitignored), create .better-dev/bin as a per-machine symlink to the
    global install's scripts so .better-dev/bin/bd-mem resolves here, and write a discovery block into
    the entry file (CLAUDE.md / AGENTS.md), plus a comms-style block unless this machine already
@@ -125,7 +132,7 @@ Skills you later mint with `/self-extension` are **repo-scoped** by default - co
 
 | Path | What |
 |------|------|
-| `skills/` | the 35 practices (agentskills.io: `name` + `description`, progressive disclosure) |
+| `skills/` | the practices, one dir per skill - the roster here is the count of record (agentskills.io: `name` + `description`, progressive disclosure) |
 | `scripts/` | the `bd-*` spine - `bd-mem` (memory + ledger), `bd-block`, `bd-dispatch`, `bd-guard` (enforced guardrails), `bd-worktree-guard`, `bd-review-package`, `bd-skill-stage`, `bd-link`, `bd-package-check`, `bd-uninstall`, `bd-gfx` (shared graphify helpers), `bd-atlas` (offline codebase atlas from a graphify graph) |
 | `hooks/` · `hosts/` | session awareness + PreToolUse guard hooks · per-host install adapters (declarative, enumerated) |
 | `browse/` · `ios-qa/` | vendored daemons (gstack, MIT - see `NOTICE`): headless-browser QA · on-device iOS QA; compiled on first need, never in CI |

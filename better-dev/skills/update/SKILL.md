@@ -46,6 +46,10 @@ Where the host gates machine-touching commands, hand the pull to the operator pa
 the clone carries local work - report that and stop rather than merging or resetting on the
 operator's behalf. A pull that fails offline: report it and stop; never guess what the remote holds.
 
+Where the resolved clone is a host-managed plugin checkout rather than your own clone, a refused
+or unavailable pull is the channel working as designed, not local work in the way - say so and
+move to step 3 rather than reporting a dirty clone.
+
 ## 2. Reconcile links only when needed
 
 ```bash

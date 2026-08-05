@@ -41,8 +41,9 @@ Otherwise install it. Two paths:
   (`~/.claude/skills/<skill>`, `~/.codex/skills/<skill>`, and so on), since hosts only discover a skill
   at `<skills-dir>/<name>/SKILL.md`; it copies instead of linking where symlinks aren't available.
 
-Updating later is `git pull` in the clone - a session started after the pull picks up the new text,
-though a session already running keeps what it loaded at start. A pull that adds or removes skills
+Updating later is `/update` - a `git pull` in the clone underneath, or the host's own plugin refresh
+where you installed the plugin. A session started after the pull picks up the new text, though a
+session already running keeps what it loaded at start. A pull that adds or removes skills
 needs a re-run of `./install.sh` too, so new ones link and orphans prune. You can't drive an
 interactive plugin installer as the agent; when one is needed, hand the operator a paste-ready command
 and continue once they confirm.
