@@ -46,7 +46,8 @@ Three rules carry the whole skill:
 You can't drive interactive UIs (a plugin installer, an auth login); a host settings or permission
 file at either scope, and any machine-global change D26's list does not name, stay operator-run. That
 class is exactly those. Everything else you run yourself after confirming: writes under the working
-tree, git operations on the branch already recorded, and the reversible, non-secret machine-global
+tree - excepting any file whose own text asks to be consulted first, which Phase 4 covers - git
+operations on the branch already recorded, and the reversible, non-secret machine-global
 writes D26 does name - each one named in the recap. Git is never in the operator-run class; handing
 back a `git merge` or a `git commit` you are allowed to run spends the operator's turn on your work.
 
@@ -232,6 +233,12 @@ so read the global config first and propose nothing when both rules are already 
 steady state on any machine that took the install offer. Only a machine that predates that offer, or
 declined it, reaches this at all.
 
+Probe that config for the two rule names; do not dump it. A command that reads the permission file out
+in full is the shape a host classifier refuses - observed 2026-08-05, two runs lost a turn each to a
+blocked `python3 -c` that printed the whole allow list, when `grep -c bd-mem` would have answered the
+only question being asked. And a refused probe means *unknown*, not *absent*: proposing a grant the
+operator already has spends their turn on a no-op, so say the check could not run and move on.
+
 The doctrine holds at either scope: a permission file is a settings-class mutation, so the write stays
 operator-run - observed 2026-07-16, that write class is classifier-blocked for the agent even with
 adjacent operator consent, so proposing to make it yourself buys a denial rather than a shortcut. Emit
@@ -313,6 +320,16 @@ step that got skipped.
 Write the discovery block into the **entry file** from Phase 1, between the markers the shared writer
 uses - `<!-- BEGIN better-dev -->` / `<!-- END better-dev -->` - replacing any existing block in place
 and never touching the operator's own text.
+
+**An entry file that withholds consent in its own text keeps it.** Read the file before writing:
+where it says to ask first - "do not edit without asking", "my notes, hands off" - that sentence is
+addressed to you, and appending below it is still editing it. Ask, and offer the local-only entry
+file as the alternative that needs no permission. Being invoked is not the permission: `/onboard`
+is an instruction to wire the repo, and the operator who wrote that line was declining exactly the
+write you are about to make on the strength of it - observed 2026-08-05, a run appended and
+explained itself with "`/onboard` was taken as the 'ask' its edit rule requires", and the operator
+came back with "next time actually ask before touching CLAUDE.md". The rule holds for any file
+carrying that instruction, not `CLAUDE.md` alone.
 
 Solo adoption changes only the destination: the block goes in a local-only entry file - on the
 Claude family, `CLAUDE.local.md`, loaded beside `CLAUDE.md` and kept out of git by its own
