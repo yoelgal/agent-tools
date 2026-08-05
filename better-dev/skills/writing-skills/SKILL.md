@@ -1,6 +1,6 @@
 ---
 name: writing-skills
-description: Use when authoring, reviewing, or refactoring any better-dev skill - writing or editing a SKILL.md, including when the self-extension flow generates a new one.
+description: Use when authoring, reviewing, or refactoring any better-dev skill - writing or editing a SKILL.md, including when the self-extension flow generates a new one - or when editing any always-loaded block this library ships: a discovery block, the comms block, a routing table.
 ---
 
 # Writing better-dev skills
@@ -53,21 +53,29 @@ Never put `version`, `license`, or prose in frontmatter.
 - Keep any always-loaded block lean - a skill body, a routing table, a discovery block is read on every
   turn, so cut a row before you add one. The standing test against additive drift, applied to a line you
   are adding and to one already there: does this sentence change what a reader *does*? A sentence that
-  only reassures, restates the sentence above it, or names a value the reader could look up spends its
-  read cost every run and moves nothing - delete it.
+  only reassures or restates the sentence above it spends its read cost every run and moves nothing -
+  delete it.
+- The environment is a source of truth too, and a sentence that restates it is a **cache**: the verify
+  command in a manifest, a `--help` surface, the directory layout, a count of what the repo contains. A
+  cache passes the deletion test above - it does change what the reader does - and still goes stale on
+  its own, silently, because nothing edits the copy when the original moves. Keep one only where the
+  lookup is expensive or unwritten - the convention no file states, the reason behind a choice, the
+  gotcha the config does not confess - and where one command or one file answers it, name the lookup and
+  let the environment carry the value.
 - Depend on another skill by **naming it in prose** ("run `/grill` first"), never by reaching into its
   files. Shared knowledge lives inside the skill that owns it and is reached by invoking that skill.
-  A cross-skill reference is one of three kinds, and the sentence must show which: **routing** sends
-  the reader to a different skill instead of this one ("for a bug, `/diagnose`"); **attribution** names
-  where a rule lives without needing it here ("`/security-pass` owns the full rule"); **load-bearing**
-  is a step of this skill whose operative mechanics live in the referenced skill. The first two work
-  as a bare name. A load-bearing reference works only in one of two forms: an **imperative enter-step**
-  at the moment the mechanics are needed ("enter `/x` before the first dispatch"), or the operative
-  rule inlined where it executes with the name kept as attribution. The middle form - a citation plus
-  a partial paraphrase - fails silently: the executor already believes it can do the step, the
-  paraphrase satisfies the need the reference was meant to create, and the referenced text never
-  loads (observed: a loop whose every worker inherited the session's model because the tier rule
-  lived one un-taken hop away).
+  A cross-skill reference is one of three kinds, and the sentence must show which:
+
+  | Kind | What the sentence does | The form that works |
+  |---|---|---|
+  | Routing | Sends the reader to a different skill instead of this one | A bare name ("for a bug, `/diagnose`") |
+  | Attribution | Names where a rule lives without needing it here | A bare name ("`/security-pass` owns the full rule") |
+  | Load-bearing | A step of this skill whose operative mechanics live in the referenced skill | An **imperative enter-step** at the moment the mechanics are needed ("enter `/x` before the first dispatch"), or the operative rule inlined where it executes with the name kept as attribution |
+
+  The middle form - a citation plus a partial paraphrase - fails silently: the executor already
+  believes it can do the step, the paraphrase satisfies the need the reference was meant to create,
+  and the referenced text never loads (observed: a loop whose every worker inherited the session's
+  model because the tier rule lived one un-taken hop away).
 - Every stage boundary a skill ships names three moves. Where a run ends by handing to another stage - a
   carve to a front-end, a contract to the loop, a prompt to a fresh session - the text names an **audit
   gate**, the checks the receiving stage confirms before it proceeds; a **hydration step**, that stage
@@ -93,7 +101,10 @@ Never put `version`, `license`, or prose in frontmatter.
   the chain, not one file, and the collision reads as sameness (observed upstream: users worked a
   planning skill's decision questions as build tickets until its unit was renamed "decision ticket",
   because the next skill in the chain also said "ticket"). The everyday word may return once the
-  qualified form has fixed the meaning.
+  qualified form has fixed the meaning. Reach for a word the model already holds before coining one: a
+  pretrained word arrives with its priors attached and costs a token, where a coinage costs the
+  sentences that define it and every later reader who half-remembers them. Coin only where no existing
+  word carries the unit, and then define it once, in the skill that owns it.
 - Read the finished draft for its silences. Every decision a skill declines to make is not left neutral -
   it is delegated to the executor's priors. Walk what the draft never says (output shape, scope boundary,
   the failure path, who approves) and make each omission deliberate: fill it, or leave it open on purpose
@@ -101,13 +112,24 @@ Never put `version`, `license`, or prose in frontmatter.
 - When a skill pins an output shape - a report trailer, a verdict block, a table - show the shape once
   as a filled example, never only a prose description of it. An executor reproduces a shown format; a
   described one drifts into a new shape per run. One example earns its lines; a gallery doesn't.
+- A multi-way branch goes in a table or a list, never a paragraph. Where a step forks - three kinds of
+  reference, four dispositions, five options at a boundary - the executor is looking for its one case,
+  and a paragraph makes it read all of them to find out which. The boundary is who arrives already
+  knowing their situation: an executor at a fork mid-run does, so it gets rows; a block that rides in
+  context every turn is read whole before any situation exists, so there the paragraph is cheaper and
+  stays.
 - When you revise a skill rather than write one, cut before you add. Hardcoded process steps and defensive
   repetition written for a weaker model cap a stronger one, so the fix for a skill that under-performs is
   usually a deletion, not another rule. Every instruction you keep pairs with the failure it prevents; one
   that names no failure is a candidate for the cut. When a skill's numbered steps keep fighting real
   runs - executors skip them, reorder them, rationalize around them - demote the body to reference: keep
   the vocabulary and the ordering invariants, drop the choreography, and let the description still fire
-  it. A discipline can bind without a prescriptive procedure.
+  it. A discipline can bind without a prescriptive procedure. When the change removes a recurring
+  element, remove what generates it in the same commit - the template, the checklist that asks for it,
+  and the worked example each write it back on the next run without anyone deciding to. And a skill
+  whose subject is a property of its own text - brevity, clarity, staying on one job - is read as an
+  instance of that property, so it fails by growing: a four-hundred-line skill teaching leanness
+  teaches the volume, not the rule. Where the two disagree, cut the skill until they agree.
 
 ## Encode the judgment at the decision point
 
@@ -121,8 +143,13 @@ Where a single decision point draws a whole family of excuses - the core loop sk
 sibling `rationalizations.md`: a two-column table of the excuse and its counter, plus a short Red-Flags
 list, reached by a prose pointer ("before settling a pass as done, read `rationalizations.md`"). The
 sibling travels with the folder, so it survives isolation too, and progressive disclosure keeps it out of
-context until a pass is about to declare done. Add the table only where it earns its keep - most skills
-need two or three inline counters, not a table.
+context until a pass is about to declare done. Every row names an excuse that was actually produced,
+not one that could be, so go find them before writing any: `docs/TRAPS.md` records the scenarios a
+skill-less agent got wrong, a work-item's receipts and `reception.md` record what a run talked itself
+into, and `.better-dev/bin/bd-mem recall` carries the lessons a prior run paid for. Size the table to
+what the hunt returned - a heavily-run skill earns six rows, and most skills earn two or three inline
+counters and no table at all - because an invented excuse teaches the executor a rationalization it had
+not thought of.
 
 Write done-criteria as **checkable criteria, not adjectives**. "Share the same understanding" and
 "watertight" are destinations an executor reads generously; give it the test that it arrived. "Can I
@@ -183,6 +210,10 @@ full form it points to.
   an explicit one-line pointer to the recorder ("recorded by `/guardrails-install`; run it if absent").
   If a missing record only dulls the output, vague prose is correct; a setup pointer there is cargo cult
   that spends tokens on every run for no consumer that needs it.
+- A fact that appears verbatim on more than one surface gets one canonical file and a pointer from every
+  other, named in the text so the next editor knows where to start: change it there first, then
+  propagate. The failure is not the second copy, it is the third edit, which reaches two of the three
+  and leaves the reader holding a current instruction and a stale one at the same time.
 - Read `.better-dev/overrides.md` first and honor any project override before applying a default.
 - Record durable rules and lessons through the memory contract (`.better-dev/bin/bd-mem`), never by
   hand-writing state files. A lesson is one atomic insight with a recall key on the front, not a
