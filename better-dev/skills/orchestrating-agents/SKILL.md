@@ -294,6 +294,10 @@ finished work - the most expensive failure there is.
   Record the trailer's `STATUS` either way; counting is separate from recording. An unmeasured result
   never becomes another stage's brief - that is how one bad output poisons a pipeline. Exactly one
   in-progress at a time.
+- A run the human watches from outside instead of from your todo list - a long unattended loop, a
+  gauntlet run in a fresh session - carries its own surface, and `observatory.md` holds the emission
+  contract that surface renders: the append-only record, the four state words, and the file a parked
+  question waits in. Read it before writing a progress page or a record block.
 - Report on milestones, with the artifact. When the human names a milestone ("when all three merge",
   "when the page renders"), the report at that milestone carries the artifact itself - the URL, the
   screenshot, the merged-PR list - never a status sentence about it, and visual work reports with the
