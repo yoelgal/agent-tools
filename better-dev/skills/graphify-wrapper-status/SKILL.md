@@ -21,20 +21,29 @@ echo "registry   : $reg"
 echo
 
 head=$(git -C "$this" rev-parse HEAD 2>/dev/null)
-printf '%-14s %-28s %-9s %-8s %-8s %s\n' INDEX PATH SEMANTIC GRAPH FRESH BUILT
+printf '%-14s %-28s %-9s %-8s %-8s %-8s %s\n' INDEX PATH SEMANTIC GRAPH FRESH RENDER BUILT
 for name in $(gfx_index_names); do
   idx_path=$(gfx_index_field "$name" path)
   sem=$(gfx_index_field "$name" semantic)
-  g="$(gfx_out_dir "$name")/graph.json"
+  out="$(gfx_out_dir "$name")"
+  g="$out/graph.json"
   if [ -f "$g" ]; then
     read -r nodes built <<<"$(jq -r '"\(.nodes|length) \(.built_at_commit // "?")"' "$g" 2>/dev/null)"
     ts=$(date -r "$g" '+%Y-%m-%d %H:%M' 2>/dev/null)
     if [ -z "$head" ] || [ "$built" = "?" ]; then fresh="?"
     elif [ "$built" = "$head" ]; then fresh="current"
     else fresh="behind"; fi
-    printf '%-14s %-28s %-9s %-8s %-8s %s\n' "$name" "$idx_path" "$sem" "${nodes}n" "$fresh" "$ts"
+    # Judge the OLDEST page present: graph.html regenerates with every update,
+    # so checking it alone would mask a stale atlas (the page NOT on the glob).
+    render="absent"
+    for cand in "$out/graph.html" "$out/${name}-callflow.html" "$out/${name}-atlas.html"; do
+      [ -f "$cand" ] || continue
+      if [ "$g" -nt "$cand" ] || [ "$fresh" = "behind" ]; then render="stale"; break
+      else render="fresh"; fi
+    done
+    printf '%-14s %-28s %-9s %-8s %-8s %-8s %s\n' "$name" "$idx_path" "$sem" "${nodes}n" "$fresh" "$render" "$ts"
   else
-    printf '%-14s %-28s %-9s %-8s %-8s %s\n' "$name" "$idx_path" "$sem" "-" "-" "(not built here)"
+    printf '%-14s %-28s %-9s %-8s %-8s %-8s %s\n' "$name" "$idx_path" "$sem" "-" "-" "-" "(not built here)"
   fi
 done
 ```
@@ -47,3 +56,11 @@ done
   SessionStart hook auto-runs an AST `graphify update` on drifted, affected
   domains; or run `/graphify-wrapper-sync <name>` now. The semantic layer isn't
   auto-refreshed - use `--semantic` when you need fresh community naming.
+- `RENDER` → whether the rendered pages (`graph.html`, `<name>-callflow.html`,
+  `<name>-atlas.html`) beside the graph are current: `absent` (none rendered
+  yet - run `/graphify-wrapper-sync <name>` or a one-time `graphify export`),
+  `stale` (ANY present page is older than graph.json, or the graph itself sits
+  `behind` HEAD - the atlas is the usual culprit, since only `*-callflow.html`
+  rides graphify's auto-regen glob), or `fresh`. Computed here at read time
+  from page mtimes and graph.json's `built_at_commit`, never stored - nothing
+  here accumulates.
