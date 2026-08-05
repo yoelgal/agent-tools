@@ -146,7 +146,12 @@ the frontier read, repo-side: the target's stated goals and roadmap (PLAN or roa
 files, open issues or discussion threads where present), recorded gaps and TODOs, and
 known weaknesses. When an input is absent, name the absence in every dossier brief
 ("no roadmap found") and proceed on what exists - the frontier read reports the repo's
-stated direction, it never invents one.
+stated direction, it never invents one. The frontier read also sweeps the archive's
+recent prior batches for orphans: diff each related prior entry's FEEDS list against
+the rulings record (DECISIONS or equivalent) - a finding a prior capture named that no
+ruling ever adopted, rejected, or covered is this batch's input, and the dossier briefs
+name each one with its owner. A capture without an execution trace is not a done
+finding, and orphans discovered this way have carried a batch's best landings.
 
 A single-source harvest with a handful of findings takes inline
 synthesis at the top tier; the fan-out below is for multi-source dumps. Fan out one
