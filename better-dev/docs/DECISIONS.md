@@ -768,3 +768,105 @@ Covered, not re-filed (so the next harvest does not re-litigate):
 - "A capability that can act autonomously is not thereby authorized to" - independent corroboration of `/guardrails-install`'s blast-radius framing, landed as one line there.
 - Issues #6 (Braintrust's eval-gated CI: the trace becomes a test fixture) and #7 (critic-harness slot knob; different-model-same-diff rotation axis via the D20 tier-map) - nudged by comment, deliberately not by skill change.
 - Glamorous Toolkit's verbatim ingest, the Sourcegraph/Amp split, Riftmap - promoted hops this batch did not fetch; recorded as next-batch inputs in the batch manifest rather than dropped.
+
+## D28 - observatory-viz harvest (2026-08-05; three calls operator-ratified)
+
+Sources: 4 dossiers, a completeness critic, and the master plan under
+`raw/synthesis/2026-08-05-observatory-viz/`, built against a live verification pass (graph built
+for this repo: 1929 nodes / 3184 edges / 162 communities at 9b27ee6; callflow and wiki exports
+tested working, svg export reproduced broken). Operator ratified three calls: (1) this work-item
+lands both the free path (text edits plus a setup fix) and the bd-atlas build in one pass, nothing
+else grows the scope; (2) a CDN stays acceptable for graphify's own rendered pages (callflow,
+graph.html) while the word "self-contained" is reserved for bd-atlas, which must open with the
+network disabled; (3) the flows panel and the answer overlay are bd-atlas features now, with a
+real path/affected export upstreamed to graphify itself recorded as an opportunity rather than
+built here. Rulings, in the order they bind.
+
+1. **Render ownership splits across three skills, no new skill.** Emission belongs to
+`/graphify-wrapper-sync`: after `graphify update` the report's first line is the human-openable
+page path, `graph.json` second; refusal (a semantic-only build, a zero-node or single-community
+callflow graph) is reported, never fatal. Freshness is one column on `/graphify-wrapper-status`,
+computed at read time from the page's mtime against `graph.json`'s `built_at_commit` - stored
+nowhere. The look-first practice belongs to `/codebase-map`: open the domain's rendered page
+before grepping, worded engine-agnostically. The query pointer is one line on
+`/graphify-wrapper-query` naming the page beside the graph.
+2. **Never pass `--output` on the callflow export.** The default filename lands on graphify's
+`*-callflow.html` auto-regeneration glob, so every later sync refreshes the page for free; a
+custom name is correct once and then silently stale forever. Stated in the sync skill with the
+failure mode, not just the rule.
+3. **Two surfaces, two names, one firewall sentence - and the deletion test decides which.** The
+run observatory (`observatory.md`) renders a record that accumulates within one run. The codebase
+atlas is a pure function of `graph.json` plus commit and holds no history: delete it and rebuild
+it losslessly, or it is not an atlas. "Observatory" is not shared vocabulary; the firewall
+sentence lands once, in `observatory.md`, and the atlas text cross-references it by name. Never
+commit a rendered page, never store a render history; the freshness column computes, it never
+accumulates.
+4. **Flows are computed, never invented.** A flow is a named pair of endpoints a human or skill
+declares in `flows.json` (`[{name, from, to}]`, config beside `graph.json`, not history); the
+steps are whatever the embedded graph traversal yields at render time, recomputed per render so
+they cannot go stale independently of the graph. bd-atlas checks every rendered flow against the
+graph's own edges before a byte is written - endpoints, every step's node id, and every consecutive
+pair as a real edge - so a fabricated path of real ids is refused by name, not just an unknown id.
+A model never authors a flow's steps.
+5. **Pedagogy is a sort order, not a narration.** bd-atlas orders what it shows (entry point
+first, then fan-in rank within layer/community) and never generates per-step prose - no LLM call
+in any render path, so the page can never drift from the graph.
+6. **The wiki export is the agent-readable offline surface.** One line in
+`/graphify-wrapper-query` names `graphify export wiki --graph "$graph"` (markdown articles,
+`index.md` as entry point, zero JS) as the answer to "give an agent the whole area without the
+graph tooling."
+7. **Setup fix.** `/graphify-wrapper-setup` installs with matplotlib so `export svg` works -
+reproduced broken (ImportError) on the harvesting machine. One line.
+8. **codebase-map stays engine-agnostic.** No wrapper function names hardwired in; the
+fallback-to-grep exit is tightened by condition (no structural tool installed and sourcing one
+declined), not by naming a tool.
+9. **bd-atlas is the build row.** One stdlib-only Python script (`better-dev/scripts/bd-atlas`)
+rendering `<domain>-atlas.html` beside `graph.json`: one file, no server, no external fetch, opens
+with the network disabled; data embedded in a JSON script tag and mirrored to `window.ATLAS_DATA`
+so agents and the console both read it. The renderer computes its own layered layout (no vendored
+JS, no CDN); drill-down goes community/layer cards to member nodes to a node card naming the next
+`/graphify-wrapper-query --explain` command - a front door to the library's verbs, not a rival
+surface. `--highlight "<a>[,<b>]"` re-emits the page with a precomputed highlight set, and the page
+also accepts `#highlight=<id-list>` at open time. Above roughly 3000 nodes the page embeds the
+community-aggregated graph plus per-community drill-down instead of every raw node in one SVG.
+10. **Pipeline-hygiene folds are surgical, not a rewrite (R9).** Two land here, both one edit each:
+`/graphify-wrapper-sync`'s torn-graph repair moves the unparsable `graph.json` into a timestamped
+`.trash-<epoch>/` instead of `rm -f`-ing it, because an `rm` on a just-created path trips
+destructive-action gates on hardened hosts and left the repair unable to run where it was needed
+most; and `orchestrating-agents/briefs-and-reviews.md` gains one sentence requiring an output
+naming contract to be stated together with its failure mode ("files not matching batch-N.json are
+silently dropped by the merge" binds a worker where "filenames must match" does not). The larger
+emission-contract upgrades that came with them in the dossier - arithmetic self-checks and ordered
+deterministic repair for `orchestrating-agents` - are recorded as an opportunity rather than ridden
+along: they change how every dispatch reports, so they earn their own grill and their own
+verification pass, not a slot in a visualization harvest.
+
+Rejected-with-reasons (one row each):
+- Attendance-style run knobs (per-run dials over what the observatory records, filed with ruling 3's
+  naming call) - what the run record holds is a ruling, not a per-run preference, and a dial over it
+  is the first step back toward a series compared across runs, which D27 already rejected.
+- Log overlay on the atlas - would make the atlas a run-fact surface and start the metrics-store
+  slide; a fenced permission is still a permission, and run facts stay on the run observatory's
+  record.
+- Served dashboards (Vite plus a token gate) - contradicts no-server discipline; the artifact
+  could no longer be shared as a file.
+- Vendoring a multi-phase LLM pipeline or a JS graph library - `/codebase-map`'s "mature ecosystem
+  territory" line stands; graphify already answers the schema; a vendored library is a
+  NOTICE-plus-maintenance bill the stdlib renderer avoids.
+- C4 as mandated notation - the atlas borrows the levels idea as drill-down without adopting the
+  notation; `/design-brief` owns visual language.
+- LLM-regenerates-the-page as the primary rendering path - that is what hallucinates components;
+  the atlas is deterministic. The source thread's value was the artifact shape and the
+  dual-delivery doctrine, both adopted; the regeneration method itself was not.
+- Committing rendered pages or the graph - stale with a git blessing.
+
+Covered, not re-filed (so the next harvest does not re-litigate): a persistent code-health
+observatory tracking complexity/coverage/duplication trends over time (already rejected, D27);
+shared "observatory" naming across the two surfaces (ruling 3).
+
+Recorded as opportunities, priced but unbuilt: a real path/affected visual export upstreamed to
+graphify itself (days, external review cycle; every graphify user would inherit it, and it could
+retire bd-atlas's overlay duty); an emission-contract grill for `orchestrating-agents` (arithmetic
+self-checks, ordered deterministic repair); an install-surface security audit of `install.sh`; a
+bd-atlas tour mode surfacing ruling 5's sort order as a "read in this order" strip; watching
+graphify 0.9.33's hosted-platform early access for a future serve story.

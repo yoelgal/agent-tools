@@ -98,6 +98,14 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
     prompt (github.com/mshumer/Claude-of-Duty), plus "How I Prompt Fable" (shumer.dev)
     (method reimplemented in the gauntlet skill: goal-not-steps, a concrete inspectable
     bar, builder/critic separation with fresh critics, no fixed final round; our own words)
+  Understand-Anything - Egonex-AI (MIT, (c) Yuxiang Lin / Infinite Universe Inc, originally
+    Lum1104; pipeline hygiene and dashboard patterns studied for the 2026-08-05
+    observatory-viz harvest, ideas adapted - no prose copied)
+  graphify - Graphify-Labs (the wrapped CLI tool itself, distinct from the orrgal1
+    graphify-wrapper credited above as verbatim-ported; courtesy-credited for the
+    export surfaces - callflow-html, wiki, svg - that bd-atlas and the wrapper surface)
+  Dual-delivery artifact shape + flow-highlighting pattern - @franpradas (X thread,
+    ideas only; no shipped text)
 
 ── NOT copied - inspiration only, NOT redistributable ──
   Andrej Karpathy - LOOPS.md v060726 ("personal use permitted"). Concepts reimplemented

@@ -25,11 +25,12 @@ nothing more. `UV_INDEX` and `UV_EXTRA_INDEX_URL` add indexes uv searches first
 and they still decide whose build backend runs here (measured, uv 0.11.7).
 
 ```bash
-floor=0.9.18; idx=(--default-index https://pypi.org/simple)
+# --with matplotlib: svg export is the only renderer-free visual and ImportErrors without it.
+floor=0.9.18; idx=(--default-index https://pypi.org/simple); withs=(--with matplotlib)
 gfxver() { graphify --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1; }
 gfxlow() { [ -z "$1" ] || [ "$(printf '%s\n%s\n' "$floor" "$1" | sort -V | head -1)" != "$floor" ]; }
 if command -v graphify >/dev/null; then echo "graphifyy: already present"
-else uv tool install "graphifyy>=$floor" "${idx[@]}" && echo "graphifyy: INSTALLED"; fi
+else uv tool install "graphifyy>=$floor" "${withs[@]}" "${idx[@]}" && echo "graphifyy: INSTALLED"; fi
 have=$(gfxver); echo "graphify ${have:-unknown}"
 if ! command -v graphify >/dev/null; then echo "graphifyy: NOT ON PATH"
 elif gfxlow "$have"; then
@@ -39,10 +40,13 @@ elif gfxlow "$have"; then
 fi
 ```
 
-`uv tool upgrade` exits 0 on a no-op, so the announce is the observed version
-change, never the exit code. Two stops, and both skip steps 2-3. `BELOW FLOOR`
-means the upgrade did not clear it (an exact `==` pin does that): hand the
-operator `uv tool install 'graphifyy@latest'`. `NOT ON PATH` means the version was
+`uv tool upgrade` has no `--with` flag; it re-reads the `--with matplotlib`
+recorded at install time from the tool's own receipt, so it stays consistent
+without repeating it. `uv tool upgrade` exits 0 on a no-op, so the announce is
+the observed version change, never the exit code. Two stops, and both skip
+steps 2-3. `BELOW FLOOR` means the upgrade did not clear it (an exact `==` pin
+does that): hand the operator `uv tool install 'graphifyy@latest' --with
+matplotlib`. `NOT ON PATH` means the version was
 never read, because the binary uv installed is not resolvable here - a re-install
 cannot fix that, so hand `uv tool update-shell` instead (uv warns about this on a
 fresh machine). No `uv` at all: stop and say `brew install uv` - never a global

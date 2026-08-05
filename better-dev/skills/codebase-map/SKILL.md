@@ -44,6 +44,13 @@ Ask it the concrete question: every caller of `X` (who reaches in), what's affec
 reverse direction - that's the blast radius), the shortest path between two symbols, the columns of
 table `Z`. Carry the answer into whatever you're doing with `file:line` receipts.
 
+For shape questions - "how is this area organized", "what talks to what", "where does the
+architecture concentrate" - open the domain's rendered page before grepping: a built code-graph
+typically leaves a browsable page beside its graph file (better-dev's wrapper is one instance of
+this, surfacing a graph page and an architecture/call-flow page; `/graphify-wrapper-status` says
+whether it's fresh). A human asking "explain this codebase" gets pointed at the page, not at a wall
+of query output.
+
 A structural map reflects its last build, not the live working tree, so treat its answer as a lead to
 confirm at the source, not gospel - and if a symbol looks moved or renamed, refresh the index before
 you trust it. The receipts are what keep a lagging graph honest. Run `/graphify-wrapper-status` to see
@@ -74,7 +81,10 @@ scratch (`/worktree-branching`).
 
 ## 3. Fall back to disciplined search
 
-No tool and no reason to source one: orient by hand, deliberately, not by skimming.
+No structural tool is installed, and sourcing one was declined at section 2's gate: orient by hand,
+deliberately, not by skimming. That is the entry condition, not "opening the map felt slower than
+grepping" - a missing map never blocks the work, but a present one that felt slow to open still
+gets opened.
 
 - **Locate**, don't guess - find where a thing is defined and read what it actually does.
 - **Grep every caller** before you decide a symbol's behavior or where a fix lands - the shared seam
