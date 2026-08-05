@@ -37,7 +37,7 @@ stated anywhere nearby. The standard's fix is one voice: a calm declarative that
 consequence and the move to make instead, never a shout and never a hedge.
 
 **Can I just restate a value from another file so the skill reads standalone?** Only if the lookup is
-genuinely expensive or unwritten elsewhere. A recorded trap (`docs/TRAPS.md` #143) shows why not by
+genuinely expensive or unwritten elsewhere. A recorded trap (`docs/TRAPS.md` #147) shows why not by
 default: a skill body once copied in a verify command that a manifest already named, passed the
 "does this change what the reader does" deletion test, and then went stale six weeks later when the
 project switched test runners. The standard treats that as a second, separate filter - the cache rule -
