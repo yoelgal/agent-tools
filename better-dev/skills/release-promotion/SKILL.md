@@ -131,7 +131,20 @@ cutting it, confirm every version-bearing surface the repo ships (a package or p
 a surface exists, and each tag cut over a stale manifest widens the lag every consumer of that
 manifest reads. A lagging surface gets bumped as a commit that rides the promote range through the
 normal gates; found after the tag, it is fixed forward on integration, since a published tag never
-moves. If no scheme is discoverable, that's a `NEEDS_INPUT`: ask for the version rather than
+moves.
+
+**The release ledger is a version-bearing surface too.** For a library whose consumers update by
+pulling, `docs/RELEASES.md` is the only channel that tells an already-wired machine to do
+anything - re-run the installer, re-onboard, or answer a one-time offer. Absence is not neutral
+there: a version with no line is pull-only by contract, so a release that added, removed, or
+renamed a skill dir, changed a repo surface, or added something opt-in and ships without its line
+tells every wired machine that nothing is owed, and no later edit reaches the operators who already
+updated past it. Before the tag, confirm two things: the line exists where one is needed, and its
+version is the version being tagged. A line naming a version *ahead* of the manifest is the same
+defect from the other side - `/update` collects its flags and then stamps the manifest's lower
+version, so the nudge re-fires every session and a declined offer is re-asked forever.
+
+If no scheme is discoverable, that's a `NEEDS_INPUT`: ask for the version rather than
 guessing. Guard the tag before creating it: an existing `$version` tag means this promote already
 ran, or the version was never bumped - either way, stop and reconcile rather than moving or
 overwriting a published tag:
@@ -195,8 +208,10 @@ answers, three paths:
   in the release receipt; the release is done at the tag. Where the library ships by linked install
   (better-dev itself), the tag is not the end - propagation is the deploy: the primary checkout pulls,
   fresh sessions pick up the new text, and a release that added or removed skills names the
-  `install.sh` re-run each consuming machine still owes. Record a propagation line in the release
-  receipt.
+  `install.sh` re-run each consuming machine still owes. Where the library also ships through a
+  host's plugin channel, that channel propagates on its own schedule and not at the tag - record
+  which channels the receipt covers, since a right tag over right content still reaches nobody whose
+  channel has not moved.
 - Deploy keys recorded - run the deploy-verify pass in `post-deploy.md`: wait out the deploy,
   drive the deployed surface, watch it hold. Its verdict lands in the receipt before the release
   settles.
