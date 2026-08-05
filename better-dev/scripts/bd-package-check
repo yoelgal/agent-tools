@@ -469,6 +469,50 @@ echo "== manifest version =="
 v="$(jq -r '.version // empty' .claude-plugin/plugin.json 2>/dev/null)"
 [ -n "$v" ] && ok "plugin.json version present ($v)" || bad "plugin.json has no non-empty version"
 
+# A RELEASES.md line naming a version the manifest has not reached is the one version drift that
+# breaks /update: step 3 collects that line's flags (they are newer than the repo's wired-version
+# stamp), step 5 then stamps plugin.json's LOWER version, so the same reonboard nudge and the same
+# offer question fire again on every session, forever - contradicting RELEASES.md's own promise that
+# "the wired-version stamp closes it". The reverse gap is legitimate and stays green: a pull-only
+# release carries no line at all, so the newest flagged version sits arbitrarily far behind the
+# manifest by design. Hence a bound, not an equality. Numeric field-by-field compare on the dots -
+# no sort -V (BSD and GNU userlands differ) and no string compare (0.9.10 sorts before 0.9.2).
+ahead="$(awk -v m="$v" '
+  $1 !~ /^[0-9]+\.[0-9]+\.[0-9]+$/ { next }
+  { split($1, r, "."); split(m, w, ".")
+    for (i = 1; i <= 3; i++) {
+      if (r[i] + 0 > w[i] + 0) { print $1; break }
+      if (r[i] + 0 < w[i] + 0) break } }' docs/RELEASES.md 2>/dev/null)"
+[ -z "$ahead" ] \
+  && ok "no RELEASES.md line runs ahead of the manifest version" \
+  || bad "RELEASES.md names version(s) ahead of plugin.json $v:$(printf ' %s' $ahead) - /update collects their flags then stamps $v, so the nudge and any offer re-fire every session" # prove-new: regression-guard the ledger is level with or behind the manifest today, as it is after any release that bumped both; this catches the later release that ships the line and forgets the bump
+
+echo "== docs/skills mapping =="
+# R7h: the per-skill docs layer mirrors the shipped skill roster one-for-one, both directions - a
+# skill dir with no page is an unreviewed page, a page with no skill dir is stale after a removal or
+# rename (the #748 drift class: a sidecar left naming a skill that moved). RED on the current tree by
+# construction (docs/skills/ does not exist yet, the pages land later in this same batch); that is the
+# correct starting state for a check proving a mapping that has not been built, not a reason to weaken
+# it. README.md is the standard/index page, not a skill page, and is exempt from the reverse mapping.
+missing_pages=""
+for d in skills/*/; do
+  [ -d "$d" ] || continue
+  name="$(basename "$d")"
+  [ -f "docs/skills/$name.md" ] || missing_pages="$missing_pages $name"
+done
+[ -z "$missing_pages" ] && ok "every skills/<name>/ has a docs/skills/<name>.md page" \
+  || bad "docs/skills page missing for:$missing_pages"
+
+orphan_pages=""
+for f in docs/skills/*.md; do
+  [ -f "$f" ] || continue
+  name="$(basename "$f" .md)"
+  [ "$name" = "README" ] && continue
+  [ -d "skills/$name" ] || orphan_pages="$orphan_pages $name"
+done
+[ -z "$orphan_pages" ] && ok "every docs/skills page maps back to a shipped skills/<name>/ dir" \
+  || bad "docs/skills page with no shipped skill dir:$orphan_pages"
+
 echo "== entry-skill utterances =="
 # Each entry skill's description should carry at least one phrase a real user would type for that need,
 # so natural-language activation routes without a skill name. Any-of match, case-insensitive.
