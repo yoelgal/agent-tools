@@ -233,10 +233,12 @@ so read the global config first and propose nothing when both rules are already 
 steady state on any machine that took the install offer. Only a machine that predates that offer, or
 declined it, reaches this at all.
 
-Probe that config for the two rule names; do not dump it. A command that reads the permission file out
-in full is the shape a host classifier refuses - observed 2026-08-05, two runs lost a turn each to a
-blocked `python3 -c` that printed the whole allow list, when `grep -c bd-mem` would have answered the
-only question being asked. A refused probe means *unknown*, not *absent* - so offer the grant anyway,
+Probe that config for the two rule names, and expect the probe itself to be refused. A host classifier
+can treat its own permission file as off-limits to every read, whatever the shape: observed 2026-08-05,
+a `python3 -c` that printed the allow list was blocked, and a later run's narrow
+`grep -c 'bd-mem' ~/.claude/settings.json` was blocked too. Spend one cheap attempt, never a second
+phrasing of the same question - the refusal is about the file, not the command. A refused probe means
+*unknown*, not *absent* - so offer the grant anyway,
 saying the check could not run and it may already be there. The two failures are not the same size: a
 redundant paste block costs one turn once, while a grant never offered leaves the host prompting on
 its own memory spine for every `bd-mem` call in every later skill, and nothing downstream catches it.
@@ -487,9 +489,20 @@ come back with `/onboard <phase>`.
 Scale the recap to what actually varies. Where every deferred item traces to one absent thing - a repo
 with no stack yet defers guardrails, the verify command, the graph and the enforcement hook for the
 same reason - say that reason once and name the one step that closes it, instead of four entries
-repeating it. And this recap is read by someone meeting better-dev for the first time, over a folder
-they created minutes ago: a term this skill introduces (a *pending decision*, a *red-capable signal*)
-carries a half-line of plain gloss at first use, or the close reads as private vocabulary. Anything still waiting on the operator's own hands **leads** the
+repeating it.
+
+Then read the draft back as the operator, who has run one command and never seen this tooling's
+source, and apply two tests before sending:
+
+- **Every word they could not have met before is glossed or cut.** Not a list of terms - the terms
+  differ every run, and they arrive from the phases this recap summarizes as much as from here
+  (`loop-readiness`, `blast-radius`, `graphify registry`, a *parked decision*). Half a line of plain
+  English at first use, or leave the name in the record where the next skill reads it and describe the
+  thing here.
+- **The one action they owe is in the first two lines.** Observed 2026-08-05, three runs closed with
+  a wall an operator had to read three times to find the single thing asked of them; one answered
+  "could've just asked where the block goes". Everything else in the recap is reference they can read
+  or skip. Anything still waiting on the operator's own hands **leads** the
 recap - "ready", "armed", or "fully wired" is claimable only when that list is empty; a pending
 operator action is the headline, not a footnote under a victory banner. Each parked decision is also
 recorded where downstream skills trip over it, because a recap line scrolls away:
