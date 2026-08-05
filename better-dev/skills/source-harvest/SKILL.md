@@ -208,7 +208,11 @@ A harvest landing is a work-item, not an in-place edit: it gets its own worktree
 integration branch (`/worktree-branching`), the commits land there, and it comes home
 through `/pr-and-verify`. Never commit directly to the integration branch. Open the
 worktree at the START of the harvest, before the first archive write - not when
-execution begins. Ingest, synthesis papers, and library edits all belong to the same
+execution begins. On a worktree-isolated host every archive write lands in the
+worktree's own copy of the (gitignored) archive, so the close-out gains one mandatory
+move: sync the batch's source and synthesis folders into the canonical checkout's
+archive and append the manifest there - a batch left only in the worktree dies with
+the worktree. Ingest, synthesis papers, and library edits all belong to the same
 work-item; opening the worktree late means any tracked archive (some repos gitignore
 `raw/`, others track it - check, don't assume) accumulates on the integration branch's
 working tree while the "real" work waits for a branch. The repo's
