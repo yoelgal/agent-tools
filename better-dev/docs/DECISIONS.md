@@ -426,10 +426,12 @@ prototype branch-parking option at seal, third-party questionnaire unblock, fenc
 lookup (plan-grill); one-word-one-unit chain rule (writing-skills). Watch condition (standing): if a
 third seam shows the missing handoff-contract bug - candidates: loop -> pr-and-verify, worktree
 handoff pickup - extract the audit/hydrate/stop stage-boundary pattern into a shared doctrine doc.
+- CLOSED by D27 (2026-08-05): the third seam was `/gauntlet`'s handoff; the pattern landed as three
+  checkable lines in writing-skills, and the doctrine doc was declined (operator-ratified).
 
 Rejected-with-reasons (one row each):
 - Chart-time research subagents writing remote branches (wayfinder v1.2) - an unfenced background write path; shipped a filed side effect (their #576, unwanted draft PRs) within days; our dispatch stays read-only for fact-finding and writes go through the loop's protect-set.
-- batch-grill-me frontier-rounds interview - in-progress draft upstream; one-question-at-a-time with unblock-first ordering is the deliberate interactive discipline; revisit if it graduates and the round-batching survives their own use.
+- batch-grill-me frontier-rounds interview - in-progress draft upstream; one-question-at-a-time with unblock-first ordering is the deliberate interactive discipline; revisit if it graduates and the round-batching survives their own use. Re-grounded by D27 ruling 12 (2026-08-05): the draft shipped upstream, and the rejection now stands on the interactive discipline itself plus the observed form-answering failure of batched rounds.
 - Per-host metadata sidecars (agents/openai.yaml beside every SKILL.md) - no second harness reads better-dev skills today; the agentskills.io format is the agnostic layer; revisit when a real Codex consumer exists (their "keep the two in sync" rule is the shape to copy then).
 - One-file-per-ticket local tracker - better-dev has no local ticket artifact; the ledger is the store; nothing to change.
 - Self-hosted single-plugin marketplace (.claude-plugin/marketplace.json) - REVERSED by D24 (2026-07-30): the agent-tools monorepo supplies the second consumer the rejection was predicated on; the marketplace manifest now ships at the monorepo root.
@@ -739,9 +741,10 @@ it); `/guardrails-install` gains the corroborating blast-radius line (a capabili
 autonomously is not thereby AUTHORIZED to); `/tool-sourcing` gains the SEO-mill caution (templated
 AI-generated comparison domains need a provenance sniff before a hit counts as found); `/review`'s
 drift check reads the groundwork record's do-not-modify list via `bd-mem ledger read` rather than a
-second recorded key; `--affected` filtered to test paths lands in three call sites and
-`/codebase-map`'s freshness hedge becomes the named `/graphify-wrapper-status` command with three
-dispositions; and gauntlet's bar rows carry the comp-plus-deltas form, the no-comp written behavior
+second recorded key; `--affected` filtered to test paths lands at its owning verb
+(`/graphify-wrapper-query`) and in `/review`'s ripple step - the loop's triage cites the verb and
+reads the filter from its doc; `/codebase-map`'s freshness hedge becomes the named
+`/graphify-wrapper-status` command with three dispositions; and gauntlet's bar rows carry the comp-plus-deltas form, the no-comp written behavior
 list authored by an agent that will not implement that unit, `none, deliberate` for a declined axis,
 and the carve rule that every unit names at least one row.
 

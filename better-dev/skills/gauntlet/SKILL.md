@@ -115,7 +115,7 @@ The run's account of itself is the observatory form `/orchestrating-agents` carr
 record file the page renders, one state word per unit, a fork the house rules do not settle parked as
 a question instead of guessed. Copy its two-sentence version into the prompt rather than redrafting
 it, and keep the fence around the critic - it receives the artifact and its bar row, never the record
-or the page, because a critic that can read the run's own account of itself grades the account. The
+or the page (the sidecar carries the fence's reasoning). The
 run's last act, once the human stops it, is the return report: two paragraphs saying what they now
 have and what it cannot do yet, then one line per unit naming the bar row it was held against and the
 round its last gap closed - about the thing, not the activity.
@@ -189,8 +189,8 @@ the run asking; stopping is the user's move, per the stop-condition slot.
 
 A dead run resumes in a fresh session from the saved prompt plus the record: paste the prompt with
 one line added, read the record and continue. Where graphify is wired, or one AST-only sync on the
-artifact is cheap, have the run carry `graphify-wrapper-query --affected` output in each round block,
-so the round's blast radius is structural rather than recalled. The first work-item on the artifact
+artifact is cheap, have the run carry `graphify-wrapper-query --affected` output in each round block
+(the observatory sidecar carries why). The first work-item on the artifact
 after the run is a review pass over what landed, not a feature - the run stops holding thousands of
 lines of unreviewed machine-written code - and the bar rows seed that item's done-criteria, each row
 becoming a criterion with a runnable check or an explicitly dropped line.

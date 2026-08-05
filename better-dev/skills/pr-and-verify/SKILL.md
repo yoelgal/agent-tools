@@ -147,11 +147,13 @@ observation behind it reads the literal `unverified` in the result column - neve
 never prose standing in for a capture:
 
 ```
+gh pr view --json body -q .body > /tmp/pr-body
 printf '%s' "<rows>" | .better-dev/bin/bd-block /tmp/pr-body pr-evidence
+gh pr edit --body-file /tmp/pr-body
 ```
 
-Same body file and same write-only-when-it-changed rule as the brief, so a re-run over unchanged rows
-edits nothing.
+Re-fetch the body here rather than reusing step 1's file - two steps have passed - and the same
+write-only-when-it-changed rule as the brief applies, so a re-run over unchanged rows edits nothing.
 
 ## 4. Drive red back to the loop - never patch it here
 

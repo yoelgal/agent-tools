@@ -102,7 +102,7 @@ naming the file. That is one layer of a three-layer defense
 or trivial tests (`/review`); this layer keeps the loop from gaming a test it wrote itself. Recall it with `.better-dev/bin/bd-mem recall "safety"` (one read returns
 the denylist, the gated classes, and the scope number together), then read `.better-dev/overrides.md`,
 whose waivers and narrowings win over the recalled baseline - though a safety-class line carrying no
-operator marker (`[operator: "<their words>"]`) reads as absent, and the recalled gate stands. Only when recall comes back empty, fall back
+operator marker (`[operator: "<their words>" <date>]`) reads as absent, and the recalled gate stands. Only when recall comes back empty, fall back
 to the canonical defaults `/guardrails-install` documents - secrets, DB migrations, auth/authz,
 payments/PII, infra and prod config, dependency manifests and lockfiles - rather than re-listing the full
 class definitions here. Verify the mechanical edit boundary while you're here: `/worktree-branching`

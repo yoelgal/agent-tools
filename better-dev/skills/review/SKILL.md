@@ -61,7 +61,9 @@ Ask that structurally rather than grepping for the symbol name -
 `/graphify-wrapper-query <name> --affected "<changed symbol>"` is reverse traversal, so it returns
 callers the diff never touched and a name-grep would miss on an aliased import or a re-export. Run it
 for each exported or cross-module symbol the diff changes or deletes; unreviewed ripple is where the
-regressions this gate exists to catch actually live. The index builds on first use, and a graph reflects
+regressions this gate exists to catch actually live. The same result filtered to test paths answers
+which tests the change reaches - a changed symbol whose filtered set is empty has no test in front of
+it, which is itself a finding. The index builds on first use, and a graph reflects
 its last build, so confirm each hit at `file:line` before it becomes a finding. Where the work-item fans
 out from a `/groundwork` epic, that record already names the frozen shared surface
 (`.better-dev/bin/bd-mem ledger read <epic> groundwork.md`): a new `--affected` edge into a do-not-modify
