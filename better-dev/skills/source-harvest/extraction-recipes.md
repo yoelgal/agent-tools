@@ -172,5 +172,8 @@ IMMEDIATELY: clipboard temp paths under /var/folders vanish.
 ## Manifest
 
 Per batch, append to the archive's manifest: item, type, status
-(extracted/dupe/failed+why), files written. The manifest is what makes "did we ingest
-X?" answerable without re-crawling.
+(extracted/dupe/failed+why), files written, and the tier band plus model of the agent
+that wrote each extraction ("by extraction agent (<model>, cheap band)") - the manifest
+line is the harvest's dispatch receipt, and one without a band means the tier decision
+never reached the dispatch call. The manifest is what makes "did we ingest X?"
+answerable without re-crawling.
