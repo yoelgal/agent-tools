@@ -55,8 +55,11 @@ One folder per item in the archive: `<archive>/<post-date>-<type>-<slug>/` with
 `source.md` (frontmatter: title, type, author, url, date, captured, extraction method,
 tags + a summary that says what it FEEDS in the library), plus `article.md` /
 `transcript.md` / `media/` as the type demands. Concrete extraction recipes (X
-syndication API, the full-page browser read, yt-dlp + whisper for reels, image
-transcription) are in `extraction-recipes.md` next to this file.
+syndication API, the headless full-page read that impersonates the operator via their
+exported cookie jar - the default for any authenticated or social page, so captures run
+in the background without touching their visible browser - yt-dlp + whisper for reels,
+image transcription) are in `extraction-recipes.md` next to this file, with the runner
+`headless-read.py` beside it.
 
 Social posts are pages, not just text. After capturing the canonical post, read the
 full rendered page too: it carries what the post body alone cuts - the author's
