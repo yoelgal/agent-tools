@@ -127,7 +127,8 @@ done
 ## Report
 
 Two lines per index, page first - the page is what a human opens, the JSON is
-what an agent reads:
+what an agent reads - with the action taken, node+edge counts, and the
+cross-subtree edge count on the second line:
 
     [api] page: ~/.claude/graphify/acme__mono/worktrees/9f2c1a7b40de/api/graph.html (+ api-callflow.html)
     [api] refresh, AST - 812 nodes / 3104 edges - ~/.claude/graphify/acme__mono/worktrees/9f2c1a7b40de/api/graph.json - cross-subtree edges: 1

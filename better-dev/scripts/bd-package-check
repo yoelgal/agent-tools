@@ -319,9 +319,15 @@ unparseable=""
 for s in scripts/* hooks/* hosts/* install.sh; do
   [ -f "$s" ] || continue
   case "$s" in *.json) continue ;; esac
-  bash -n "$s" 2>/dev/null || unparseable="$unparseable $s"
+  # Parse each script with the language its shebang declares - bd-atlas is python,
+  # and `bash -n` on python rejects the first class statement, not a real defect.
+  if head -1 "$s" | grep -q python; then
+    python3 -m py_compile "$s" 2>/dev/null || unparseable="$unparseable $s"
+  else
+    bash -n "$s" 2>/dev/null || unparseable="$unparseable $s"
+  fi
 done
-[ -z "$unparseable" ] && ok "every shipped script under scripts/, hooks/, hosts/ and install.sh parses under bash -n" || bad "shell syntax error in:$unparseable - a selftest cannot see this, it exits before the parse" # prove-new: regression-guard every shipped script parses at base, as it does after any change that did not break one; this catches the later edit that does, which the selftest runner structurally cannot see
+[ -z "$unparseable" ] && ok "every shipped script under scripts/, hooks/, hosts/ and install.sh parses (bash -n, or py_compile per shebang)" || bad "syntax error in:$unparseable - a selftest cannot see this, it exits before the parse" # prove-new: regression-guard every shipped script parses at base, as it does after any change that did not break one; this catches the later edit that does, which the selftest runner structurally cannot see
 
 echo "== hook scripts (selftest) =="
 for s in hooks/bd-*; do
