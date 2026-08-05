@@ -50,7 +50,8 @@ TOOL (skills + bd-* scripts + hooks) installs GLOBALLY once per machine and ever
    global skills dir, or an existing clone), run `git pull` in the clone and skip to step 4. Otherwise: on
    Claude Code install it as a plugin (add this repo as a marketplace, then install better-dev); on any host,
    `git clone https://github.com/yoelgal/agent-tools ~/agent-tools && ~/agent-tools/better-dev/install.sh`, which links the
-   tool into the host's global skills dir. Update later with /update (a `git pull` in the clone underneath).
+   tool into the host's global skills dir. Update later with /update - a `git pull` in the clone
+   underneath, or the host's own plugin refresh where you installed the plugin.
 3. Offer, once, to allow better-dev's own memory scripts (bd-mem, bd-guard) to run without prompting on
    every repo this machine wires - without it the operator is prompted by better-dev's own memory spine on
    nearly every step, forever. On yes, add the two allow rules to the host's global settings.json

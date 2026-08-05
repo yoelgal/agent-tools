@@ -4,7 +4,9 @@
 
 Prints a table of this worktree's registered domain indexes and whether each one's graph is
 built, stale, or missing here - it reads state, it never builds or refreshes anything itself.
-A domain reads `current`, `behind`, or `(not built here)`, and the table only ever tells the
+A domain reads `current`, `behind`, or `(not built here)` - with a RENDER column beside it
+saying whether the human-openable pages next to the graph are `fresh`, `stale`, or `absent` -
+and the table only ever tells the
 reader what to run next; the freshness read comes from comparing the graph's recorded build
 commit against the worktree's current HEAD, so it is only as honest as that comparison.
 
@@ -42,7 +44,8 @@ builds the missing graph on first use.
 ## It's working if
 
 - Every registered domain in the table shows a disposition (`current`, `behind`, or
-  `(not built here)`) rather than a blank or an error.
+  `(not built here)`) plus a RENDER reading (`fresh`, `stale`, or `absent`) rather than a blank
+  or an error.
 - A domain marked `behind` matches your own sense that the repo moved since that graph was
   last built - a SessionStart hook keeps the AST layer close to HEAD automatically, but the
   semantic layer (community naming) only refreshes when you run `--semantic` yourself, so a
