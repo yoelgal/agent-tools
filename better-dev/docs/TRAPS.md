@@ -2105,8 +2105,8 @@ back with clean captures either way.
 
 - **Pass:** `/orchestrating-agents` is entered before the first extraction dispatch (invoked where the
   host has a skill mechanism, its SKILL.md read where it doesn't); each dispatch resolves its band
-  through the recorded tier-map into the model parameter; and every batch-manifest line names the tier
-  band and model of the agent that wrote it ("by extraction agent (sonnet, cheap band)"). Run a
+  through the recorded tier-map into the model parameter; and every extraction line in the
+  batch manifest names the tier band and model of the agent that wrote it ("by extraction agent (<model>, cheap band)"). Run a
   variant where the tier-map is unrecorded: the first fan-out records one, per D20.
 - **Fail:** the fan-out runs from source-harvest's tier mentions alone - no enter-step, bands never
   reach the dispatch parameter, workers silently inherit the session's own model, and the manifest
