@@ -233,6 +233,12 @@ so read the global config first and propose nothing when both rules are already 
 steady state on any machine that took the install offer. Only a machine that predates that offer, or
 declined it, reaches this at all.
 
+Probe that config for the two rule names; do not dump it. A command that reads the permission file out
+in full is the shape a host classifier refuses - observed 2026-08-05, two runs lost a turn each to a
+blocked `python3 -c` that printed the whole allow list, when `grep -c bd-mem` would have answered the
+only question being asked. And a refused probe means *unknown*, not *absent*: proposing a grant the
+operator already has spends their turn on a no-op, so say the check could not run and move on.
+
 The doctrine holds at either scope: a permission file is a settings-class mutation, so the write stays
 operator-run - observed 2026-07-16, that write class is classifier-blocked for the agent even with
 adjacent operator consent, so proposing to make it yourself buys a denial rather than a shortcut. Emit

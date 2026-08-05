@@ -106,7 +106,10 @@ verbalized distribution - each option with a stated probability that a typical s
 at least one under ~0.10 - or the "distinct ways" arrive as the default design plus paraphrases of
 it (the *verbalized candidates* shape in `/orchestrating-agents`). Of the sketched options, one is
 the minimal build that satisfies the intent and one is the ambitious build that would make it
-excellent - both present, equal weight, your pick stated with its reason. The user's choice sets
+excellent - both present, equal weight, your pick stated with its reason. The distribution is how you
+*reach* options that differ; it is not what you show. What the user reads is the options, the
+trade-off between them, and which you would take - a printed `~0.45` invites them to audit a number
+they have no way to check, and reads as arithmetic standing in for a recommendation. The user's choice sets
 the scope posture the rest of the grill holds; any expansion surfaced later is offered individually
 and opted into, never absorbed - the scope-growth rule in step 3 polices the drift. Skip this when the
 user already arrives with a specific design; grilling *is* the work then. The point is to enter the
@@ -217,7 +220,17 @@ done-criteria will turn on and skip exhaustive branch-walking.
 
 ## 4. Capture the done-contract
 
-Synthesize what the grill settled - no fresh interview, just write down what you already know. The
+Synthesize what the grill settled - no fresh interview, just write down what you already know.
+
+The contract is the one artifact the user has to read and approve, so it is written for them, not for
+the skills downstream. Better-dev's own key names - `human-gate`, `merge-policy`, `pending-decision`,
+`attack pass`, `red-capable signal` - carry the exact meaning a later skill recalls, and none of it to
+someone meeting the words for the first time. Keep the keys in the record where a skill reads them,
+and say the thing in plain words where the user reads it: "you approve before this merges", not
+`merge-policy: human`. Observed 2026-08-05, an operator met four of these terms in a contract for a
+~50-line endpoint and answered "I just wanted 'here's what I'll build, ok?'". Match the contract's
+weight to the change too - a small feature earns a short contract, and the sections that would be
+empty are left out rather than filled with the reason they are empty. The
 contract's spine is its **done-criteria**: each one is a *runnable check* (a command or test) plus
 the **seam** it attaches to, phrased so it is red now and goes green exactly when the criterion is
 met. "Done" is a check going green, never a claim - this is what the loop drives to and refuses to
