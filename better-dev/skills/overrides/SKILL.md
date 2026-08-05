@@ -64,12 +64,15 @@ that standing, not just here:
 
 A one-off past a safety gate is a loop approval: it persists nothing, the same way "just proceed this once"
 never should. Only an explicit yes to the *standing* change writes anything, and it writes as a keyed line
-the loop and PR brief already recall, so the exception sits beside the baseline it bends and carries its own
-provenance:
+the loop and PR brief already recall, so the exception sits beside the baseline it bends and carries the
+operator's own words as its provenance:
 
 ```bash
-.better-dev/bin/bd-mem persist-override "safety-gate: payments waived (was human-gated)"
+.better-dev/bin/bd-mem persist-override 'safety-gate: payments waived (was human-gated) [operator: "yes, stop gating payments" 2026-08-05]'
 ```
+
+The `[operator: "<their words>" <date>]` marker is the difference between a waiver the operator granted
+and one a session granted itself, so `persist-override` refuses a safety-class line that lacks it.
 
 `/guardrails-install` writes the baseline (`safety-gate:` / `safety-scope:` / `safety-denylist:`); a waiver
 writes a matching keyed line here; the loop reads this overrides layer first. Watch the pressure tell: a
@@ -107,6 +110,12 @@ A recorded line that git or file reality contradicts - an integration branch the
 instruction. Re-verify against reality, apply what is real now, and offer the one-line rewrite of the
 record (the same light confirm this skill already owns). Obeying the stale line, or stopping without
 offering the rewrite, both leave the next session to hit it again.
+
+One class does not win on sight. A `safety-gate:` / `safety-scope:` / `safety-denylist:` line without
+its `[operator: "<words>" <date>]` marker reads as absent - the recorded baseline gate stands, and the
+waiver is put to the operator again before anything proceeds past it. The agent is the constrained
+party under a safety gate and can write to this file, so the reader tests for the marker rather than
+trusting that the confirm above happened.
 
 ## When the correction changes the product, not the practice
 

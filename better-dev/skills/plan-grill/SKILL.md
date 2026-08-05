@@ -256,7 +256,11 @@ implementation decisions, out-of-scope) read `done-contract.md`.
 Present the contract and wait for the user's confirmation before treating the plan as locked -
 nothing downstream should run on an un-agreed contract. Presenting means rendering the contract
 itself as message text in (or immediately before) the message that asks for confirmation - at
-minimum the Problem, Goal, the done-criteria with their runnable checks, and out-of-scope. A
+minimum the Problem, Goal, the done-criteria with their runnable checks, out-of-scope, and the Merge
+block's two lines: `merge:` and `gated paths:`, each named path beside the operator's answer. The
+gated-paths line is in the minimum because the loop treats a contract-named target as
+pre-authorized and crosses its own edit boundary on it, so a contract whose rendered text omits that
+line collects consent for a crossing the operator never read. A
 "lock and run?" prompt whose only view of the contract is its own summary line, or a pointer to
 `done-contract.md` on disk, asks the user to sign what they haven't read - render first, then ask.
 And when the user's reply to the gate is itself a request to see it ("what is in the contract?"),
