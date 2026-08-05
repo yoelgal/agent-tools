@@ -42,7 +42,11 @@ Pick the graphify verb from the flags (default: `query`):
   traversal; `--dfs` for depth-first; `--budget` caps output tokens, default
   2000).
 - `--affected` - `graphify affected "<X>" --graph "$graph"` (reverse traversal:
-  what is impacted by X).
+  what is impacted by X). Filtered to the repo's test paths - keep only the
+  hits under test directories - it answers which tests are affected by
+  changing X, the one clause the 2026 market fails to answer without fusing a
+  call graph with coverage data. One query over the existing traversal, not a
+  new index.
 - `--path "A" "B"` - `graphify path "A" "B" --graph "$graph"` (shortest path
   between two nodes).
 - `--explain` - `graphify explain "<X>" --graph "$graph"` (plain-language

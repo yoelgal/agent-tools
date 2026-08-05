@@ -37,10 +37,42 @@ captured versus skipped - never silently drop them.
 
 ## Full-page browser read (X Articles, threads, any authenticated page)
 
-Preferred (verified 2026-07-18): pull the rendered DOM out of Chrome and clean it
-with pandoc. Needs View > Developer > Allow JavaScript from Apple Events turned on
-(one-time, per profile) - if it is off the osascript errors telling you so; use the
-fallback below or ask the operator to flip it.
+Preferred (verified 2026-08-05): a **headless browser impersonating the operator** -
+Playwright chromium loading the operator's own cookie jar, so authenticated pages
+render logged-in, in the background, with no visible browser and no focus theft. The
+runner is `headless-read.py` next to this file:
+
+    python3 <skill-dir>/headless-read.py "<URL>" <out-basename> \
+      --cookies ~/.cache/harvest/cookies.txt --wait 6
+
+Writes `<out>.html` (rendered DOM) and `<out>.md` (pandoc-cleaned). It scrolls to
+pull in lazy-loaded replies/feeds (`--scrolls` tunes how far); a logged-in capture is
+roughly double a logged-out one on an X thread - compare sizes when unsure which you
+got. Confirm the capture names the expected author/title before filing. Content
+images are the `pbs.twimg.com/media/...` URLs in the markdown (`profile_images/` is
+avatar junk), curl each into `media/`. This read also recovers truncated note-tweets:
+the thread page carries the full text the syndication API cuts at ~280 chars.
+
+**The cookie jar is operator-run, once per batch.** Agent reads of the browser's
+cookie store are classifier-blocked (credential access), so hand the operator this
+paste-ready line (pbcopy it) and wait for the jar before the first authenticated read:
+
+    mkdir -p ~/.cache/harvest && yt-dlp --cookies-from-browser chrome \
+      --cookies ~/.cache/harvest/cookies.txt --skip-download --no-warnings \
+      "https://x.com/home"
+
+A "No video could be found" error is fine - the jar still writes (verify with `wc -l`).
+The jar holds live credentials: it stays in `~/.cache`, never in the archive, never in
+a repo. Stale-jar tell: pages render logged-out (small captures, no reply pane) -
+re-run the export. Two mechanics the script already handles, recorded here so a
+rewrite keeps them: yt-dlp exports Chrome cookies with WebKit-epoch microsecond
+expiries (convert > 1e14 values via `/1e6 - 11644473600` or Playwright rejects the
+jar), and session cookies carry `expires: 0` (map to `-1`).
+
+Fallback (no Playwright, or a site that blocks headless): drive the operator's
+visible Chrome via osascript - it steals the screen and focus, so it is the fallback,
+not the default. Needs View > Developer > Allow JavaScript from Apple Events (one-time,
+per profile); if off, osascript errors telling you so.
 
     osascript <<'EOF' > raw-capture.html
     tell application "Google Chrome" to open location "https://x.com/i/article/<ARTICLE_ID>"
@@ -49,13 +81,9 @@ fallback below or ask the operator to flip it.
     EOF
     pandoc -f html -t gfm-raw_html raw-capture.html -o raw-capture.md
 
-No keystrokes, no clipboard, no focus games - and unlike the copy fallback it keeps
-every img src: content images are the `pbs.twimg.com/media/...` URLs in the markdown
-(`profile_images/` is avatar junk), curl each into `media/`. A slow page can still
-hand you the previous tab's DOM, so confirm the capture names the expected
-author/title before filing; on a mismatch re-run with a longer delay. This read also
-recovers truncated note-tweets: the thread page carries the full text the
-syndication API cuts at ~280 chars.
+A slow page can hand you the previous tab's DOM, so apply the same expected-author
+check; on a mismatch re-run with a longer delay. Note this path captures whatever
+rendered at snapshot time - no scrolling, so reply panes are routinely missing.
 
 The top-level thread DOM is one layer, not the conversation: replies clipped at "Show
 more" and subthreads folded behind "Show replies" are absent from it. Give each
@@ -64,8 +92,8 @@ substantive subthread its own permalink page read with this same recipe - the au
 canonical answers routinely live two levels down, under a reply the top page shows
 only folded.
 
-Fallback (setting off, no settings needed): open the page, select-all, copy, read
-the clipboard. Frontmost gotcha (hit 2026-07-07): some terminal apps (cmux) stay
+Last resort (Apple-Events JavaScript off, no settings needed): open the page,
+select-all, copy, read the clipboard. Frontmost gotcha (hit 2026-07-07): some terminal apps (cmux) stay
 frontmost after `activate`, so the keystrokes land in the terminal and you copy your
 own session. Force focus inside System Events right before the keystrokes - `set
 frontmost of process "Google Chrome" to true`, delay 2 - and apply the same

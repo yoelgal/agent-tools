@@ -78,6 +78,8 @@ its miss gets an explicit disposition. Output you cannot read confidently settle
 raw capture - ambiguity never reads toward a pass. Uncertainty tilts the same way, because the cost
 asymmetry runs one direction: a wrong PASS ships a defect to users, a wrong FAIL only buys a second
 look. The observation is the evidence; a criterion with no capture behind it is unproven, not passed.
+Keep each capture quotable in one line - an output line, a row count, a screenshot path - because
+`/pr-and-verify` step 3 carries it into the PR body's evidence region beside the verdict token.
 
 ## Every claim points to a tool result
 

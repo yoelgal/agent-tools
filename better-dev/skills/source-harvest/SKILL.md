@@ -55,8 +55,11 @@ One folder per item in the archive: `<archive>/<post-date>-<type>-<slug>/` with
 `source.md` (frontmatter: title, type, author, url, date, captured, extraction method,
 tags + a summary that says what it FEEDS in the library), plus `article.md` /
 `transcript.md` / `media/` as the type demands. Concrete extraction recipes (X
-syndication API, the full-page browser read, yt-dlp + whisper for reels, image
-transcription) are in `extraction-recipes.md` next to this file.
+syndication API, the headless full-page read that impersonates the operator via their
+exported cookie jar - the default for any authenticated or social page, so captures run
+in the background without touching their visible browser - yt-dlp + whisper for reels,
+image transcription) are in `extraction-recipes.md` next to this file, with the runner
+`headless-read.py` beside it.
 
 Social posts are pages, not just text. After capturing the canonical post, read the
 full rendered page too: it carries what the post body alone cuts - the author's
@@ -205,7 +208,11 @@ A harvest landing is a work-item, not an in-place edit: it gets its own worktree
 integration branch (`/worktree-branching`), the commits land there, and it comes home
 through `/pr-and-verify`. Never commit directly to the integration branch. Open the
 worktree at the START of the harvest, before the first archive write - not when
-execution begins. Ingest, synthesis papers, and library edits all belong to the same
+execution begins. On a worktree-isolated host every archive write lands in the
+worktree's own copy of the (gitignored) archive, so the close-out gains one mandatory
+move: sync the batch's source and synthesis folders into the canonical checkout's
+archive and append the manifest there - a batch left only in the worktree dies with
+the worktree. Ingest, synthesis papers, and library edits all belong to the same
 work-item; opening the worktree late means any tracked archive (some repos gitignore
 `raw/`, others track it - check, don't assume) accumulates on the integration branch's
 working tree while the "real" work waits for a branch. The repo's

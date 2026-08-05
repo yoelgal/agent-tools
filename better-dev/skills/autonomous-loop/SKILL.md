@@ -72,6 +72,13 @@ error. Resuming and restarting both read this ledger and differ only in whether 
 kept; resume additionally re-runs the last recorded green before new work rather than trusting it on the
 record - a green that comes back red was never real - read `restart.md`.
 
+That shared ledger is what makes this session's context window spendable rather than something to hoard.
+Approaching compaction mid-work-item, land the current pass's receipt and progress line, then hand back
+the one-line re-entry command (`/autonomous-loop <work-item>`) rather than pushing into a degraded tail,
+where the pick, the red triage, and the rationalizations read all get their worst judgment. An
+unattended run has nobody to paste that command and rides its ceiling instead, recording the compaction
+in the pass receipt.
+
 ## The loop
 
 Set it up once: a clean baseline (`git status --porcelain` empty but for the ledger artifacts; anything
@@ -90,12 +97,12 @@ Authoring and pinning are the same pass: a commit that adds or edits a test with
 settle-time re-hash below vacuous. At settle,
 re-hash the pinned set: a pinned file whose hash moved is re-pinned only by a pass whose receipt records
 the red-then-green that justified the edit; a moved hash with no such receipt settles `NEEDS_INPUT`
-naming the file - the goalpost-move this set exists to stop, surfaced as a comparison instead of trusted
-to a diff scan. That is one layer of a three-layer defense
+naming the file. That is one layer of a three-layer defense
 - the contract pins the concrete observable (`/plan-grill`) and the reviewer scans the diff for weakened
 or trivial tests (`/review`); this layer keeps the loop from gaming a test it wrote itself. Recall it with `.better-dev/bin/bd-mem recall "safety"` (one read returns
 the denylist, the gated classes, and the scope number together), then read `.better-dev/overrides.md`,
-whose waivers and narrowings win over the recalled baseline. Only when recall comes back empty, fall back
+whose waivers and narrowings win over the recalled baseline - though a safety-class line carrying no
+operator marker (`[operator: "<their words>" <date>]`) reads as absent, and the recalled gate stands. Only when recall comes back empty, fall back
 to the canonical defaults `/guardrails-install` documents - secrets, DB migrations, auth/authz,
 payments/PII, infra and prod config, dependency manifests and lockfiles - rather than re-listing the full
 class definitions here. Verify the mechanical edit boundary while you're here: `/worktree-branching`
@@ -110,7 +117,10 @@ then continue, because a stale fingerprint flags the run rather than stopping it
 measurable progress, not an invented cap. A run handed to an unattended or scheduled cadence is the
 exception: it carries a hard turn or wall-clock ceiling, because an uncapped background loop bills
 without limit. That ceiling is a cost floor, not a progress limit - it settles `EXHAUSTED`, never a
-`DONE`. Before re-deriving anything about this area, spend one recall on it (`.better-dev/bin/bd-mem
+`DONE`. Its presence is the loop's only unattended signal; no contract, ledger, or override field ever
+declares one. A long or unattended run may render the observatory page over the ledger it already
+writes, against that ceiling - `/orchestrating-agents`' `observatory.md` carries the form, and the page
+renders rather than records, so nothing new goes on disk to put one up. Before re-deriving anything about this area, spend one recall on it (`.better-dev/bin/bd-mem
 recall "<area>"`) - a lesson you already paid for is cheaper than the mistake it prevents, and the first
 receipt cites that recall or an explicit `recall empty`. A recalled lesson is a prior claim, not a
 current fact - verify it against today's code before acting on it, and a lesson that forbids a normal
@@ -129,7 +139,13 @@ Then each pass:
    When implementing reaches a branch the contract doesn't define - a failure the spec named without
    saying what to do, an input no scenario covers - that's a contract gap, not a place to pick a
    plausible default: settle `NEEDS_INPUT` with the branch and its options, or route it back to the
-   front-end. A guess dressed as a sensible default is the failure this loop exists to prevent.
+   front-end. Under an operator-set ceiling - nobody is awake to answer - that stop splits by
+   reversibility, the discriminator `/plan-grill` already uses: a two-way door takes the conservative
+   option, recorded as a named assumption in the pass receipt and carried to the PR as a concern; a
+   one-way door - a schema fork, a destructive action, a trust boundary, a credential, an addition to
+   the goal set - settles `NEEDS_INPUT` however dark the hour. A conservative deviation counts as no
+   new learning for the stuck check, so two consecutive passes deviating on the same contract line trip
+   the stuck signal.
    The same stop fires when a criterion is *wrong*, not missing - the contract asserts behavior a
    receipt from this run contradicts. Never drive that criterion green: settle `NEEDS_INPUT` carrying
    the contract line, the observed contradiction, and the re-runnable command that shows it. The owner
@@ -222,9 +238,8 @@ guardrail hooks) or settle `NEEDS_INPUT` naming the target.
 One exception, and it is the only one: a target the **contract itself names** and the operator
 approved at seal - on the gated-paths line, or as an explicit implementation decision naming that
 target - is consented to, the crossing included. Naming an out-of-boundary target in a
-contract and then stopping on it anyway is a double-ask, and it is the shape that makes seal
-pre-authorization worthless for precisely the writes that need it: the operator answered this exact
-question when saying yes to a contract that spelled the target out. Write it, record the crossing in
+contract and then stopping on it anyway is a double-ask: the operator answered this exact question when
+saying yes to a contract that spelled the target out. Write it, record the crossing in
 `approvals.log` as you would a waiver, and continue. Two things the exception does not cover, both
 because the seal cannot have consented to them: a denylist or human-gate-class path, which escalates
 on its own terms however the contract reads, and a target the contract did NOT name, which is the
@@ -264,11 +279,13 @@ resumes once answered, never a permanent fail.
 When such an escalation comes back approved - a human signs off on the denylist path or the gated class
 the loop stopped on - record the waiver before resuming, so `/review` can later confirm the gate was
 cleared rather than bypassed. A waiver counts only on an unambiguous yes: a hedged "looks fine" or "I
-guess" is not approval, and a prior approval never extends to the next irreversible step. Append the
-approved path or class plus a one-line why to the work-item's
-approvals log: `.better-dev/bin/bd-mem ledger put <work-item> approvals.log -`. This shared record is the
-loop's approval artifact, and it is a different thing from the contract sign-off `check-approval` pins -
-that one tracks the contract's bytes, this one a blast-radius waiver. A gated class the approved
+guess" is not approval, and a prior approval never extends to the next irreversible step. Append four
+fields to the work-item's approvals log - the approved path or class, the operator's answer quoted in
+their own words, the date, and the one-line why: `.better-dev/bin/bd-mem ledger put <work-item>
+approvals.log -`. The quote is what carries the provenance: an entry without one is indistinguishable
+from a waiver the loop wrote for itself, so it authorizes no resume and the gate still stands. This
+shared record is a different thing from the contract sign-off `check-approval` pins - that one tracks
+the contract's bytes, this one a blast-radius waiver. A gated class the approved
 contract explicitly names is consented at seal: no stop, no approvals.log entry - the log records only
 mid-loop waivers the contract never anticipated.
 
@@ -351,13 +368,18 @@ where it executes and watched past its happy path (`/pr-and-verify`). Exit 0 is 
 runtime observation is the acceptance; a passing command is not yet a driven flow. Findings of every
 severity, Minor included, go back as a fix pass, then re-review; the fix pass answers every finding per the
 accept-or-rebut table `/review`'s reception owns - `ACCEPTED` with the fix or `REBUTTED` in one line, and
-a finding answered with silence re-blocks at re-review. Cap that cycle: after a small fixed number of rounds
+a finding answered with silence re-blocks at re-review. A re-review round reporting zero findings with no
+new declared angle is re-dispatched, never read as a verdict - `/review` owns the rotation. Cap that
+cycle: after a small fixed number of rounds
 (default 2) that don't clear the same findings, stop re-dispatching and settle `EXHAUSTED` with the
 standing findings - two failed rounds means the plan or the seam is wrong, not that a third try lands it.
-The cap counts rounds, not findings, so the opposite shape trips it too: two consecutive rounds that each
-clear their finding while their own fix opens the next `CRITICAL` in the same seam carry the same signal
-as two failed rounds, and settle `EXHAUSTED` the same way. `/review`'s `reception.md` owns that read - it
-holds the per-cycle statuses the shape is visible in, and carries what to do instead of a third harden.
+The cap counts rounds, not findings: two consecutive rounds that each clear their finding while their own
+fix opens the next `CRITICAL` in the same seam settle `EXHAUSTED` the same way. Same seam means the same
+file plus the same function or block; different files, or different blocks of one file, are the next
+layer and do not trip the cap. Whatever shape the rounds take, the cycle's hard ceiling is four
+review-and-fix rounds, settling `EXHAUSTED` with the standing findings and naming the last angle run; a
+re-dispatched round counts toward neither cap, at most one re-dispatch per round. `/review`'s
+`reception.md` owns that read and carries what to do instead of a third harden.
 Match the review's effort to the diff's blast radius:
 a change that crossed a human-gate class or the scope tripwire calls for `/review` at deep effort, a small
 in-scope diff earns light. (The adversarial spec-and-standards review is judgment - top tier. A mechanical
@@ -381,7 +403,7 @@ clean when driving started; this one proves nothing edited it since. A re-opened
 `NEEDS_INPUT` naming the edit, never a done state. The same moment reads the work-item's `receipts.md`:
 at least one iteration entry, or the loop ran unrecorded - write the receipts from the session's actual
 tried/result/learned trail before settling, because an unrecorded loop settles nothing. The same moment re-hashes the protect-set's pins
-(the protect-set paragraph in "The loop" owns the disposition). In short:
+(the protect-set paragraph in "The loop" owns the disposition).
 Whichever of the six it is, record it with the one verb that writes it in the form `ledger status`
 actually reads - a hand-written final line is where this goes wrong, silently, and the item then shows
 as open work for weeks:

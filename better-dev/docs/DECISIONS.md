@@ -426,10 +426,12 @@ prototype branch-parking option at seal, third-party questionnaire unblock, fenc
 lookup (plan-grill); one-word-one-unit chain rule (writing-skills). Watch condition (standing): if a
 third seam shows the missing handoff-contract bug - candidates: loop -> pr-and-verify, worktree
 handoff pickup - extract the audit/hydrate/stop stage-boundary pattern into a shared doctrine doc.
+- CLOSED by D27 (2026-08-05): the third seam was `/gauntlet`'s handoff; the pattern landed as three
+  checkable lines in writing-skills, and the doctrine doc was declined (operator-ratified).
 
 Rejected-with-reasons (one row each):
 - Chart-time research subagents writing remote branches (wayfinder v1.2) - an unfenced background write path; shipped a filed side effect (their #576, unwanted draft PRs) within days; our dispatch stays read-only for fact-finding and writes go through the loop's protect-set.
-- batch-grill-me frontier-rounds interview - in-progress draft upstream; one-question-at-a-time with unblock-first ordering is the deliberate interactive discipline; revisit if it graduates and the round-batching survives their own use.
+- batch-grill-me frontier-rounds interview - in-progress draft upstream; one-question-at-a-time with unblock-first ordering is the deliberate interactive discipline; revisit if it graduates and the round-batching survives their own use. Re-grounded by D27 ruling 12 (2026-08-05): the draft shipped upstream, and the rejection now stands on the interactive discipline itself plus the observed form-answering failure of batched rounds.
 - Per-host metadata sidecars (agents/openai.yaml beside every SKILL.md) - no second harness reads better-dev skills today; the agentskills.io format is the agnostic layer; revisit when a real Codex consumer exists (their "keep the two in sync" rule is the shape to copy then).
 - One-file-per-ticket local tracker - better-dev has no local ticket artifact; the ledger is the store; nothing to change.
 - Self-hosted single-plugin marketplace (.claude-plugin/marketplace.json) - REVERSED by D24 (2026-07-30): the agent-tools monorepo supplies the second consumer the rejection was predicated on; the marketplace manifest now ships at the monorepo root.
@@ -601,3 +603,168 @@ Evidence: `/graphify-wrapper-setup` has made these writes on every run since it 
 `/onboard` forbade silent global machine changes in the same phase that hands the operator a
 settings paste block; neither `docs/DECISIONS.md` nor `docs/TRAPS.md` carried a single graphify
 entry, so the contradiction survived by nobody having decided it (audit, 2026-08-02).
+
+## D27 - gauntlet-for-software harvest rulings (2026-08-05; four calls operator-ratified)
+
+Sources: the re-submitted gauntlet-loop article, mfishbein's software-factory thread,
+simoncorry/foundry and squidbay/factory, mattpocock/skills v1.2 delta plus the aihero wayfinder
+piece, steida's observatory thread, and three research sweeps - five dossiers, a completeness critic,
+and the master plan under `raw/synthesis/2026-08-05-gauntlet-software/`. Operator ratified four calls:
+best-of-N stays rejected; D23's doctrine lands as `/writing-skills` lines; the artifact set leverages
+graphify; scope covers features and PRs, not only a gauntlet run. Rulings, in the order they bind.
+
+1. **The gauntlet run's artifact set is two plain files with one writer.** An append-only
+`gauntlet/RUN.md` in the run's own working directory, one block per round - round number, one state
+word per unit, the critic's named gap, spend against the ceiling - and the prompt saved beside it as
+`gauntlet/PROMPT.md` rather than only on a clipboard. The progress page is a **renderer** over that
+record, so a compaction costs markup and never history, and a fresh session resumes from prompt plus
+record. Plain files deliberately, never `bd-mem`: a gauntlet run is a fresh session on a repo that may
+carry no wiring, so a memory dependency would fail exactly where the record is needed most. Bar rows
+live inline in the skill's step 2 - no sidecar. **Critic fence:** the record and the page are surfaces
+the blind critic never reads; it receives the artifact and its bar row and nothing else. Where
+graphify is wired, or one AST-only sync is cheap, the round block carries
+`graphify-wrapper-query --affected`, so a round's blast radius is structural rather than recalled -
+a run note, not a prompt sentence.
+
+2. **The observatory generalizes past `/gauntlet`, and the D14/G31 boundary is ruled once here.**
+One owner, `skills/orchestrating-agents/observatory.md`, carries the emission contract: the
+append-only record, the page that renders and never records, the four state words
+(`BUILDING`/`JUDGING`/`WAITING`/`STUCK`), the question channel, the counter rule, the critic fence.
+Three skills compose it - `/gauntlet` for a fresh-session run, `/autonomous-loop` for a long or
+unattended item (the ledger already is the record: a page renders `receipts.md` and `progress.md`
+against the operator-set ceiling, and nothing new goes on disk to put one up), `/pr-and-verify` for
+the landed `pr-evidence` block, one row per done-criterion with a literal `unverified` where a blank
+cell would hide. **Boundary, cited by all three landings:** a counter series that lives inside one run
+or one work-item, is never aggregated across items and never charted across time, is inside the
+ruling - the same class as `receipts.md`. Nothing here reopens D14. steida's persistent code-health
+observatory is out of scope for a practices library (that is a product, in its own repo), and
+`/codebase-audit` is recorded as the shipped on-demand answer to his clause 6.
+
+3. **Seven grill slots, three of them must-asks.** `Blast radius` joins the table: what live or shared
+systems, paths, and credentials are in the run's reach, defaulting - and answering a user with no
+preference - to a fresh directory, no credentials, no calls to a system the operator did not name. An
+unnamed environment is not a permissive one. Prediction may never satisfy three slots: Bars, Stop
+condition, and Blast radius wherever a live or shared system is in reach; each traces to a user
+message in the conversation or to a quoted recorded override. `Unattended decisions` is **not** an
+eighth slot - it is ruling 4 plus one batched pre-run question set folded into the existing handoff
+step, because a question answered before the run starts is not a question that strands it at 3am.
+
+4. **An unsettled fork mid-run splits by reversibility, and deviating carries a cap.** Under an
+operator-set ceiling, a two-way door takes the conservative option, recorded as a named assumption in
+the pass receipt and carried to the PR as a concern - no `deviations.md`, no new artifact class. A
+one-way door (schema fork, destructive action, trust boundary, credential, addition to the goal set)
+settles `NEEDS_INPUT` in a loop, or writes that unit's `WAITING` block with the question and two
+candidate answers in a gauntlet run, advancing the other units and reading the answer file at round
+boundaries. Cap: a conservative deviation counts as no new learning for the stuck check, so two
+consecutive passes deviating on the same contract line trip the stuck signal. Answering a `WAITING`
+question by writing one file is not interrupting the run - the watch-without-interrupting stance
+forbade barging into the session's turn, not answering what the run asked.
+
+5. **No `attendance:` field, as a standing non-goal.** No contract, ledger record, or override line
+ever gains a boolean "the loop may proceed unattended" or "this item carries execution" field an agent
+can author; #683 is the proof of what such a field becomes when the constrained party can write it.
+The unattended signal stays the operator-set turn or wall-clock ceiling `/autonomous-loop` already
+requires - set by hand, unwritable by the loop, and needing no render-minimum or approve-gate change.
+The Autonomy Dial (a spectrum from "suggest only" to "act and notify me after", settable per task
+type) is recorded as **examined prior art**: its per-task-type dial is exactly the field this declines.
+
+6. **`/review` owns rotation, and the cycle's hard ceiling is four rounds.** A full re-review declares
+in one line an angle from outside the exclusion set (prior rounds' channel focuses and lens surfaces),
+dedupes candidates against everything seen - counts blocks plus `reception.md`'s disposition table,
+`REBUTTED` rows included - and closes `ROUND: <n> ANGLE: <one line> NEW: <count>`. Fix-confirm passes
+are exempt; trap 73 already ruled that scope. "Unrun round" retires as vocabulary. `/autonomous-loop`
+carries the consequence sentence: a zero-finding round with no new angle is re-dispatched, never read
+as a verdict. **Accounting ruled:** a re-dispatched round counts toward neither cap, at most one
+re-dispatch per round, so bookkeeping can neither exhaust the ceiling nor unbound it. "The same seam"
+is defined - same file plus the same function or block; different files, or different blocks of one
+file, are the next layer and do not trip the cap.
+
+7. **One disproof vocabulary.** `reviewer-brief.md` carries the full form: before a row reads `DONE`,
+spend one attempt on the opposite claim and let the Evidence cell carry both the behaviour at
+`file:line` and the failed attack (`tried: <input> -> <where it held>`); one attempt per criterion,
+never a matrix. `/gauntlet`'s critic line uses the same verb ("tries to prove the artifact fails its
+bar row") as a reference to that idea, not as a second definition of it.
+
+8. **Both comprehension surfaces land; the per-work-item explain artifact does not.**
+`/pr-and-verify`'s settle announcement gains the capability sentence - what the operator can now DO,
+banned from containing a file path, a file count, or a first-person verb about the session's work -
+and `/gauntlet`'s prompt names the return report as the run's last act: two paragraphs (what you now
+have; what it cannot do yet) plus one line per unit naming its bar row and its closing round. A
+per-work-item explain artifact (owner's manual, comprehension quiz) is a **named non-goal**: the
+steered pipeline's operator reviewed every gate, so it would serve a bottleneck that pipeline does not
+have.
+
+9. **One prose rule gets script teeth; the other convenience read does not.** `bd-mem
+persist-override` refuses a `safety-*`-class line carrying no `[operator: "<their words>" <date>]`
+marker, and the reader-side rule lands beside the overrides-win text: an unmarked safety-class line
+reads as absent and the recalled baseline gate stands. This is consistent with D25 ruling 3 - that
+de-gated memory writes on consent, this demands provenance on one key class and asks nobody anything.
+`approvals.log` entries carry the operator's answer quoted in their own words; an entry without one is
+indistinguishable from a waiver the loop wrote for itself, so it authorizes no resume. The
+`ledger status` stage column is declined - a resuming agent derives the stage with `ls`.
+
+10. **Best-of-N stays rejected, critic-scored included** (operator-ratified). D14's rejection binds
+critic-scored best-of-N against a pinned bar too: the spend multiplier is real, and a gauntlet run's
+only cost governance is its stop condition.
+
+11. **D23's watch condition is MET and closed** (operator-ratified). The third seam is `/gauntlet`'s
+own handoff. The pattern lands as three checkable lines in `/writing-skills` - every stage boundary a
+skill ships names an audit gate (proceed only when the named checks pass), a hydration step (the next
+stage re-reads the decisions and never trusts a summary), and an explicit stop reporting exactly what
+keeps the boundary closed. **No doctrine doc:** four boundaries already carry the pattern, and a doc
+would cache their text. Gauntlet's own boundary is fixed by ruling 1 plus one run note - the first
+work-item on the artifact after a run is a review pass over what landed, not a feature, and the bar
+rows seed that item's done-criteria.
+
+12. **D18's batch-grill rejection is re-grounded, not reversed.** Its original predicate ("in-progress
+draft upstream") is gone - the rounds mechanic shipped. The rejection now stands on refreshed grounds:
+one-question-at-a-time with unblock-first ordering is the deliberate interactive discipline, and our
+own form-answering observation is that batched rounds get answered as a form rather than considered.
+No mechanism change.
+
+13. **The sentence budget and the net delta are gates, not aspirations.** `/gauntlet`'s worked example
+stays at or under 13 sentences, counted in the diff - bar rows replace the old bar sentence, and the
+record-plus-page-plus-question sentences replace the old progress-surface one. The panel enumeration
+and the per-round field schema stay OUT of the prompt (the source's own "you don't need to
+over-specify this" wrote the current cell) and live in `observatory.md` for the skills. Hot-file edits
+state their net character delta in the commit body; `autonomous-loop/SKILL.md` and `review/SKILL.md`
+each stay net under +2,000 characters this batch. The 97.7k-characters-per-pass read-budget diagnosis
+is real, and its fix - extracting loop setup into a sidecar - is its own chore work-item, never a
+harvest rider; `/writing-skills` gains the deletion test (does every sentence change what a reader
+does?) as the standing counterweight.
+
+Also adopted, one line each, no ruling needed: `/update` checks both sources of truth updated by
+different human acts and takes the newer, and never string-sorts version-like identifiers (`sort -V`);
+`/observability-install` gains the honest-null rule (a check whose failure mode is indistinguishable
+from its success mode is not a check, and a red X on a nightly read-only job trains people to ignore
+it); `/guardrails-install` gains the corroborating blast-radius line (a capability that CAN act
+autonomously is not thereby AUTHORIZED to); `/tool-sourcing` gains the SEO-mill caution (templated
+AI-generated comparison domains need a provenance sniff before a hit counts as found); `/review`'s
+drift check reads the groundwork record's do-not-modify list via `bd-mem ledger read` rather than a
+second recorded key; `--affected` filtered to test paths lands at its owning verb
+(`/graphify-wrapper-query`) and in `/review`'s ripple step - the loop's triage cites the verb and
+reads the filter from its doc; `/codebase-map`'s freshness hedge becomes the named
+`/graphify-wrapper-status` command with three dispositions; and gauntlet's bar rows carry the comp-plus-deltas form, the no-comp written behavior
+list authored by an agent that will not implement that unit, `none, deliberate` for a declined axis,
+and the carve rule that every unit names at least one row.
+
+Rejected-with-reasons (one row each):
+- `skills/gauntlet/bars.md` sidecar - a 136-line skill whose whole output is one paste block buys a progressive-disclosure hop for roughly 15 lines; the rows go inline in step 2.
+- Five-panel page mandate plus the six-field per-round schema - machinery where two sentences hold, against a prompt whose ceiling is a dozen sentences and a source that says do not over-specify the surface.
+- `deviations.md` as a ledger artifact class - five files for a record the pass receipt already exists to hold; the conservative choice is a named assumption in the receipt, carried to the PR as a concern.
+- `attendance:` contract field - puts a "may proceed unattended" boolean in a file the constrained party can write; the operator-set ceiling already carries the signal (ruling 5).
+- `BAR.md` / `ROUNDS.md` / `STATE.md` file triple - three writers of one run's state; ruling 1's single append-only record plus the saved prompt covers resume and history both.
+- Bar-derivation recipes (screen-record the comp for frame timings, capture its waterfall) - speculative; no operator has wanted a performance bar yet, and "every number names its source" already forces the honest answer.
+- `ledger status` stage column - runtime for a fact five `test -f` calls infer; a resuming agent reads the artifacts directly.
+- Per-work-item explain artifact (owner's manual, quiz) - serves a comprehension bottleneck the steered pipeline does not have; the two settle-time surfaces in ruling 8 close the real absences.
+- Stage-boundary doctrine doc - four boundaries already carry the pattern; a doc would cache their text and drift from it. The three checkable lines go in `/writing-skills`.
+- Batch-grill frontier rounds - re-grounded, not reversed (ruling 12): batched rounds get answered as a form, not considered.
+- Critic-scored best-of-N against a pinned bar - operator-ratified extension of D14's rejection; the spend multiplier is real and the stop condition is a gauntlet's only cost governance.
+
+Covered, not re-filed (so the next harvest does not re-litigate):
+- steida's clause 6 (track complexity, coverage, duplication, readability) - `/codebase-audit` is the shipped on-demand answer; the trend DB half stays rejected under D14.
+- The ADE vendor definition (a task board, a spec-approval gate, an isolated branch per agent, the runtime, a review layer ending in a PR) - a clause-by-clause description of this library's pipeline, arrived at independently. Corroboration, not a gap.
+- The Autonomy Dial - examined prior art, declined by ruling 5; recorded so it is not re-proposed as new.
+- "A capability that can act autonomously is not thereby authorized to" - independent corroboration of `/guardrails-install`'s blast-radius framing, landed as one line there.
+- Issues #6 (Braintrust's eval-gated CI: the trace becomes a test fixture) and #7 (critic-harness slot knob; different-model-same-diff rotation axis via the D20 tier-map) - nudged by comment, deliberately not by skill change.
+- Glamorous Toolkit's verbatim ingest, the Sourcegraph/Amp split, Riftmap - promoted hops this batch did not fetch; recorded as next-batch inputs in the batch manifest rather than dropped.

@@ -54,6 +54,12 @@ Add only the gaps; never replace monitoring the repo already runs.
    two keys; so does the host's own cadence primitive armed with the probe line `/release-promotion`
    offers on a `VERIFIED` settle.
 
+A pulse that overstates its reach is worse than no pulse: a probe that reports green regardless of
+what it actually reached earns trust it never proved. Design each check so its failure mode is
+visibly distinct from its success mode - a nightly job that can only ever report "ran," never "ran
+correctly," trains a human to stop reading it, and an ignored alert is the same silence this skill
+exists to close.
+
 ## Prove it fires
 
 Wiring unproven is the same silence with more config. Trigger the pipeline end to end once: raise a

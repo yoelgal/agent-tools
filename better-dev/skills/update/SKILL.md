@@ -66,8 +66,10 @@ with no line is pull-only; a clone with no file at all declares nothing pending.
 
 This repo's baseline is `.better-dev/wired-version`; a missing file means wired before 0.6.0, older
 than every listed version. Collect the flags of every listed version strictly greater than the
-baseline - compare numerically, field by field on the dots (awk or IFS), because `sort -V` differs
-across the BSD/GNU userlands this runs on. A pending `install` flag that step 2's diff did not
+baseline - compare numerically, field by field on the dots (awk or IFS): a version-like identifier
+never sorts correctly as a plain string (`2026-07-23.10` reads before `2026-07-23.2`), and `sort -V`
+itself differs across the BSD/GNU userlands this runs on, so neither is a shortcut here. A pending
+`install` flag that step 2's diff did not
 already surface still means a one-time `install.sh` re-run; a pending `reonboard` flag goes to
 step 4, and so does a pending `offer` flag - collect its summary line, it is the question's text.
 
@@ -79,7 +81,9 @@ stamp behind the manifest on purpose, and nothing is owed. Answering "what versi
 here" by diffing the two numbers reports a top-up that no flag asked for; read the flags between
 the stamp and the manifest instead, and where none are pending, say so rather than prescribing a
 run. Step 5 still re-stamps on any run that gets there, so a synced number is a side effect of
-updating, never the reason to.
+updating, never the reason to. This is the general shape any "am I up to date" check needs: two
+sources of truth, each moved by a different human act - a maintainer's release, this skill's own
+top-up - read both, and let the newer one govern rather than trusting either alone.
 
 ## 4. Top up this repo only
 

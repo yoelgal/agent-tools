@@ -42,7 +42,9 @@ A finding with no row is `persistent` at re-review and re-blocks - it never just
 conversation. And acceptance is a change, not a sentence: re-review checks each `ACCEPTED` row against
 the new diff, and an accepted finding whose cited seam the new diff never touches is itself a new
 finding, not a pass. Record the table through the memory contract alongside the per-cycle statuses
-below, so the next cycle reads dispositions, not vibes.
+below, so the next cycle reads dispositions, not vibes. The table is also the seen-set a rotated
+re-review dedupes against (`/review` step 5): a `REBUTTED` row is a candidate the last round saw, so it
+cannot come back as a fresh finding.
 
 Skip the performative acknowledgements - "you're absolutely right", "great catch", any thanks. The changed
 code shows you heard the feedback. State the fix and move on. If you pushed back and turned out wrong, say
