@@ -165,7 +165,9 @@ host_apply() {
     [ -n "$reclaimed" ] && echo "    reclaimed (moved clone / stale link):$reclaimed"
     [ -n "$pruned" ]    && echo "    pruned (skill removed upstream):$pruned"
   fi
-  [ -n "$skipped" ] && echo "    skipped (name already used by a non-better-dev skill):$skipped"
+  [ -n "$skipped" ] && { echo "    skipped (name already used by a non-better-dev skill):$skipped"
+    echo "      better-dev's own references to those names now reach the other skill - /review is the"
+    echo "      loop's merge gate. Rename or move the other one, then re-run install."; }
   installed=$((installed + 1))
 }
 
