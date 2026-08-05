@@ -102,14 +102,20 @@ The output is a report to the human, in three parts:
   goal). A sweep that returns no `cut` rows on a mature codebase is worth a second look - deletion
   findings are the ones category-thinking under-surfaces.
 
-  A `cut` row clears one check the others don't: name what still references the thing, from evidence
-  already in hand. CI config, build scripts, and the dependency manifest are read earlier in this sweep
-  anyway - a component one of them exercises is early, not dead, and proposing its deletion tells the
-  reader you did not cross the two facts you already had. Observed 2026-08-04: an audit offered "drop
-  `web/`" while the same run had read the `ci.yml` job that runs `web/`'s tests. Unreferenced anywhere
-  you looked is a `cut` at high confidence; referenced by a runner is not a `cut` row at all; looks
-  unused but you could not check the runners is `cut` at low confidence, saying so in the Evidence
-  column.
+  A `cut` row clears one check the others don't, and it costs a read this sweep has not done yet:
+  **open the runners before filing it.** The CI workflows, the build scripts, and the dependency
+  manifest are where a component's last caller hides once the source sweep finds nothing - a directory
+  no module imports is still live if a CI job runs its tests. Observed 2026-08-04: an audit offered
+  "drop `web/`" in a run whose own verify-command read had already opened the `ci.yml` job that runs
+  `web/`'s tests, and never crossed the two. Grep the thing's path and name across those files, then
+  file:
+
+  - **Nothing references it** - `cut`, high confidence, citing the runners you checked.
+  - **A runner references it** - still a legitimate `cut` where the runner is dead weight too, and the
+    row's fix then names both; where the runner is live, it is not a `cut` and belongs in another Move.
+    Either way the Evidence column carries the reference, so the reader sees what deletion would take
+    with it.
+  - **You could not read the runners** - `cut` at low confidence, saying so in the Evidence column.
 
   Leverage-ordered, highest first.
 

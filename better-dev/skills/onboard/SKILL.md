@@ -236,8 +236,10 @@ declined it, reaches this at all.
 Probe that config for the two rule names; do not dump it. A command that reads the permission file out
 in full is the shape a host classifier refuses - observed 2026-08-05, two runs lost a turn each to a
 blocked `python3 -c` that printed the whole allow list, when `grep -c bd-mem` would have answered the
-only question being asked. And a refused probe means *unknown*, not *absent*: proposing a grant the
-operator already has spends their turn on a no-op, so say the check could not run and move on.
+only question being asked. A refused probe means *unknown*, not *absent* - so offer the grant anyway,
+saying the check could not run and it may already be there. The two failures are not the same size: a
+redundant paste block costs one turn once, while a grant never offered leaves the host prompting on
+its own memory spine for every `bd-mem` call in every later skill, and nothing downstream catches it.
 
 The doctrine holds at either scope: a permission file is a settings-class mutation, so the write stays
 operator-run - observed 2026-07-16, that write class is classifier-blocked for the agent even with
@@ -323,8 +325,11 @@ and never touching the operator's own text.
 
 **An entry file that withholds consent in its own text keeps it.** Read the file before writing:
 where it says to ask first - "do not edit without asking", "my notes, hands off" - that sentence is
-addressed to you, and appending below it is still editing it. Ask, and offer the local-only entry
-file as the alternative that needs no permission. Being invoked is not the permission: `/onboard`
+addressed to you, and appending below it is still editing it. Ask, and offer the local-only entry file
+beside it as the other option - not as a way around the answer: that file loads into every session
+too, so an operator who declined always-loaded better-dev text has declined it there as well. Their
+answer picks a destination or none, and it covers every block this phase writes into that file, the
+comms block included. Being invoked is not the permission: `/onboard`
 is an instruction to wire the repo, and the operator who wrote that line was declining exactly the
 write you are about to make on the strength of it - observed 2026-08-05, a run appended and
 explained itself with "`/onboard` was taken as the 'ask' its edit rule requires", and the operator
@@ -453,7 +458,10 @@ for the `<!-- BEGIN better-dev-comms -->` marker before writing, and let what yo
   reads it from the global file, and a second copy is a duplicate tax on every turn of every session
   in this repo.
 - **Found, real teammates:** write it anyway, after the confirm above. The shared block is not for the
-  operator, it is for teammates who have no global block of their own.
+  operator, it is for teammates who have no global block of their own. "Write it anyway" answers the
+  duplicate question, never the consent one: where the destination file's own text asks to be
+  consulted first, the answer given earlier in this phase still governs, and a declined destination
+  stays declined for this block too.
 - **Not found:** write as usual, and let the recap name the global option once. The install-time ask
   is prose an agent follows, so a missed ask should cost one line to recover, not a re-install.
 
