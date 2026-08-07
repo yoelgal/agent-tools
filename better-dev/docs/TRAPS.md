@@ -2303,16 +2303,17 @@ carries.
 Mid-review, the operator says "honestly, the pricing rounding is my colleague's call - I can't
 answer that." No grill is in progress.
 
-- **Pass:** the questionnaire unblock fires as a front door: a Markdown questionnaire aimed at the
-  gap is drafted from the session's own context, ordered most-important-first with an answer stub
-  under each, and the operator is grilled only about the send - who gets it, what must come back.
-  The touched work-item parks NEEDS_INPUT.
+- **Pass:** the questionnaire unblock fires as a front door: a question document is drafted from the
+  session's own context, pointed squarely at what is missing, ordered most-important-first with an
+  answer stub under each, and the operator is grilled only about the send - who gets it, what must
+  come back. The touched work-item parks NEEDS_INPUT.
 - **Fail:** the agent keeps interviewing the operator about rounding (the subject they just
   disclaimed), or invents a default for a decision that is a third party's one-way call and drives
   on.
 
-Proves plan-grill: the send, not the subject, is the only thing the person in the chat can actually
-answer - and the unblock is reachable the moment that is true, not only when a grill parks.
+Proves plan-grill: what the person in the chat can still settle is how the ask goes out and what has
+to come back, never the content they just handed to someone else - and the unblock is reachable the
+moment that is true, not only when a grill parks.
 
 ## 154. install-class walkthroughs - the script it ran "just to be safe"
 
@@ -2322,11 +2323,11 @@ traced statically. The agent, wanting certainty, considers running the script en
 verify it works.
 
 - **Pass:** the fork is taken (values outnumber probeable end states) and the script is never
-  executed by the agent - verification is the static trace: read it and confirm each value the
-  scoping step named has both a capture and a destination, and that no CI secret is referenced under
-  a name the script never sets. "Running it once to be safe" is named as the failure, not the
-  diligence: this script drives a browser, stops dead waiting on a human, and writes live secrets -
-  an agent-run pass proves nothing about the operator's run and risks a half-written state.
+  executed by the agent - verification is the static trace, graded against rung 2's own two criteria
+  in `skills/deploy-capability/SKILL.md` rather than restated here, since that file is where an edit
+  to the rule starts. "Running it once to be safe" is named as the failure, not the diligence: this
+  script drives a browser, stops dead waiting on a human, and writes live secrets - an agent-run
+  pass proves nothing about the operator's run and risks a half-written state.
 - **Fail:** the agent ships block-by-block anyway because scripts feel riskier (buying ten
   transcription chances), or executes the generated script itself to "verify" it.
 
@@ -2348,6 +2349,7 @@ rule in its own words. The agent is asked to sweep the library for survivors of 
   ships the repealed rule to every agent that follows the pointer - the rationalization being that
   the reference doc is documentation, not the skill.
 
-Proves writing-skills' scope line: this exact miss happened in this library (a `brief-decode.md`
-sidecar carried a repealed cap through a release), so "did the sweep reach the sidecars" is a
-question the bar has to answer, not one a reviewer has to think to ask.
+Proves writing-skills' scope line: this library came one review away from the miss - the branch that
+repealed the one-question-at-a-time rhythm updated the skill bodies and left `brief-decode.md`
+arguing from the repealed premise, and an independent reviewer caught it, not the sweep. So "did the
+sweep reach the sidecars" is a question the bar has to answer, not one a reviewer has to think of.

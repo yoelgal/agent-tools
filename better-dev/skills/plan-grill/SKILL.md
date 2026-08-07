@@ -144,13 +144,13 @@ grill only the decisions the done-criteria will turn on and skip exhaustive bran
   most four questions, then recompute: their answers settle prerequisites, the frontier moves
   outward, and the next round asks what just unblocked - the same decisions land in a few rounds
   instead of a serial interview. More than four unblocked at once is normal, not a conflict: the
-  four carrying the most downstream weight go in this round and the rest stay on the frontier for
-  the next one, so the cap defers a decision rather than dropping it. Never seat a question beside
-  one it depends on - the dependent stays out until a recompute clears it. Where the host has a
-  native ask tool that
-  presents each question with options and a marked recommendation, the round rides it; elsewhere
-  emit a numbered list - each question, then your recommendation on its own line - so the user
-  answers by number. Two guards keep a round from being answered as a form. A one-way door (the
+  four carrying the most downstream weight go in this round (one-way doors excepted - they get
+  their own round, below) and the rest stay on the frontier for the next one, so the cap defers a
+  decision rather than dropping it. Never seat a question beside one it depends on - the dependent
+  stays out until a recompute clears it. Where the host has a native ask tool that presents each
+  question with options and a marked recommendation, the round rides it; elsewhere number the
+  questions and set your pick apart beneath each one, so a reply can come back as numbers alone.
+  Two guards keep a round from being answered as a form. A one-way door (the
   class below) is always its own round of one, never seated beside preference calls. And a blanket
   accept-all reply ("all fine", "your picks") does not lock the round: reflect the two picks with
   the most downstream weight back in a line each and let them hold before they harden. Questions
@@ -233,9 +233,9 @@ grill only the decisions the done-criteria will turn on and skip exhaustive bran
   refutation with its disposition (died-against-evidence / promoted-to-open-concern /
   promoted-to-out-of-scope) - an empty Open-concerns section with no recorded refutation fails this.
 - **Know when the grill is done.** An empty frontier is the structural sign; before closing, run
-  one honesty check on top: *can you predict the
-  user's reaction to the next three questions you would ask?* If yes, the decisions are settled and
-  the plan is decision-complete - the implementer will make none. If no, you still have open
+  one honesty check on top: *can you predict the user's reaction to the next three questions you
+  would ask?* If yes, the decisions are settled and the plan is decision-complete - the implementer
+  will make none. If no, you still have open
   questions; keep going. Shared understanding is that prediction coming true, not a feeling that
   you're finished.
 

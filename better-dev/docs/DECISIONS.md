@@ -967,9 +967,8 @@ clause. The ratified ledger line said user-invoked; it ships model-invoked - a b
 disclosed at the PR, not silently ratified - so it fires on the natural signal ("wait", "you lost
 me"), not only by name: a corrective needed at the moment of frustration cannot depend on
 remembering a command, and the authoring standard reserves user-invocation for deliberate-command
-skills. The
-body stays a few lines by design; the authoring standard's fails-by-growing rule has its working
-example, and trap 152 rigs the growth ask.
+skills. The body stays a few lines by design; the authoring standard's fails-by-growing rule has
+its working example, and trap 152 rigs the growth ask.
 3. **The questionnaire unblock gains a front door.** The grill-the-send machinery (landed at D27)
 is reachable from any flow the moment the operator says a decision is someone else's - a routing
 row plus an arrival paragraph in plan-grill, trap 153. No new machinery: a name and a door.
@@ -980,8 +979,9 @@ bash-light, reimplement-first.
 5. Two uncontested widenings ride along: the third-party logic prototype gains one tab per worked
 case (each spelled out in plain words, its clicks numbered, the state rewound on open); the
 writing-skills bar explicitly binds the sibling files a skill sends the agent off to read. Trap 155
-rigs that second one: the sweep that stops at the `SKILL.md` files is the failure this library
-already shipped once, when a `brief-decode.md` sidecar carried a repealed cap through a release.
+rigs that second one: the sweep that stops at the `SKILL.md` files is a miss this very branch came
+one review away from shipping, when ruling 1's repeal left `brief-decode.md` arguing from the
+repealed rhythm and the reviewer, not the sweep, was what caught it.
 
 Rejected-with-reasons:
 - Full upstream-shape frontier rounds (whole frontier at once, no guards) - the form-answering
