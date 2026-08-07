@@ -535,6 +535,37 @@ if [ "${1:-}" = "selftest" ]; then
   printf '%s' "$out" | grep -q "no link for this host (b)" || fail "missing link nudge for unlinked skill b"
   printf '%s' "$out" | jq -r '.systemMessage' | grep -q 'skill links missing, run install.sh' || fail "missing link nudge from the operator-visible welcome"
 
+  # UNWIRED repo, both clone-level nudges. They answer questions about the clone and the host, not
+  # about this repo, so wiring must not gate them - and an unwired repo is where they matter most,
+  # because the next action is /onboard and onboarding off a stale clone stamps the stale version
+  # too, leaving the reonboard nudge comparing two stale values that agree. $tmp holds no
+  # .better-dev of its own, so a dir directly under it is genuinely unwired.
+  # A fresh behind-clone, not $clone: the ff-only auto-update case above fast-forwarded that one,
+  # so reusing it would assert against a clone that is already current.
+  mkdir -p "$tmp/bare"
+  uclone="$tmp/uclone"; git clone -q "$origin" "$uclone"
+  mkdir -p "$uclone/skills/onboard"; : > "$uclone/skills/onboard/SKILL.md"
+  ( cd "$seed" && echo three >> f && git commit -qam three && git push -q origin HEAD:main ) >/dev/null 2>&1
+  ( cd "$uclone" && git fetch -q ) >/dev/null 2>&1
+  out="$(cd "$tmp/bare" && HOME="$tmp" CLAUDE_PLUGIN_ROOT="$uclone" "$SELF")" || fail "errored when unwired"
+  printf '%s' "$out" | jq -e . >/dev/null                                    || fail "unwired output is not valid JSON"
+  printf '%s' "$out" | grep -q "not wired in this repo"                      || fail "unwired welcome lost when a nudge is pending"
+  printf '%s' "$out" | jq -r '.systemMessage' | grep -q 'update available, run /update before /onboard' \
+    || fail "no update nudge in an unwired repo (the clone is behind)"
+  printf '%s' "$out" | grep -qE 'additionalContext|additional_context' && fail "unwired path emitted an agent context block"
+
+  # Same, for the link nudge: skill b is still unlinked in $home1 at this point.
+  out="$(cd "$tmp/bare" && HOME="$home1" CLAUDE_PLUGIN_ROOT="$lclone" "$SELF")" || fail "errored when unwired with a missing link"
+  printf '%s' "$out" | jq -r '.systemMessage' | grep -q 'skill links missing, run install.sh' \
+    || fail "no link nudge in an unwired repo"
+
+  # Nothing pending -> the unwired welcome stays exactly the default. $tmp/notgit is not a git
+  # checkout (no update nudge) and HOME=$tmp has no skills dir (no link nudge), so this is the
+  # everyday case: a fresh project on a current clone must read exactly as it did before.
+  out="$(cd "$tmp/bare" && HOME="$tmp" CLAUDE_PLUGIN_ROOT="$tmp/notgit" "$SELF")" || fail "errored when unwired with nothing pending"
+  [ "$(printf '%s' "$out" | jq -r '.systemMessage')" = "$WELCOME_UNWIRED" ] \
+    || fail "unwired welcome carried a marker with nothing pending"
+
   # All linked -> no nudge.
   ln -s "$lclone/skills/b" "$home1/.claude/skills/b"
   out="$(cd "$tmp/proj" && HOME="$home1" CLAUDE_PLUGIN_ROOT="$lclone" "$SELF")"
@@ -639,7 +670,24 @@ fi
 # path must never surface as a session error, which set -e alone can't promise
 # before the trailing exit 0 runs. This trap makes the stated contract hold.
 trap 'exit 0' ERR
-bd_root="$(find_bd_root)" || { printf '{ "systemMessage": "%s" }\n' "$WELCOME_UNWIRED"; exit 0; }
+if ! bd_root="$(find_bd_root)"; then
+  # Not wired here, but the two clone-level nudges still apply: update_nudge asks whether the
+  # installed CLONE is behind its origin and link_nudge whether the HOST is missing a skill link.
+  # Neither fact depends on this repo being wired, and this is where they matter most - the next
+  # action is /onboard, and onboarding off a stale clone wires stale practices AND stamps
+  # wired-version from that same stale manifest, so the reonboard nudge then compares two stale
+  # values that agree and stays silent too. Gating these on wiring hid the staleness twice over.
+  # No overrides file exists in an unwired repo, so ff-only auto-update cannot apply: pass none
+  # and let the nudge only report. Only static text reaches the JSON - update_nudge's own line
+  # carries the clone path, which is why we test it rather than interpolate it.
+  unwired_mark=""
+  case "$(update_nudge '')" in
+    *'update available'*) unwired_mark=" - update available, run /update before /onboard" ;;
+  esac
+  [ -n "$(link_nudge)" ] && unwired_mark="${unwired_mark} - skill links missing, run install.sh"
+  printf '{ "systemMessage": "%s%s" }\n' "$WELCOME_UNWIRED" "$unwired_mark"
+  exit 0
+fi
 FP_WRITE=""
 emit "$bd_root"
 # The fingerprint updates only after the note above went out - an interrupted emit warns again
