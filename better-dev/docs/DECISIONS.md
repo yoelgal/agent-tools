@@ -870,3 +870,75 @@ retire bd-atlas's overlay duty); an emission-contract grill for `orchestrating-a
 self-checks, ordered deterministic repair); an install-surface security audit of `install.sh`; a
 bd-atlas tour mode surfacing ruling 5's sort order as a "read in this order" strip; watching
 graphify 0.9.33's hosted-platform early access for a future serve story.
+
+## D29 - mattpocock v1.2 release harvest rulings (2026-08-05 evening; four calls operator-ratified)
+
+Sources: the v1.2 release announcement thread and the release-delta repo ingest (a621cc4..0986eba,
+fourth capture of this repo). Three dossiers plus a completeness critic and the master plan under
+`raw/synthesis/2026-08-05-mattpocock-v1.2-release/`. Operator ratified four calls: batch scope =
+everything including the two author-decoupled droppables; the install-story repair as sequenced;
+a **full per-skill human docs layer** - an operator override of the dossier's "no" and the critic's
+cheap-middle recommendation, recorded as such; the retirement clause written now. Rulings:
+
+1. **The docs layer exists**: one page per shipped skill at `docs/skills/<name>.md`, standard and
+index at `docs/skills/README.md`. Four-section spine (What it does / When to reach for it / Common
+questions / It's working if); FAQ evidence-gated from TRAPS/DECISIONS/RELEASES/rationalizations and
+sized honestly; working-if bullets checkable without opening SKILL.md, bound by the pr-and-verify
+capability ban list; a known unfixed sharp edge stated plainly with its stopgap (the page is the
+user surface for edges; TRAPS.md stays the library record); no install commands (BOOTSTRAP.md is
+canonical); the cache rule binds pages; branches in tables; a behaviour change lands with its page
+re-synced in the same commit; `bd-package-check` enforces the name mapping both ways.
+2. **BOOTSTRAP.md is the canonical install story** - README's locked-down block is regenerated from
+it (marked so), and its update line names both channels' verbs. The standing-permission offer (2c)
+is restored to the README block.
+3. **The release ledger is a version-bearing surface**: release-promotion gates the RELEASES.md
+line at the tag; the package gate bounds RELEASES.md versions against the manifest one-directionally
+(a line ahead re-fires the nudge and re-asks a declined offer forever; equality is wrong - pull-only
+releases legitimately trail, seven live tags prove it). Flags on a condensed line are the union;
+a removal names its absorber or says "retired, nothing replaces it".
+4. **Generic-name collision is named where it bites**: install.sh's skip report and packaging state
+the consequence (a foreign same-named skill wins the name; /review is the loop's merge gate). The
+plugin channel's host-namespacing fact is recorded in packaging. **Open verification row**: on a
+machine with no clone symlinks, install better-dev as a plugin, route "review this diff", record
+which skill enters. No chain rewrite until that observable fails. No writing-skills clause about
+generic slugs is owed (resolved by the packaging sentence; do not add one later).
+5. **The #693 coordinator-mode exposure** (Claude desktop/web drops user-invoked skills from the
+listing) is answered by a fallback route in the always-loaded routing row - terse form - and a trap;
+`/uninstall` keeps its flag: user-invoked-for-destructive-acts is right, the harness owns the fix.
+6. **wizard's mechanic lands at exactly one seam**: deploy-capability rung 2's payload fork (values
+transcribed -> one generated script, traced statically, never run end-to-end; probeable end states ->
+block-by-block). No vendored template (bash-light, reimplement-first), no sidecar doc (D27 r11).
+7. **writing-skills gains the batch's authoring rules**: the widened trigger (always-loaded blocks),
+the cache leading word (the environment is a source of truth; a restated lookup passes the deletion
+test and still rots), one-canonical-wording, delete-the-generator-with-the-thing, evidence-hunted
+rationalization rows (an invented row is a suggestion, not dead weight), branches-in-tables with its
+always-loaded-block boundary, a-skill-about-its-own-text-property-fails-by-growing, and
+reach-for-a-pretrained-word-before-coining.
+
+Rejected-with-reasons (one row each; full grounds in the batch dossiers):
+- Narrative RELEASES.md entries - machine-read by two awk consumers; the one-line format is load-bearing.
+- Changesets tooling - a Node toolchain and a bot for one line in one file.
+- "Drop docs-only entries" - category mismatch; the tier system filters by consumer consequence, which is stronger.
+- Empty deprecated/ bucket + public beta channel - a bucket that does not gate distribution is a label (their obsidian-vault proves it); self-extension's staging dir gates mechanically.
+- The equality version check - red today by contract (0.9.14 manifest vs 0.9.7 newest line, seven pull-only tags).
+- tag==manifest check - already shipped in release-promotion.
+- A wait-what corrective skill - the comms block carries the preventive half; the naming insight is already the description rule.
+- SKILL-MECHANICS-style split of writing-skills - one audience, no minority branch; the split buys a hop for material every reader needs.
+- First-use-link mechanics - hypertext-page mechanics with no plain-text analogue beyond one-word-one-unit.
+- The dictionary as a vocabulary asset - D15-era ruling at the Emil glossary row stands (dated asset, sync cadence).
+- Flipping /uninstall model-invoked - PLAN section 2 holds; the upstream filer's own position: the fix belongs in the harness.
+- Vendored template.sh / wizard sidecar doc - see ruling 6.
+- The five-option phase-boundary tree as a shipped artifact - four rows covered by existing owners; /clear declined because the ledger IS the durable why its primary-source argument protects; their /handoff-was-oversold correction is a check worktree-branching/handoff.md passes.
+- provisioning.md pointer sentence - a cache under the batch's own cache rule.
+- Branch-table conversion of comms-block.md's "Override when" line - the block is read whole every turn by an agent, not scanned by a reader who knows their situation; the branch rule's own boundary excludes it.
+- The narrative changeset style as a DECISIONS.md format upgrade - these rulings already read in that shape (what changed, what it replaced, the failure that drove it); nothing to add.
+
+Covered, not re-filed (so the next harvest does not re-litigate): #747 is a second independent
+same-day field report of the #683 self-authorization class - validates D27 rulings 5 and 9 with
+field evidence; the 25-page per-page-agent docs rewrite corroborates /orchestrating-agents' fan-out
+practice; #746 (whether-vs-where a change warrants the loop) is covered by front-end routing;
+#748 (rename shipped, Codex sidecar not re-synced, model invocation silently dead) is live field
+corroboration of D23's sidecar rejection; #481/Cursor asks carry no transfer under D23's
+second-consumer predicate; upstream's marketplace.json deprecated-in-prose has no transfer (ours is
+load-bearing); the v1.2.1 lesson is behavioural, not structural, for us (one version surface by
+construction; the propagation receipt now names its channels).

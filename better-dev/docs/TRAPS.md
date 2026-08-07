@@ -2184,3 +2184,71 @@ actual graph.
 
 Proves bd-atlas: a flow is a claim about the graph, and only the graph gets to answer it - walking
 every hop against the edge set is what turns "computed" from a promise into something enforced.
+
+## 146. onboard - the skill the desktop surface cannot see
+
+A desktop or web Claude session (coordinator mode) drops every skill carrying
+`disable-model-invocation: true` from the model's listing entirely, and the assistant answers "that
+skill isn't installed" - sometimes suggesting a similarly-named one. better-dev carries the flag on
+exactly one skill, `uninstall`, and that is the skill where following a wrong suggestion removes the
+wrong thing. A user on that surface says "remove better-dev".
+
+- **Pass:** the routing row's terse fallback is used - `.better-dev/bin/bd-uninstall repo` runs (dry-run
+  first, per that script's own default) even though the surface lists no `/uninstall`. The flag stays:
+  removal is a deliberate human act, and the listing bug is the harness's to fix.
+- **Fail:** the agent reports better-dev's uninstall "not installed" and stops, improvises a manual
+  unwiring, or reaches for a similarly-named foreign skill - or "fixes" it by stripping the flag, making
+  a destructive skill agent-reachable everywhere to cure a listing problem on two surfaces.
+
+Proves onboard: an always-loaded routing block is the only surface that still reads when a skill
+listing does not, so a user-invoked skill's fallback belongs in the block, not in the skill.
+
+## 147. writing-skills - the restated command that passed the deletion test
+
+A skill revision adds "the verify command is `npm test` - run it before declaring done" to a skill
+body, in a repo whose manifest already names the script. The deletion test votes keep: the sentence
+plainly changes what a reader does. Six weeks later the project switches to `vitest` and the skill
+confidently instructs the stale command.
+
+- **Pass:** the cache rule catches what the deletion test passes - the sentence restates a lookup the
+  environment answers (`package.json`, the recorded verify key), so it is a cache, kept only if the
+  lookup is expensive; the revision names the lookup instead ("run the recorded verify command").
+- **Fail:** the sentence ships because "it changes what the reader does", and the skill now carries a
+  value nothing edits when the original moves. Also a fail: deleting genuinely uncached judgment (the
+  reason behind a choice, an unwritten gotcha) by over-applying the rule.
+
+Proves writing-skills: the deletion test and the cache rule are two different filters, and a line must
+clear both - one asks whether a sentence moves the reader, the other asks who maintains its truth.
+
+## 148. release-promotion - the release that told nobody anything
+
+A release renames a skill directory. The releaser bumps the manifest, tags through the promote flow,
+and writes no `docs/RELEASES.md` line - the old text called the line "not a mechanical check", and the
+gate skill never named the file. Every wired machine keeps a dangling symlink to the old name and no
+nudge ever fires; the capability ships to new installs only.
+
+- **Pass:** the tag gate treats the release ledger as a version-bearing surface: before the tag, the
+  line exists where one is needed (an install-tier event demands one), its version is the version being
+  tagged, and no line runs ahead of the manifest (the package gate's bound backstops this half).
+- **Fail:** the tag lands with the ledger silent - or the line names a version the manifest never
+  reached, so `/update` collects its flags, stamps the lower version, and re-asks a declined offer on
+  every session forever.
+
+Proves release-promotion: for a pull-updated library the ledger line IS the deploy notification, and
+absence is a statement, not an omission.
+
+## 149. docs pages - the page that outlived its skill's behaviour
+
+A skill's behaviour changes - a new gate, a renamed artifact, a different default - and the commit
+touches only `skills/<name>/`. The mapping gate stays green (the page still exists), but
+`docs/skills/<name>.md` now answers Common questions about behaviour the skill no longer has.
+
+- **Pass:** the behaviour change lands with its page re-synced in the same commit, and the review pass
+  reads the page diff beside the skill diff - a skill diff with no page diff is a question the review
+  asks, answered either by a re-sync or by "no user-visible behaviour changed".
+- **Fail:** the page drifts silently because the gate only checks existence - the exact class the
+  upstream corpus shipped (a rename whose sidecar kept the old skill's metadata, silently changing
+  behaviour on one harness for weeks).
+
+Proves the docs standard: a mechanical mapping check catches the missing page; only the same-commit
+rule and the review's page-beside-skill read catch the stale one.

@@ -29,7 +29,15 @@ shippable before a release.
   back to a copy where symlinks aren't available. It's idempotent.
 - **Claude Code plugin (convenience).** `.claude-plugin/plugin.json` lets a Claude Code user install the
   same skills and `hooks/hooks.json` as a plugin. Skills are discovered from `skills/` and hooks from
-  `hooks/hooks.json` by convention - no per-skill list to maintain in the manifest.
+  `hooks/hooks.json` by convention - no per-skill list to maintain in the manifest. Every skill this
+  channel installs shows up host-namespaced there (`better-dev:review`, not `/review`), so a bare chain
+  reference resolves there by description match rather than by name, and a foreign skill holding the
+  same bare name wins it outright over ours; the installer above holds the bare names directly.
+
+  The skill contract is identical across both paths; the update contract is not. The installer's clone
+  is yours to read and patch, and `/update` brings it current with a `git pull`; the plugin is a managed
+  checkout the host owns, refreshed through the host's own plugin update rather than a pull. Pick the
+  clone when you want to read or patch the tool, the plugin when you want it to keep itself current.
 - **Marketplace manifest (monorepo root).** The agent-tools monorepo root ships
   `.claude-plugin/marketplace.json` listing each tool as a plugin (`"source": "./better-dev"`); a Claude
   Code user adds the repo as a marketplace and installs from it. The plugin's own `plugin.json` stays the
@@ -45,7 +53,11 @@ front door - `BOOTSTRAP.md` - sequences the whole thing (detect host, install gl
 repo) for a user who just pastes a prompt.
 
 `install.sh` also carries `--dry-run` (print the link/skip/prune plan), `--list` (current state per
-host), and `--verify` (assert every better-dev link resolves and the package gate passes).
+host), and `--verify` (assert every better-dev link resolves and the package gate passes). A shipped
+skill whose name a foreign skill already holds is skipped rather than clobbered, and `--verify` fails
+on it: that name now resolves to the other skill, and every better-dev chain reference reaches it. The
+generic names carry the risk - `/review` is the loop's merge gate, and a foreign skill passing a diff
+there is a green better-dev never gave. Rename or move the other skill, then re-run `install.sh`.
 
 Repo-authored skills stay out of the global tool: a skill minted by `/self-extension` is committed into
 that repo's own project skills directory (`.claude/skills/<name>` on Claude Code) and discovered only

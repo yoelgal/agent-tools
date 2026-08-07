@@ -6,7 +6,13 @@ Machine-read by the session-start hook and `/update`. One line per release, newe
 whole update), **install** (a skill dir was added, removed, or renamed - re-run `install.sh` once
 per machine), **reonboard** (a repo surface changed - re-run `/onboard` once per wired repo), and
 **offer** (the release added something opt-in - ask the operator once whether they want it). A
-version with no line here is pull-only; flags are never empty.
+version with no line here is pull-only; flags are never empty. One line covers everything in its
+release, so its flags are the **union** of what each change in it needs, never the mildest one: a
+release that changed a repo surface *and* removed a skill dir is `install,reonboard`, because
+dropping the `install` tier leaves a dangling link to a deleted skill on every machine and no nudge
+ever fires for it. A line that removes or renames a skill also names where its job went - the skill
+that absorbed it, or "retired, nothing replaces it" - since the installer prunes the link silently
+and the operator's next question is what to reach for instead.
 
 The first three tiers say *do this to stay current*; `offer` is the only one that asks a question,
 and it exists because a new capability otherwise reaches new installs alone. A first install meets

@@ -27,7 +27,7 @@ itself - a tool you name wins over a row:
 | "what's worth doing here", "audit this codebase" | `/codebase-audit` | ranked findings; you pick -> front-ends |
 | "here are some links / ingest these / harvest this", a link or dump of source material for the library - even one framed as "implement this" | `/source-harvest` | captures verbatim -> critical synthesis; a build ask then -> `/plan-grill` |
 | "just push to the PR / use feat/ / skip the grill" | `/overrides` | records the standing default |
-| "remove better-dev" | `/uninstall` | unwires this repo, keeps your data |
+| "remove better-dev" | `/uninstall` (or `.better-dev/bin/bd-uninstall repo`) | unwires this repo, keeps your data |
 | a one-to-two-step change | no front-end - just make it | inline in the work-item's worktree; verify before done |
 
 You name the entry, not every step: each front-end hands to `/autonomous-loop`, which hands a DONE
