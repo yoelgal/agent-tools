@@ -148,8 +148,8 @@ grill only the decisions the done-criteria will turn on and skip exhaustive bran
   their own round, below) and the rest stay on the frontier for the next one, so the cap defers a
   decision rather than dropping it. Never seat a question beside one it depends on - the dependent
   stays out until a recompute clears it. Where the host has a native ask tool that presents each
-  question with options and a marked recommendation, the round rides it; elsewhere number the
-  questions and set your pick apart beneath each one, so a reply can come back as numbers alone.
+  question with options and a marked recommendation, the round rides it; elsewhere emit a numbered
+  list - each question, then your recommendation on its own line - so the user answers by number.
   Two guards keep a round from being answered as a form. A one-way door (the
   class below) is always its own round of one, never seated beside preference calls. And a blanket
   accept-all reply ("all fine", "your picks") does not lock the round: reflect the two picks with

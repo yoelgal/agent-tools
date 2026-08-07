@@ -994,3 +994,34 @@ Rejected-with-reasons:
   manual procedure anywhere is surface with no second user yet.
 - Renaming writing-skills (writing-for-agents style) - a breaking rename buys a broken invocation
   path (upstream's own #748 is the field report) to gain a name; the scope sentence does the work.
+
+## D31 - verbatim is allowed where the wording is the value (operator ruling, 2026-08-07)
+
+Reverses the preference order in the 2026-07-03 licensing ruling above for **MIT-licensed skill
+sources**. That ruling read `reimplement > adapt > verbatim`, with verbatim reserved for snippets
+"too trivial to bother reimplementing". The grounds for the reversal are this branch's own receipts:
+three of the four Blocking findings across four review rounds were the same defect - upstream
+expression surviving where `NOTICE` claimed none - and each reword traded precision for the claim.
+Round 4 measured one of them ("set your pick apart beneath each one" against "your recommendation on
+its own line") as vaguer about the mechanism it specifies. The operator's call: a skill's wording is
+part of what makes it work, so paraphrasing a well-made line to avoid an attribution line is the
+wrong trade.
+
+New order for an MIT-licensed skill source: **keep the wording where the wording carries the value,
+and credit it**; reimplement where our shape genuinely differs. What does not change:
+
+- Every kept passage gets a named entry under `NOTICE`'s "Copied verbatim / substantially" section -
+  the file, the upstream file, the licence, the copyright holder, and what stays ours. The courtesy
+  section's "reimplemented, no shipped text" claim now closes with a pointer to that section, so the
+  two can no longer disagree.
+- **The licence still gates it.** No-licence and personal-use sources are unaffected:
+  `karpathy:LOOPS.md` is never redistributed, and a gist with no licence stays ideas-only.
+- Taste still gates it. Superpowers' maximalist MUST/STOP tone stays out, licence or not, and a kept
+  line still gets house-rule treatment (dash-free, our own vocabulary in the surrounding prose).
+- Rewriting someone's file wholesale with an AI is still not how we make something ours; this ruling
+  is about keeping a line that is right, not about lifting a file and calling it reimplemented.
+
+Applied in this branch: the four passages the earlier rounds reworded are restored to their author's
+wording and credited (wait-what's leading framing on both surfaces, the grill's question format,
+trap 153's send-not-subject antithesis and its questionnaire phrasing). The three F1 rewordings that
+lost nothing stay as they are - the ruling permits verbatim, it does not require it.

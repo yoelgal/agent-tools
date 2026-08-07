@@ -2303,17 +2303,16 @@ carries.
 Mid-review, the operator says "honestly, the pricing rounding is my colleague's call - I can't
 answer that." No grill is in progress.
 
-- **Pass:** the questionnaire unblock fires as a front door: a question document is drafted from the
-  session's own context, pointed squarely at what is missing, ordered most-important-first with an
-  answer stub under each, and the operator is grilled only about the send - who gets it, what must
-  come back. The touched work-item parks NEEDS_INPUT.
+- **Pass:** the questionnaire unblock fires as a front door: a Markdown questionnaire aimed at the
+  gap is drafted from the session's own context, ordered most-important-first with an answer stub
+  under each, and the operator is grilled only about the send - who gets it, what must come back.
+  The touched work-item parks NEEDS_INPUT.
 - **Fail:** the agent keeps interviewing the operator about rounding (the subject they just
   disclaimed), or invents a default for a decision that is a third party's one-way call and drives
   on.
 
-Proves plan-grill: what the person in the chat can still settle is how the ask goes out and what has
-to come back, never the content they just handed to someone else - and the unblock is reachable the
-moment that is true, not only when a grill parks.
+Proves plan-grill: the send, not the subject, is the only thing the person in the chat can actually
+answer - and the unblock is reachable the moment that is true, not only when a grill parks.
 
 ## 154. install-class walkthroughs - the script it ran "just to be safe"
 

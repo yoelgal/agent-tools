@@ -6,7 +6,7 @@ Re-pitches the message that just lost you: one line of context for where the age
 matters, then the point again in short plain sentences using your project's own vocabulary instead
 of better-dev's. Its defining constraint is what it refuses to be: a concision setting. Aiming a
 fix at the output ("be brief", "tldr") trims the reply while the gap that lost you stays open;
-aiming it at the reader - you could not follow that - brings back both the point and the
+aiming it at the listener - comprehension failed here - brings back both the point and the
 background it needed, in less space.
 
 ## When to reach for it
