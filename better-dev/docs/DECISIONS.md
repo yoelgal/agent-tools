@@ -942,3 +942,50 @@ corroboration of D23's sidecar rejection; #481/Cursor asks carry no transfer und
 second-consumer predicate; upstream's marketplace.json deprecated-in-prose has no transfer (ours is
 load-bearing); the v1.2.1 lesson is behavioural, not structural, for us (one version surface by
 construction; the propagation receipt now names its channels).
+
+## D30 - conversation-layer north star (2026-08-06 ratified; 2026-08-07 built)
+
+Source: the operator's north-star alignment over the mattpocock v1.2 conversation layer, one day
+after D29. The four contested calls were themselves put as one guarded round; all four came back
+considered - two overrode the session's recommendation - which is the second live receipt for
+ruling 1 below. Rulings:
+
+1. **Ruling 12 (D23, re-grounded D27) reversed: the grill works the frontier in rounds, guarded.**
+The recorded revisit condition was met - the rounds mechanic graduated upstream into the main
+grilling skill and survived their own use - and the form-answering ground the rejection stood on is
+answered inside the mechanic: a round caps at four, every question carries options plus a
+recommended pick, a one-way door is always its own round of one, and a blanket accept-all reply
+gets the two most consequential picks reflected back before locking. Evidence on the reversal side:
+two live batched rounds in this repo's own sessions (2026-08-05 harvest scope round, 2026-08-06
+north-star round) produced considered answers including overrides of the recommendation - the
+observed failure did not reproduce under the guards. Traps 150-151 rig both guards.
+2. **The D29 wait-what rejection is reopened by operator call: the corrective ships as a tiny
+model-invoked skill.** The rejection's ground (the comms block carries the preventive half) stands,
+but the corrective half had no home - the record's own "I just wanted 'here's what I'll build,
+ok?'" moment is the evidence it was needed. The operator chose the skill form over a comms-block
+clause. It is model-invoked so it fires on the natural signal ("wait", "you lost me"), not only by
+name - a corrective needed at the moment of frustration cannot depend on remembering a command. The
+body stays a few lines by design; the authoring standard's fails-by-growing rule has its working
+example, and trap 152 rigs the growth ask.
+3. **The questionnaire unblock gains a front door.** The grill-the-send machinery (landed at D27)
+is reachable from any flow the moment the operator says a decision is someone else's - a routing
+row plus an arrival paragraph in plan-grill, trap 153. No new machinery: a name and a door.
+4. **D29 ruling 6 widened: the payload fork is the library's canonical walkthrough form.**
+deploy-capability rung 2 keeps the full form and is named the canonical home; observability-install
+and guardrails-install point at it from their own operator steps. Still no vendored template file -
+bash-light, reimplement-first.
+5. Two uncontested widenings ride along: the third-party logic prototype gains tabbed guided
+walkthroughs (a scenario per tab in plain words, ordered buttons, reset to a known start); the
+writing-skills bar explicitly binds sibling reference files reached by prose pointer.
+
+Rejected-with-reasons:
+- Full upstream-shape frontier rounds (whole frontier at once, no guards) - the form-answering
+  observation was real; the two guards are the reversal's price, not decoration.
+- A comms-block wait-what clause, or clause plus skill - the operator chose the single skill form;
+  two homes for one corrective is drift.
+- A standalone questionnaire skill - the machinery already lives in plan-grill; a name and a door
+  was all that was missing (the laziness test).
+- A full general wizard skill - the install-class seams are the observed need; a generator for any
+  manual procedure anywhere is surface with no second user yet.
+- Renaming writing-skills (writing-for-agents style) - a breaking rename buys a broken invocation
+  path (upstream's own #748 is the field report) to gain a name; the scope sentence does the work.
