@@ -20,52 +20,65 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
     orrgal1/claude-plugins graphify-wrapper v1.2.0 (MIT, (c) 2026 orrgal1); mechanics
     kept substantially verbatim, prose adapted to house rules (dash-free, Use-when
     descriptions, bridge-resolved lib path).
-  skills/review/standards-baseline.md - the Fowler smell baseline (entry wording, the
-    what-it-is -> how-to-fix form, and the "possible <smell>" judgement-call framing)
-    adapted from mattpocock/skills skills/engineering/code-review/SKILL.md (MIT,
-    (c) 2026 Matt Pocock); the surrounding review machinery is ours.
-  skills/deploy-capability/SKILL.md rung 2 - the static-trace rule for a generated
-    operator script (don't run it end to end since it opens browsers and blocks on
-    input; trace it statically instead, and the two things that trace checks) adapted
-    from mattpocock/skills skills/engineering/wizard/SKILL.md (MIT, (c) 2026 Matt
-    Pocock); the payload fork itself, its counting test, and the surrounding
-    walkthrough machinery are ours.
-  skills/writing-skills/SKILL.md - four passages kept in their author's wording, all
-    mattpocock/skills (MIT, (c) 2026 Matt Pocock): the fails-by-growing formulation and
-    its four-hundred-line illustration, from docs/productivity/wait-what.md; the
-    negation mechanism ("the negation is a weak modifier the ... concept overruns", the
-    ban half-reading "as an instruction to do the thing"), from
-    skills/productivity/writing-great-skills/GLOSSARY.md, the pre-rename file; the
-    branches rule ("a multi-way branch goes in a table or a list, never a paragraph"),
-    from .agents/writing-docs.md; and the environment-as-cache rule (the environment as
-    a source of truth, a restating document as a cache, "the reason behind a choice",
-    the gotcha the config does not confess), from
-    skills/productivity/writing-for-agents/SKILL.md. The bar's other rules, its
-    frontmatter standard, the deletion test and the trap set around them are ours.
-  docs/skills/README.md, docs/skills/*.md - the four-section page spine (What it does /
-    When to reach for it / Common questions / It's working if) and the orient-then-answer
-    rationale for it, from mattpocock/skills .agents/writing-docs.md (MIT, (c) 2026 Matt
-    Pocock); every page's contents, and the bidirectional mapping the package gate
-    enforces, are ours.
-  skills/wait-what/SKILL.md, docs/skills/wait-what.md - the corrective's own framing
-    kept in its author's wording ("the last message did not land", "comprehension
-    failed here") from mattpocock/skills skills/productivity/wait-what/SKILL.md and
-    docs/productivity/wait-what.md (MIT, (c) 2026 Matt Pocock); the size gate, the
-    context-line-leads rule, the routing table and the comms-block boundary are ours.
-  skills/plan-grill/SKILL.md - two passages, both mattpocock/skills (MIT, (c) 2026 Matt
-    Pocock). The round's question format ("each question, then your recommendation on
-    its own line - so the user answers by number") from the grilling-question-format
-    changeset that pinned it into skills/productivity/grilling/SKILL.md; the two guards,
-    the four-question cap and the one-way-door class are ours. The questionnaire
-    unblock's rules (grill the user only about the send - who it goes to and what must
-    come back; questions ordered most-important-first because async may get one pass;
-    one idea per question with an answer stub under each) from
-    skills/productivity/to-questionnaire/SKILL.md; the front-door routing, the
-    NEEDS_INPUT park and the work-item wiring are ours.
-  docs/TRAPS.md trap 153 - the "send, not the subject" antithesis, the "Markdown
-    questionnaire aimed at the gap" phrasing, and the ordering-and-stub clause it
-    restates, from mattpocock/skills skills/productivity/to-questionnaire/SKILL.md (MIT,
-    (c) 2026 Matt Pocock); the trap's scenario and its Pass/Fail structure are ours.
+  mattpocock/skills - Matt Pocock (MIT, (c) 2026 Matt Pocock). Under D31 this library
+    keeps that repo's wording wherever the wording is what carries the value, so the
+    files below hold passages in their author's expression and not only reimplemented
+    patterns. The list is deliberately scoped by FILE, not by sentence: what a reader
+    needs is which of our files to treat as carrying upstream text, and a
+    sentence-level list is stale the day someone finds one more. Where a file is named
+    here, assume its debt may run past the examples given.
+      skills/review/standards-baseline.md, skills/review/SKILL.md,
+        skills/review/reviewer-brief.md <- skills/engineering/code-review/SKILL.md.
+        The Fowler smell baseline (entry wording, the what-it-is -> how-to-fix form, the
+        "possible <smell>" framing), the two-axis "a change can pass one axis and fail
+        the other" line, the repo-standard-overrides-the-baseline rule. The review
+        chain, its channels, its dispatch and its gates are ours.
+      skills/deploy-capability/SKILL.md rung 2 <- skills/engineering/wizard/SKILL.md.
+        The static-trace rule for a generated operator script: do not run it end to end
+        since it opens browsers and blocks on input, trace it statically, and the two
+        things that trace checks. The payload fork itself, its counting test and the
+        walkthrough machinery around it are ours.
+      skills/writing-skills/SKILL.md <- .agents/writing-docs.md,
+        skills/productivity/writing-for-agents/SKILL.md,
+        skills/productivity/writing-great-skills/GLOSSARY.md (the pre-rename file),
+        docs/productivity/wait-what.md. The branches-in-a-table rule, the
+        environment-as-cache rule, the negation mechanism, the read-the-draft-for-its-
+        silences rule, the fails-by-growing formulation and its four-hundred-line
+        illustration. The frontmatter standard, the deletion test, the leading-word
+        rules and the trap set around them are ours.
+      docs/skills/README.md and the pages under docs/skills/ <- .agents/writing-docs.md,
+        skills/productivity/writing-for-agents/SKILL.md. The four-section page spine
+        (What it does / When to reach for it / Common questions / It's working if) and
+        its orient-then-answer rationale, the working-if bar ("a few bullets naming what
+        the reader sees when the skill is doing its job"), the compliance-check-wearing-
+        this-section's-name line, the evidence-gated question sizing, and this file's own
+        copies of the branches and cache rules. Every page's contents, and the
+        bidirectional mapping the package gate enforces, are ours.
+      skills/wait-what/SKILL.md, docs/skills/wait-what.md <-
+        skills/productivity/wait-what/SKILL.md, docs/productivity/wait-what.md.
+        The corrective's own framing, kept in its author's words: "the last message did
+        not land", "comprehension failed here". The size gate, the context-line-leads
+        rule, the routing table and the comms-block boundary are ours.
+      skills/plan-grill/SKILL.md <- the grilling-question-format changeset that pinned
+        the format into skills/productivity/grilling/SKILL.md, and
+        skills/productivity/to-questionnaire/SKILL.md. The round's question format
+        ("each question, then your recommendation on its own line - so the user answers
+        by number") and the questionnaire unblock's rules (grill the user only about the
+        send; most-important-first because async may get one pass; one idea per question
+        with an answer stub under each). The two guards, the four-question cap, the
+        one-way-door class, the front-door routing and the NEEDS_INPUT park are ours.
+      docs/TRAPS.md trap 153 <- skills/productivity/to-questionnaire/SKILL.md. The
+        "send, not the subject" antithesis, the "Markdown questionnaire aimed at the gap"
+        phrasing, and the ordering-and-stub clause it restates. The trap's scenario and
+        its Pass/Fail structure are ours.
+      skills/codebase-audit/SKILL.md, skills/orchestrating-agents/briefs-and-reviews.md,
+        skills/groundwork/carving.md, skills/plan-grill/done-contract.md <- the same
+        repo's engineering and productivity skills. Short kept runs inside otherwise
+        original procedures, found by the 2026-08-07 attribution sweep and listed here
+        rather than paraphrased away.
+      docs/DECISIONS.md and docs/TRAPS.md restate several of the rules above where a
+        ruling or a trap turns on one. Those are records of what was adopted and name
+        their source in the same breath; the reasoning and the scenarios are ours.
 
 ── Pattern inspiration (courtesy credit, not legally required) ──
   mattpocock/skills - Matt Pocock       (MIT) (also: the wait-what listener-state corrective,

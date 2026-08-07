@@ -474,8 +474,10 @@ that. Order of preference per source: **reimplement > adapt > verbatim** - REVER
 (2026-08-07): for an **MIT-licensed skill source** the order is now to keep the author's wording
 where the wording carries the value and credit it in `NOTICE`. Everything else in this ruling,
 including both carve-outs below, still stands; read D31 before applying this line.
-- `NOTICE` credits **only** expression actually copied (today: the vendored `browse/` and `ios-qa/`
-  daemons plus bd-guard's adapted pattern set - the D14 exception); pattern inspiration is courtesy, not required.
+- `NOTICE` credits **only** expression actually copied; pattern inspiration is courtesy, not
+  required. (This line used to enumerate the copied set inline. It was eight entries behind by
+  2026-08-07 and read as a cap on what the section may hold at exactly the moment D31 started
+  adding to it, so the enumeration lives in `NOTICE` alone now.)
 - Rewriting someone's file with an AI ≠ making it ours - that's a derivative work. We reimplement from the
   *idea*, not by paraphrasing their file.
 - **Never redistribute** `karpathy:LOOPS.md` (personal-use) - reimplement, never quote.
@@ -1013,10 +1015,17 @@ to avoid an attribution line is the wrong trade.
 New order for an MIT-licensed skill source: **keep the wording where the wording carries the value,
 and credit it**; reimplement where our shape genuinely differs. What does not change:
 
-- Every kept passage gets a named entry under `NOTICE`'s "Copied verbatim / substantially" section -
-  the file, the upstream file, the licence, the copyright holder, and what stays ours. The courtesy
-  section's "reimplemented, no shipped text" claim now closes with a pointer to that section, so the
-  two can no longer disagree.
+- **Credit by file, not by sentence.** A source's entry names the files of ours that carry its
+  expression, the upstream files they draw on, examples of what was kept, and what stays ours. Six
+  review rounds on this branch established why: a sentence-level entry names a file, naming a file
+  puts it in an auditor's scope, the audit finds one more passage in it, and the entry that was
+  written to be accurate is now false. A file-scoped entry survives the next passage found in a file
+  it already names. `NOTICE` says so in the entry itself, so the scope is a stated choice rather
+  than an omission.
+- Every kept passage sits under a named entry in `NOTICE`'s "Copied verbatim / substantially"
+  section, carrying the file, the upstream file, the licence and the copyright holder. The courtesy
+  section's "reimplemented, no shipped text" claim closes with a pointer to that section, so the two
+  can no longer disagree.
 - **The licence still gates it.** No-licence and personal-use sources are unaffected:
   `karpathy:LOOPS.md` is never redistributed, and a gist with no licence stays ideas-only.
 - Taste still gates it. Superpowers' maximalist MUST/STOP tone stays out, licence or not, and a kept
