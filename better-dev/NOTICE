@@ -30,23 +30,42 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
     from mattpocock/skills skills/engineering/wizard/SKILL.md (MIT, (c) 2026 Matt
     Pocock); the payload fork itself, its counting test, and the surrounding
     walkthrough machinery are ours.
-  skills/writing-skills/SKILL.md - the fails-by-growing formulation and its
-    four-hundred-line illustration ("a four-hundred-line skill teaching leanness
-    teaches the volume, not the rule") adapted from the same repo's wait-what design
-    rationale (MIT, (c) 2026 Matt Pocock); the authoring standard around it is ours.
+  skills/writing-skills/SKILL.md - four passages kept in their author's wording, all
+    mattpocock/skills (MIT, (c) 2026 Matt Pocock): the fails-by-growing formulation and
+    its four-hundred-line illustration, from docs/productivity/wait-what.md; the
+    negation mechanism ("the negation is a weak modifier the ... concept overruns", the
+    ban half-reading "as an instruction to do the thing"), from
+    skills/productivity/writing-great-skills/GLOSSARY.md, the pre-rename file; the
+    branches rule ("a multi-way branch goes in a table or a list, never a paragraph"),
+    from .agents/writing-docs.md; and the environment-as-cache rule (the environment as
+    a source of truth, a restating document as a cache, "the reason behind a choice",
+    the gotcha the config does not confess), from
+    skills/productivity/writing-for-agents/SKILL.md. The bar's other rules, its
+    frontmatter standard, the deletion test and the trap set around them are ours.
+  docs/skills/README.md, docs/skills/*.md - the four-section page spine (What it does /
+    When to reach for it / Common questions / It's working if) and the orient-then-answer
+    rationale for it, from mattpocock/skills .agents/writing-docs.md (MIT, (c) 2026 Matt
+    Pocock); every page's contents, and the bidirectional mapping the package gate
+    enforces, are ours.
   skills/wait-what/SKILL.md, docs/skills/wait-what.md - the corrective's own framing
     kept in its author's wording ("the last message did not land", "comprehension
     failed here") from mattpocock/skills skills/productivity/wait-what/SKILL.md and
     docs/productivity/wait-what.md (MIT, (c) 2026 Matt Pocock); the size gate, the
     context-line-leads rule, the routing table and the comms-block boundary are ours.
-  skills/plan-grill/SKILL.md - the round's question format ("each question, then your
-    recommendation on its own line - so the user answers by number") adapted from
-    mattpocock/skills skills/productivity/grilling/SKILL.md (MIT, (c) 2026 Matt
-    Pocock); the two guards, the four-question cap and the one-way-door class are ours.
-  docs/TRAPS.md trap 153 - the "send, not the subject" antithesis and the "Markdown
-    questionnaire aimed at the gap" phrasing from mattpocock/skills
-    skills/productivity/to-questionnaire/SKILL.md (MIT, (c) 2026 Matt Pocock); the
-    trap's scenario and its Pass/Fail are ours.
+  skills/plan-grill/SKILL.md - two passages, both mattpocock/skills (MIT, (c) 2026 Matt
+    Pocock). The round's question format ("each question, then your recommendation on
+    its own line - so the user answers by number") from the grilling-question-format
+    changeset that pinned it into skills/productivity/grilling/SKILL.md; the two guards,
+    the four-question cap and the one-way-door class are ours. The questionnaire
+    unblock's rules (grill the user only about the send - who it goes to and what must
+    come back; questions ordered most-important-first because async may get one pass;
+    one idea per question with an answer stub under each) from
+    skills/productivity/to-questionnaire/SKILL.md; the front-door routing, the
+    NEEDS_INPUT park and the work-item wiring are ours.
+  docs/TRAPS.md trap 153 - the "send, not the subject" antithesis, the "Markdown
+    questionnaire aimed at the gap" phrasing, and the ordering-and-stub clause it
+    restates, from mattpocock/skills skills/productivity/to-questionnaire/SKILL.md (MIT,
+    (c) 2026 Matt Pocock); the trap's scenario and its Pass/Fail structure are ours.
 
 ── Pattern inspiration (courtesy credit, not legally required) ──
   mattpocock/skills - Matt Pocock       (MIT) (also: the wait-what listener-state corrective,

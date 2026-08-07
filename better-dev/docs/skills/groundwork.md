@@ -26,14 +26,14 @@ ask.
 
 ## Where it fits
 
-It sits above `/plan-grill` in the chain, after `/onboard` has wired the tool and the branching base.
-Its lean built-in grill (used when `/plan-grill`'s composables are absent) batches questions into
-small rounds by settled prerequisites - the same rhythm, and the same guards, the plan-grill page
-describes.
-The foundation it designs goes through the normal pipeline as the epic's first work-item - its own
-worktree, grilled, driven by the loop, merged - before any carved item bases off it. Each carved item
-then goes down its own front-end (`/plan-grill` or `/diagnose`) into `/autonomous-loop` and
-`/pr-and-verify`, same as any other work-item; groundwork's job ends at the handoff.
+It sits above `/plan-grill` in the chain, after `/onboard` has wired the tool and the branching
+base. Its lean built-in grill (used when `/plan-grill`'s composables are absent) batches questions
+into small rounds by settled prerequisites - the same rhythm, and the same guards, the plan-grill
+page describes. The foundation it designs goes through the normal pipeline as the epic's first
+work-item - its own worktree, grilled, driven by the loop, merged - before any carved item bases off
+it. Each carved item then goes down its own front-end (`/plan-grill` or `/diagnose`) into
+`/autonomous-loop` and `/pr-and-verify`, same as any other work-item; groundwork's job ends at the
+handoff.
 
 ## Prerequisites
 

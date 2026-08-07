@@ -150,11 +150,11 @@ grill only the decisions the done-criteria will turn on and skip exhaustive bran
   stays out until a recompute clears it. Where the host has a native ask tool that presents each
   question with options and a marked recommendation, the round rides it; elsewhere emit a numbered
   list - each question, then your recommendation on its own line - so the user answers by number.
-  Two guards keep a round from being answered as a form. A one-way door (the
-  class below) is always its own round of one, never seated beside preference calls. And a blanket
-  accept-all reply ("all fine", "your picks") does not lock the round: reflect the two picks with
-  the most downstream weight back in a line each and let them hold before they harden. Questions
-  surfacing from parallel workers still batch through the orchestrator's question budget
+  Two guards keep a round from being answered as a form. A one-way door (the class below) is
+  always its own round of one, never seated beside preference calls. And a blanket accept-all
+  reply ("all fine", "your picks") does not lock the round: reflect the two picks with the most
+  downstream weight back in a line each and let them hold before they harden. Questions surfacing
+  from parallel workers still batch through the orchestrator's question budget
   (`/orchestrating-agents`); the frontier round is the rule with the user present.
 - **Carry a recommended answer.** Every question ships with the answer you'd pick and why - the user
   corrects a default faster than they fill a blank. If the user answers "whatever you think," they

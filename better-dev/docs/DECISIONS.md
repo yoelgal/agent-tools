@@ -467,10 +467,13 @@ Ran `onboard` + one feature slice → staging end-to-end on the real clone (loca
 3. bootstrap-hooks → packaging → (release, guardrails, pr-and-verify, browser)
 
 ## Licensing & attribution - the clean path (owner-approved 2026-07-03)
-Build by **reimplementing patterns from understanding**. Ideas, methods, and system designs are not
-copyrightable, so reimplemented components are our original work and owe **no attribution**. Copy verbatim
-only when a snippet is too trivial to bother reimplementing - and minimize even that. Order of preference
-per source: **reimplement > adapt > verbatim**.
+Build by **reimplementing patterns from understanding**. Ideas, methods, and system designs are
+not copyrightable, so reimplemented components are our original work and owe **no attribution**.
+Copy verbatim only when a snippet is too trivial to bother reimplementing - and minimize even
+that. Order of preference per source: **reimplement > adapt > verbatim** - REVERSED IN PART by D31
+(2026-08-07): for an **MIT-licensed skill source** the order is now to keep the author's wording
+where the wording carries the value and credit it in `NOTICE`. Everything else in this ruling,
+including both carve-outs below, still stands; read D31 before applying this line.
 - `NOTICE` credits **only** expression actually copied (today: the vendored `browse/` and `ios-qa/`
   daemons plus bd-guard's adapted pattern set - the D14 exception); pattern inspiration is courtesy, not required.
 - Rewriting someone's file with an AI ≠ making it ours - that's a derivative work. We reimplement from the
@@ -1000,12 +1003,12 @@ Rejected-with-reasons:
 Reverses the preference order in the 2026-07-03 licensing ruling above for **MIT-licensed skill
 sources**. That ruling read `reimplement > adapt > verbatim`, with verbatim reserved for snippets
 "too trivial to bother reimplementing". The grounds for the reversal are this branch's own receipts:
-three of the four Blocking findings across four review rounds were the same defect - upstream
-expression surviving where `NOTICE` claimed none - and each reword traded precision for the claim.
-Round 4 measured one of them ("set your pick apart beneath each one" against "your recommendation on
-its own line") as vaguer about the mechanism it specifies. The operator's call: a skill's wording is
-part of what makes it work, so paraphrasing a well-made line to avoid an attribution line is the
-wrong trade.
+all four Blocking findings across four review rounds were one defect - upstream expression surviving
+where `NOTICE` claimed none - and three of the four were dispositioned by rewording the line, each
+trading precision for the claim. Round 4 measured one of them ("set your pick apart beneath each
+one" against "your recommendation on its own line") as vaguer about the mechanism it specifies. The
+operator's call: a skill's wording is part of what makes it work, so paraphrasing a well-made line
+to avoid an attribution line is the wrong trade.
 
 New order for an MIT-licensed skill source: **keep the wording where the wording carries the value,
 and credit it**; reimplement where our shape genuinely differs. What does not change:
