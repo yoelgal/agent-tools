@@ -136,15 +136,18 @@ grill closes - the design read and system choice belong in the plan, not discove
 
 Interview the design down every branch of its decision tree. At any moment some decisions are
 askable because nothing they depend on is still open - call that set the **frontier**; every other
-question is blocked behind an answer that has not arrived. At **full** depth (the default) you walk every branch; at **light** depth -
-passed as `[depth]` for a small, well-understood feature - you grill only the decisions the
-done-criteria will turn on and skip exhaustive branch-walking.
+decision is blocked behind an answer that has not arrived. At **full** depth (the default) you walk
+every branch; at **light** depth - passed as `[depth]` for a small, well-understood feature - you
+grill only the decisions the done-criteria will turn on and skip exhaustive branch-walking.
 
 - **Ask the frontier as a round, then wait.** Put the open frontier to the user as one round of at
   most four questions, then recompute: their answers settle prerequisites, the frontier moves
   outward, and the next round asks what just unblocked - the same decisions land in a few rounds
-  instead of a serial interview. Never seat a question beside one it depends on - the dependent
-  stays out until a recompute clears it. Where the host has a native ask tool that
+  instead of a serial interview. More than four unblocked at once is normal, not a conflict: the
+  four carrying the most downstream weight go in this round and the rest stay on the frontier for
+  the next one, so the cap defers a decision rather than dropping it. Never seat a question beside
+  one it depends on - the dependent stays out until a recompute clears it. Where the host has a
+  native ask tool that
   presents each question with options and a marked recommendation, the round rides it; elsewhere
   emit a numbered list - each question, then your recommendation on its own line - so the user
   answers by number. Two guards keep a round from being answered as a form. A one-way door (the
@@ -207,7 +210,7 @@ done-criteria will turn on and skip exhaustive branch-walking.
   |---|---|
   | Look-question | Several radically different variants rendered on one route and toggled by a URL param, so the user reacts to each in place rather than one mockup at a time |
   | Logic question, answerer reads code | A filled example |
-  | Logic question, answerer is the third party the async-questionnaire unblock below serves | One self-contained HTML file that renders the whole relevant state after every click, with a button per action for free play plus tabbed guided walkthroughs - each tab one scenario in plain words with the ordered buttons to press, reset to a known start so it replays the same every time |
+  | Logic question, answerer is the third party the async-questionnaire unblock below serves | One self-contained HTML file that renders the whole relevant state after every click, with a button per action for free play plus one tab per worked case - a tab spells its case out in plain words and numbers the clicks that drive it, and opening a tab rewinds the state so the case behaves identically however often it is replayed |
 
   Keep the logic itself a pure module the page only calls into, so the answer survives the page
   being thrown away. The artifact is throwaway from its first line and marked so, runs with one

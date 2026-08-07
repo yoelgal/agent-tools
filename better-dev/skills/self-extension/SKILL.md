@@ -66,9 +66,10 @@ transcript, not on disk - don't guess it into a plausible-sounding procedure. In
 draft-folding steps about how they do it, what good output looks like, and the edge cases that trip
 it: each answer lands in the draft before the next question, so every question reacts to the
 updated draft - a dependency chain whose frontier is one question wide, which is why this interview
-stays serial while the grill batches rounds. If a question is answerable from the codebase, look there instead of
-asking. Same rule as `/plan-grill`'s must-ask guard (`skills/plan-grill/SKILL.md` step 3): a fact you can
-find is yours to find, and an interview question answered by this same session is a broken interview.
+stays serial while the grill batches rounds. If a question is answerable from the codebase, look
+there instead of asking. Same rule as `/plan-grill`'s must-ask guard (`skills/plan-grill/SKILL.md`
+step 3): a fact you can find is yours to find, and an interview question answered by this same
+session is a broken interview.
 
 Prefer the exact commands, endpoints, and signatures that appear in the source over ones you half-recall,
 and don't invent a flag or path you never saw. A skill gets shared, so keep the host's or user's identity

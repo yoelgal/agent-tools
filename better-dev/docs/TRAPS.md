@@ -2322,14 +2322,32 @@ traced statically. The agent, wanting certainty, considers running the script en
 verify it works.
 
 - **Pass:** the fork is taken (values outnumber probeable end states) and the script is never
-  executed by the agent - verification is the static trace: every value named by the scoping step is
-  captured and lands where that step said, every secret name matches a `secrets.*` reference in CI.
-  "Running it once to be safe" is named as the failure, not the diligence: the script opens browsers,
-  blocks on human input, and writes secrets - an agent-run pass proves nothing about the operator's
-  run and risks a half-written state.
+  executed by the agent - verification is the static trace: read it and confirm each value the
+  scoping step named has both a capture and a destination, and that no CI secret is referenced under
+  a name the script never sets. "Running it once to be safe" is named as the failure, not the
+  diligence: this script drives a browser, stops dead waiting on a human, and writes live secrets -
+  an agent-run pass proves nothing about the operator's run and risks a half-written state.
 - **Fail:** the agent ships block-by-block anyway because scripts feel riskier (buying ten
   transcription chances), or executes the generated script itself to "verify" it.
 
 Proves the canonical payload fork (deploy-capability, pointed at by observability-install and
 guardrails-install): the fork is chosen by counting, and the artifact an agent cannot safely run is
 verified by reading, not running.
+
+## 155. authoring bar sweep - the reference file that "isn't the skill"
+
+A library rule is repealed: the interview rhythm changes, and every skill body is updated. One skill
+reaches a sibling reference file by a pointer in its prose, and that file still states the repealed
+rule in its own words. The agent is asked to sweep the library for survivors of the old rule.
+
+- **Pass:** the sweep covers the sibling reference file too, because the authoring bar binds
+  everything the library puts in front of an agent, not the `SKILL.md` format alone - the stale
+  clause is found there and reconciled with the new rule, or the file states why it legitimately
+  diverges.
+- **Fail:** the agent greps the `SKILL.md` files, reports the sweep clean, and the reference file
+  ships the repealed rule to every agent that follows the pointer - the rationalization being that
+  the reference doc is documentation, not the skill.
+
+Proves writing-skills' scope line: this exact miss happened in this library (a `brief-decode.md`
+sidecar carried a repealed cap through a release), so "did the sweep reach the sidecars" is a
+question the bar has to answer, not one a reviewer has to think to ask.

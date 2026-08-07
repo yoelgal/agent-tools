@@ -977,9 +977,11 @@ row plus an arrival paragraph in plan-grill, trap 153. No new machinery: a name 
 deploy-capability rung 2 keeps the full form and is named the canonical home; observability-install
 and guardrails-install point at it from their own operator steps. Still no vendored template file -
 bash-light, reimplement-first.
-5. Two uncontested widenings ride along: the third-party logic prototype gains tabbed guided
-walkthroughs (a scenario per tab in plain words, ordered buttons, reset to a known start); the
-writing-skills bar explicitly binds sibling reference files reached by prose pointer.
+5. Two uncontested widenings ride along: the third-party logic prototype gains one tab per worked
+case (each spelled out in plain words, its clicks numbered, the state rewound on open); the
+writing-skills bar explicitly binds the sibling files a skill sends the agent off to read. Trap 155
+rigs that second one: the sweep that stops at the `SKILL.md` files is the failure this library
+already shipped once, when a `brief-decode.md` sidecar carried a repealed cap through a release.
 
 Rejected-with-reasons:
 - Full upstream-shape frontier rounds (whole frontier at once, no guards) - the form-answering

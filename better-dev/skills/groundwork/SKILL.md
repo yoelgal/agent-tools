@@ -84,8 +84,9 @@ a `/tool-sourcing` candidate - never a blocker.
 
 Otherwise run a lean built-in grill, reusing `/plan-grill`'s discipline - including its
 brief-decode step when the epic arrives as somebody else's words: questions batched by settled
-prerequisites into small rounds, each carrying the answer you'd pick and why, exploring the codebase before spending the user's attention, and
-confirming each decision as it locks. The lean grill stays human-in-the-loop - a grill that answers
+prerequisites into small rounds, each carrying the answer you'd pick and why, exploring the
+codebase before spending the user's attention, and confirming each decision as it locks. The lean
+grill stays human-in-the-loop - a grill that answers
 its own questions inside groundwork has stopped being one (plan-grill's must-ask guard,
 `skills/plan-grill/SKILL.md` step 3). A rich pasted brief doesn't waive that: the brief may *seed*
 answers, but each seeded answer is recorded as decoded, quoting the brief line it decodes from, and

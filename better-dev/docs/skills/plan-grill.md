@@ -48,12 +48,13 @@ on the line where the user meets it, so a small feature earns a short, readable 
 than a full-dress one wearing vocabulary built for the loop.
 
 **Why did I get four questions at once instead of one at a time?**
-The grill asks the open frontier - every question whose prerequisites are already settled - as one
-small round with a recommended pick per question, recomputing after your answers; the serial
-interview it replaces spent a full round-trip per question. Two guards keep a round from turning
-into a form: an irreversible decision (a schema fork, a trust-boundary call) always arrives alone,
-and a blanket "all fine" reply gets the two most consequential picks reflected back before they
-lock.
+The grill puts up everything it can actually ask right now - the decisions with nothing unresolved
+underneath them - as one small round carrying a recommended pick per question, then recomputes once
+your answers land; the serial interview it replaces spent a full round-trip per question. Past four
+unblocked at once, the heaviest four go first and the rest ride the next round. Two guards keep it
+from turning into a form: an irreversible decision (a schema fork, a trust-boundary call) arrives
+alone, and a blanket "all fine" reply gets the two most consequential picks reflected back before
+they lock.
 
 **What happens if I don't have an answer to a question mid-grill?**
 Depends on whether the decision is reversible. A two-way door (a later edit can undo it) proceeds
