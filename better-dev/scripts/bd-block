@@ -96,6 +96,13 @@ selftest() {
     grep -q "discovery body" h.md                           || { echo "FAIL: removing one block took the sibling"; exit 1; }
     grep -q "my own notes" h.md                             || { echo "FAIL: removing one block took operator text"; exit 1; }
     ! grep -q "comms body" h.md                             || { echo "FAIL: named block survived its own remove"; exit 1; }
+
+    # A mistyped flag must be refused, not filed. The default argument is a filename, so before
+    # the flag guard `bd-block --selftest` created a file named "--selftest" in the working tree.
+    before="$(ls -A)"
+    ! printf 'x\n' | "$SELF" --selftest >/dev/null 2>&1      || { echo "FAIL: --selftest was accepted"; exit 1; }
+    ! "$SELF" remove --selftest        >/dev/null 2>&1       || { echo "FAIL: remove --selftest was accepted"; exit 1; }
+    [ "$before" = "$(ls -A)" ]                              || { echo "FAIL: a refused flag still wrote to the tree"; exit 1; }
   ) && r=0 || r=1
   rm -rf "$d"
   [ $r = 0 ] && echo "selftest OK" || { echo "selftest FAILED" >&2; exit 1; }
@@ -103,7 +110,14 @@ selftest() {
 
 case "${1:-}" in
   "") usage ;;
+  -h|--help) sed -n '2,13p' "$SELF"; exit 0 ;;
   selftest) selftest ;;
-  remove) [ $# -ge 2 ] || usage; remove_block "$2" "${3:-better-dev}" ;;
+  remove) [ $# -ge 2 ] || usage
+          case "$2" in -*) echo "bd-block: not a file: '$2'" >&2; usage ;; esac
+          remove_block "$2" "${3:-better-dev}" ;;
+  # This script's default argument IS a filename, so the catch-all cannot die on an unknown command
+  # the way its siblings do. Reject the flag shape instead: without this, `bd-block --selftest`
+  # takes the mistyped flag as the target and CREATES a file named for it.
+  -*) echo "bd-block: unknown option '$1' (did you mean 'selftest'?)" >&2; usage ;;
   *) file="$1"; write_block "$file" "${2:-better-dev}" ;;
 esac
