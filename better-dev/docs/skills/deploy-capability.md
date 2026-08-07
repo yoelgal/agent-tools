@@ -33,7 +33,10 @@ absence alone.
 Sits upstream of `/guardrails-install`: this skill creates the surface and hands back what it observed,
 `/guardrails-install` records it as `deploy-*` rules so `/release-promotion` finds them on its next run.
 Composes whatever host deploy capability is already wired before falling back to an operator walkthrough,
-and hands off to `/tool-sourcing` when even that stalls on a missing tool. A surface that now exists is
+and hands off to `/tool-sourcing` when even that stalls on a missing tool. Its walkthrough payload
+fork - value-capture steps collapse into one generated script traced statically and never run,
+probeable end states stay block-by-block - is the canonical form the other install-class skills
+(`/observability-install`, `/guardrails-install`) point at from their own operator steps. A surface that now exists is
 also now visible to `/observability-install` for the error tracking and alert channel the first release
 will need.
 

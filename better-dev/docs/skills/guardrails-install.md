@@ -24,7 +24,9 @@ is still missing.
 | Only the *why* behind a denylisted class (supply-chain risk, injection surface) is in question | `/security-pass` |
 
 `/onboard` calls it automatically while bootstrapping the minimum base; it also runs standalone any
-time a repo needs guardrails installed or its safety policy recorded after the fact.
+time a repo needs guardrails installed or its safety policy recorded after the fact. Operator-run
+steps that run long take `/deploy-capability`'s payload fork: value-capture steps collapse into one
+generated script traced statically, probeable end states stay block-by-block.
 
 ## Where it fits
 

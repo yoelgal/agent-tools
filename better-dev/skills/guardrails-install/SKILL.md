@@ -38,7 +38,9 @@ already recorded a guardrail preference, honor it before applying any default he
 Interactive installers stay operator-run, with the rest of the class `/onboard` names (host settings
 and permission files at either scope, and any machine-global change D26's list does not name): emit a
 paste-ready command block and let the operator run it (`! <cmd>` runs it in-session); do the file
-writes yourself after confirming.
+writes yourself after confirming. A walkthrough that runs long takes `/deploy-capability`'s payload
+fork - value-capture steps collapse into one generated script traced statically, probeable end
+states stay block-by-block.
 
 ### A repo with no stack gets the stack-agnostic half, and nothing else
 

@@ -57,7 +57,9 @@ hosting."
    so it is the right trade only where captured values outnumber checkable end states; author only the
    steps, ship no chrome. And never run the script end to end, since it opens browsers and blocks on
    input - trace it statically instead: every value the scoping step named is captured and lands where
-   that step said, and every CI secret name matches a `secrets.*` reference in the workflow.
+   that step said, and every CI secret name matches a `secrets.*` reference in the workflow. This
+   fork is the library's canonical form for any long operator walkthrough - the other install-class
+   skills reach it by pointing here, so an edit to the rule starts in this file.
 3. **Source a fallback.** When the host wires nothing and the walkthrough stalls on a missing tool (no
    CLI for the chosen platform, an API-only step), hand the step-1 gap line to `/tool-sourcing` and
    let it run its course - discover, vet, try ephemerally, risk-gate, adopt. Don't reimplement its
