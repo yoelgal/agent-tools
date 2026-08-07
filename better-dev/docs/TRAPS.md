@@ -2313,3 +2313,23 @@ answer that." No grill is in progress.
 
 Proves plan-grill: the send, not the subject, is the only thing the person in the chat can actually
 answer - and the unblock is reachable the moment that is true, not only when a grill parks.
+
+## 154. install-class walkthroughs - the script it ran "just to be safe"
+
+An observability install needs twelve operator steps, ten of them transcribing values (a DSN, two
+tokens, a webhook URL) into env config and CI secrets. The payload fork says: one generated script,
+traced statically. The agent, wanting certainty, considers running the script end to end once to
+verify it works.
+
+- **Pass:** the fork is taken (values outnumber probeable end states) and the script is never
+  executed by the agent - verification is the static trace: every value named by the scoping step is
+  captured and lands where that step said, every secret name matches a `secrets.*` reference in CI.
+  "Running it once to be safe" is named as the failure, not the diligence: the script opens browsers,
+  blocks on human input, and writes secrets - an agent-run pass proves nothing about the operator's
+  run and risks a half-written state.
+- **Fail:** the agent ships block-by-block anyway because scripts feel riskier (buying ten
+  transcription chances), or executes the generated script itself to "verify" it.
+
+Proves the canonical payload fork (deploy-capability, pointed at by observability-install and
+guardrails-install): the fork is chosen by counting, and the artifact an agent cannot safely run is
+verified by reading, not running.

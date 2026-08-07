@@ -131,7 +131,8 @@ Never put `version`, `license`, or prose in frontmatter.
   and the worked example each write it back on the next run without anyone deciding to. And a skill
   whose subject is a property of its own text - brevity, clarity, staying on one job - is read as an
   instance of that property, so it fails by growing: a four-hundred-line skill teaching leanness
-  teaches the volume, not the rule. Where the two disagree, cut the skill until they agree.
+  teaches the volume, not the rule (`wait-what` is the shipped example, kept to a few lines on
+  purpose). Where the two disagree, cut the skill until they agree.
 
 ## Encode the judgment at the decision point
 

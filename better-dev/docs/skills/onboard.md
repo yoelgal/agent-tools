@@ -24,7 +24,9 @@ the one paste for that and picks up from there.
 
 The foundation every other skill in the chain assumes is already in place: worktrees, the loop,
 reviews, and releases all reach for `.better-dev/bin/bd-mem`, which only resolves once onboard has
-run. It hands off to `/guardrails-install` for the repo's verify command and safety baseline, and
+run. The discovery block it writes carries the utterance-to-skill routing table, so a row a release
+adds (the wait-what corrective, the questionnaire unblock) reaches an already-wired repo on the
+next onboard top-up. It hands off to `/guardrails-install` for the repo's verify command and safety baseline, and
 closes by pointing a greenfield repo at `/groundwork` or `/gauntlet`.
 
 ## Common questions

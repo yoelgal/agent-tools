@@ -4,17 +4,18 @@
 
 Re-pitches the message that just lost you: one line of context for where the agent is and why it
 matters, then the point again in short plain sentences using your project's own vocabulary instead
-of better-dev's. Its defining constraint is what it refuses to be: a concision setting. Naming the
-output ("be brief", "tldr") gets a clipped message that is shorter and no clearer; this skill names
-the listener's failed comprehension, so the missing context arrives together with the fewer words.
+of better-dev's. Its defining constraint is what it refuses to be: a concision setting. Aiming a
+fix at the output ("be brief", "tldr") trims the reply while the gap that lost you stays open;
+aiming it at the listener - comprehension failed here - brings back both the point and the
+background it needed, in less space.
 
 ## When to reach for it
 
-Say "wait", "what?", "you lost me", or "what does that mean?" the moment a reply does not land -
-the skill fires on the signal itself, and `/wait-what` by name works too. For shaping how every
-message reads before anything fails to land, that is the comms style block `/onboard` writes, not
-this skill; and an artifact whose owning skill requires it rendered in full (a contract at its
-gate, a review verdict) still renders in full - the re-pitch wraps it, never replaces it.
+| Situation | Route |
+|---|---|
+| A reply just lost you - "wait", "what?", "you lost me", "what does that mean?" | here; it fires on the signal itself, and `/wait-what` by name works too |
+| Shaping how every message reads, before anything fails to land | the comms style block `/onboard` writes |
+| An artifact its owning skill renders in full (a contract at its gate, a review verdict) | still rendered in full - the re-pitch wraps it, never replaces it |
 
 ## Where it fits
 

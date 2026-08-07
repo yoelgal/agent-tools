@@ -963,8 +963,11 @@ observed failure did not reproduce under the guards. Traps 150-151 rig both guar
 model-invoked skill.** The rejection's ground (the comms block carries the preventive half) stands,
 but the corrective half had no home - the record's own "I just wanted 'here's what I'll build,
 ok?'" moment is the evidence it was needed. The operator chose the skill form over a comms-block
-clause. It is model-invoked so it fires on the natural signal ("wait", "you lost me"), not only by
-name - a corrective needed at the moment of frustration cannot depend on remembering a command. The
+clause. The ratified ledger line said user-invoked; it ships model-invoked - a build-time upgrade
+disclosed at the PR, not silently ratified - so it fires on the natural signal ("wait", "you lost
+me"), not only by name: a corrective needed at the moment of frustration cannot depend on
+remembering a command, and the authoring standard reserves user-invocation for deliberate-command
+skills. The
 body stays a few lines by design; the authoring standard's fails-by-growing rule has its working
 example, and trap 152 rigs the growth ask.
 3. **The questionnaire unblock gains a front door.** The grill-the-send machinery (landed at D27)

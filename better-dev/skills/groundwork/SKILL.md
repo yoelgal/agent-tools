@@ -83,8 +83,8 @@ the glossary and any hard-to-reverse decision as it crystallizes. A clear gap on
 a `/tool-sourcing` candidate - never a blocker.
 
 Otherwise run a lean built-in grill, reusing `/plan-grill`'s discipline - including its
-brief-decode step when the epic arrives as somebody else's words: the frontier a round at a time, each
-question carrying the answer you'd pick and why, exploring the codebase before spending the user's attention, and
+brief-decode step when the epic arrives as somebody else's words: questions batched by settled
+prerequisites into small rounds, each carrying the answer you'd pick and why, exploring the codebase before spending the user's attention, and
 confirming each decision as it locks. The lean grill stays human-in-the-loop - a grill that answers
 its own questions inside groundwork has stopped being one (plan-grill's must-ask guard,
 `skills/plan-grill/SKILL.md` step 3). A rich pasted brief doesn't waive that: the brief may *seed*

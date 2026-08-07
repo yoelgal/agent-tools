@@ -134,17 +134,17 @@ grill closes - the design read and system choice belong in the plan, not discove
 
 ## 3. Grill - work the frontier in rounds
 
-Interview the design down every branch of its decision tree. The **frontier** is every decision
-whose prerequisites are already settled - the questions you can ask now without guessing at answers
-you have not heard yet. At **full** depth (the default) you walk every branch; at **light** depth -
+Interview the design down every branch of its decision tree. At any moment some decisions are
+askable because nothing they depend on is still open - call that set the **frontier**; every other
+question is blocked behind an answer that has not arrived. At **full** depth (the default) you walk every branch; at **light** depth -
 passed as `[depth]` for a small, well-understood feature - you grill only the decisions the
 done-criteria will turn on and skip exhaustive branch-walking.
 
 - **Ask the frontier as a round, then wait.** Put the open frontier to the user as one round of at
   most four questions, then recompute: their answers settle prerequisites, the frontier moves
   outward, and the next round asks what just unblocked - the same decisions land in a few rounds
-  instead of a serial interview. A question whose answer depends on another question still open in
-  this round belongs to the next round, not this one. Where the host has a native ask tool that
+  instead of a serial interview. Never seat a question beside one it depends on - the dependent
+  stays out until a recompute clears it. Where the host has a native ask tool that
   presents each question with options and a marked recommendation, the round rides it; elsewhere
   emit a numbered list - each question, then your recommendation on its own line - so the user
   answers by number. Two guards keep a round from being answered as a form. A one-way door (the
@@ -158,9 +158,9 @@ done-criteria will turn on and skip exhaustive branch-walking.
   lack confidence too - don't take it as a blank cheque; re-ask as a choice between two concrete options.
 - **Ask only what you can't discover.** A fact about this repo or system is yours to find, not the
   user's to answer - go read it (this is where premise-checking pays off again). A lookup slow enough
-  to stall the interview goes to a background worker while the rounds continue - a running lookup
-  is an unsettled prerequisite, so only the questions downstream of it wait, joining a later round;
-  the dispatched worker reads, never writes: an unfenced
+  to stall the interview goes to a background worker while the rounds continue - a lookup still in
+  flight blocks nothing except its own dependents, which sit out of the rounds until the worker
+  reports; the dispatched worker reads, never writes: an unfenced
   background errand fills its silence with side effects. Type each remaining
   ambiguity by one key: would its readings change a done-criterion? If yes, it is a must-ask, asked
   before the gate closes - two readings that grade differently are two different contracts. If no,
