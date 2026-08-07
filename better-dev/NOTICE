@@ -24,9 +24,9 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
     keeps that repo's wording wherever the wording is what carries the value, so the
     files below hold passages in their author's expression and not only reimplemented
     patterns. The list is deliberately scoped by FILE, not by sentence: what a reader
-    needs is which of our files to treat as carrying upstream text, and a
-    sentence-level list is stale the day someone finds one more. Where a file is named
-    here, assume its debt may run past the examples given.
+    needs is which of our files to treat as carrying upstream text, and a sentence-level
+    list is stale the day someone finds one more. Where a file is named here, assume its
+    debt may run past the examples given.
       skills/review/standards-baseline.md, skills/review/SKILL.md,
         skills/review/reviewer-brief.md <- skills/engineering/code-review/SKILL.md.
         The Fowler smell baseline (entry wording, the what-it-is -> how-to-fix form, the
@@ -44,8 +44,8 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
         docs/productivity/wait-what.md. The branches-in-a-table rule, the
         environment-as-cache rule, the negation mechanism, the read-the-draft-for-its-
         silences rule, the fails-by-growing formulation and its four-hundred-line
-        illustration. The frontmatter standard, the deletion test, the leading-word
-        rules and the trap set around them are ours.
+        illustration. The bar's other rules, the frontmatter standard, the deletion test
+        and the trap set around them are ours.
       docs/skills/README.md and the pages under docs/skills/ <- .agents/writing-docs.md,
         skills/productivity/writing-for-agents/SKILL.md. The four-section page spine
         (What it does / When to reach for it / Common questions / It's working if) and
@@ -71,11 +71,14 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
         "send, not the subject" antithesis, the "Markdown questionnaire aimed at the gap"
         phrasing, and the ordering-and-stub clause it restates. The trap's scenario and
         its Pass/Fail structure are ours.
-      skills/codebase-audit/SKILL.md, skills/orchestrating-agents/briefs-and-reviews.md,
-        skills/groundwork/carving.md, skills/plan-grill/done-contract.md <- the same
-        repo's engineering and productivity skills. Short kept runs inside otherwise
-        original procedures, found by the 2026-08-07 attribution sweep and listed here
-        rather than paraphrased away.
+      skills/codebase-audit/SKILL.md <- skills/engineering/improve-codebase-architecture;
+        skills/orchestrating-agents/briefs-and-reviews.md <- skills/engineering/research;
+        skills/groundwork/carving.md and skills/groundwork/SKILL.md <-
+        skills/engineering/to-tickets (the slicing vocabulary, and the three-question
+        gate on a proposed carve); skills/plan-grill/done-contract.md <-
+        skills/engineering/to-spec. Short kept runs inside otherwise original
+        procedures, found by the 2026-08-07 attribution sweep and listed here rather
+        than paraphrased away.
       docs/DECISIONS.md and docs/TRAPS.md restate several of the rules above where a
         ruling or a trap turns on one. Those are records of what was adopted and name
         their source in the same breath; the reasoning and the scenarios are ours.
