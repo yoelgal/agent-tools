@@ -1,6 +1,6 @@
 ---
 name: wait-what
-description: Use when the operator signals the last message did not land - "wait", "what?", "you lost me", "what does that mean?" - or invokes it by name after a reply they could not act on.
+description: Use when the operator signals they could not follow the last reply - "wait", "what?", "you lost me", "what does that mean?" - or invokes it by name after a message they could not act on.
 ---
 
 # wait-what - re-pitch the message that lost them

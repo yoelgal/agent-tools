@@ -24,12 +24,22 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
     what-it-is -> how-to-fix form, and the "possible <smell>" judgement-call framing)
     adapted from mattpocock/skills skills/engineering/code-review/SKILL.md (MIT,
     (c) 2026 Matt Pocock); the surrounding review machinery is ours.
+  skills/deploy-capability/SKILL.md rung 2 - the static-trace rule for a generated
+    operator script (don't run it end to end since it opens browsers and blocks on
+    input; trace it statically instead, and the two things that trace checks) adapted
+    from mattpocock/skills skills/engineering/wizard/SKILL.md (MIT, (c) 2026 Matt
+    Pocock); the payload fork itself, its counting test, and the surrounding
+    walkthrough machinery are ours.
+  skills/writing-skills/SKILL.md - the fails-by-growing formulation and its
+    four-hundred-line illustration ("a four-hundred-line skill teaching leanness
+    teaches the volume, not the rule") adapted from the same repo's wait-what design
+    rationale (MIT, (c) 2026 Matt Pocock); the authoring standard around it is ours.
 
 ── Pattern inspiration (courtesy credit, not legally required) ──
   mattpocock/skills - Matt Pocock       (MIT) (also: the wait-what listener-state corrective,
-    frontier-rounds grill rhythm, guided-walkthrough logic demos, walkthrough payload fork,
-    the authoring bar widened past the SKILL.md format to the sibling files a skill sends the
-    agent off to read - reimplemented, no shipped text)
+    frontier-rounds grill rhythm, guided-walkthrough logic demos, the authoring bar widened
+    past the SKILL.md format to the sibling files a skill sends the agent off to read -
+    reimplemented, no shipped text; where text was kept, it is named in the section above)
   Whamp (Will Hampson) - wayfinder-to-spec gist (no license; ideas only, reimplemented:
     the stage-boundary audit/hydrate/stop handoff pattern in plan-grill's carved-item
     entry rule)

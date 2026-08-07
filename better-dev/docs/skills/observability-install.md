@@ -30,9 +30,9 @@ The runtime sibling of `/guardrails-install`: that skill's gates catch a broken 
 lands, this one catches a broken prod before a user reports it. Long account-setup walkthroughs
 borrow `/deploy-capability`'s payload fork - mostly-values steps become one generated script,
 traced statically, never run end to end. It runs after `/deploy-capability` has created a deploy
-surface, and its wiring feeds three downstream readers -
-`/release-promotion`'s post-deploy watch, `/diagnose`'s incident path, and `/groundwork`, which
-names this seam when a deploying product's foundation is first laid.
+surface, and its wiring feeds three downstream readers - `/release-promotion`'s post-deploy watch,
+`/diagnose`'s incident path, and `/groundwork`, which names this seam when a deploying product's
+foundation is first laid.
 
 ## Prerequisites
 

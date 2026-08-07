@@ -163,19 +163,19 @@ grill only the decisions the done-criteria will turn on and skip exhaustive bran
   user's to answer - go read it (this is where premise-checking pays off again). A lookup slow enough
   to stall the interview goes to a background worker while the rounds continue - a lookup still in
   flight blocks nothing except its own dependents, which sit out of the rounds until the worker
-  reports; the dispatched worker reads, never writes: an unfenced
-  background errand fills its silence with side effects. Type each remaining
-  ambiguity by one key: would its readings change a done-criterion? If yes, it is a must-ask, asked
-  before the gate closes - two readings that grade differently are two different contracts. If no,
-  pick one and record the pick as a named assumption in the contract. On a must-ask, offer
-  two to four mutually exclusive options with the one you'd pick marked; with five or more real
-  options, chain a second question rather than dropping or merging options to fit. If a preference
-  question goes unanswered, proceed on your default and record it as a named assumption in the
-  contract rather than stalling or guessing silently. That path is for two-way doors only -
-  decisions a later edit reverses. A one-way door - a schema or data-model fork, a destructive or
-  irreversible action, a security or trust-boundary choice, an addition to the committed goal set -
-  is asked regardless of the key above and never proceeds on an invented default: with no answer from the user and no recorded override
-  answering that question, the state is `NEEDS_INPUT`. An override can carry the user's standing
+  reports; the dispatched worker reads, never writes: an unfenced background errand fills its
+  silence with side effects. Type each remaining ambiguity by one key: would its readings change a
+  done-criterion? If yes, it is a must-ask, asked before the gate closes - two readings that grade
+  differently are two different contracts. If no, pick one and record the pick as a named
+  assumption in the contract. On a must-ask, offer two to four mutually exclusive options with the
+  one you'd pick marked; with five or more real options, chain a second question rather than
+  dropping or merging options to fit. If a preference question goes unanswered, proceed on your
+  default and record it as a named assumption in the contract rather than stalling or guessing
+  silently. That path is for two-way doors only - decisions a later edit reverses. A one-way door -
+  a schema or data-model fork, a destructive or irreversible action, a security or trust-boundary
+  choice, an addition to the committed goal set - is asked regardless of the key above and never
+  proceeds on an invented default: with no answer from the user and no recorded override answering
+  that question, the state is `NEEDS_INPUT`. An override can carry the user's standing
   answer to a one-way question - that is an answer, deliberately given once - but no override makes
   one-way doors auto-decidable in general. The grill is human-in-the-loop by construction: the user's
   answers come only from the user, and a must-ask answered by the same session that asked it is a
@@ -235,9 +235,8 @@ grill only the decisions the done-criteria will turn on and skip exhaustive bran
 - **Know when the grill is done.** An empty frontier is the structural sign; before closing, run
   one honesty check on top: *can you predict the user's reaction to the next three questions you
   would ask?* If yes, the decisions are settled and the plan is decision-complete - the implementer
-  will make none. If no, you still have open
-  questions; keep going. Shared understanding is that prediction coming true, not a feeling that
-  you're finished.
+  will make none. If no, you still have open questions; keep going. Shared understanding is that
+  prediction coming true, not a feeling that you're finished.
 
 ## 4. Capture the done-contract
 
