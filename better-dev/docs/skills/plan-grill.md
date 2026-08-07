@@ -17,6 +17,7 @@ the file on disk does not count as presenting it.
 | Someone else's relayed words - a ticket, stakeholder feedback, "users say X feels slow" | here (step 0 decodes it first) |
 | A dependency upgrade, a CVE the audit gate flagged, a behavior-preserving refactor | here, contract-lite path |
 | A trivial one-to-two-step change | skip the grill, still its own worktree branch |
+| A decision only a colleague or client can answer, hit from any flow | here (questionnaire unblock - drafts the doc, grills only the send) |
 | "X is broken / failing / slow" | `/diagnose` |
 | A whole new app or epic needing a shared foundation first | `/groundwork` |
 | A work-item spanning two separate repositories | named on arrival, routed through `/orchestrating-agents`'s cross-repo coordination |
@@ -45,6 +46,15 @@ endpoint and answered "I just wanted 'here's what I'll build, ok?'". The fix kee
 field names intact (scripts read `merge:` by that exact key) but glosses each one in plain words
 on the line where the user meets it, so a small feature earns a short, readable contract rather
 than a full-dress one wearing vocabulary built for the loop.
+
+**Why did I get four questions at once instead of one at a time?**
+The grill puts up everything it can actually ask right now - the decisions with nothing unresolved
+underneath them - as one small round carrying a recommended pick per question, then recomputes once
+your answers land; the serial interview it replaces spent a full round-trip per question. Past four
+unblocked at once, the heaviest four go first and the rest ride the next round. Two guards keep it
+from turning into a form: an irreversible decision (a schema fork, a trust-boundary call) arrives
+alone, and a blanket "all fine" reply gets the two most consequential picks reflected back before
+they lock.
 
 **What happens if I don't have an answer to a question mid-grill?**
 Depends on whether the decision is reversible. A two-way door (a later edit can undo it) proceeds
@@ -88,6 +98,8 @@ missing line today.
   summary line, not a pointer to a file on disk.
 - Every done-criterion in the contract reads as a command or test with a concrete expected result,
   never a phrase like "make sure it works."
+- Questions arrive in small rounds with a recommended pick each, and an irreversible decision
+  arrives alone - never seated inside a batch of preference calls.
 - A question you left unanswered shows up in the contract as a named assumption (two-way door) or
   a `NEEDS_INPUT` entry with a who, a what, and a re-entry point (one-way door) - never silently
   dropped.

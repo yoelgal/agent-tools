@@ -467,12 +467,17 @@ Ran `onboard` + one feature slice → staging end-to-end on the real clone (loca
 3. bootstrap-hooks → packaging → (release, guardrails, pr-and-verify, browser)
 
 ## Licensing & attribution - the clean path (owner-approved 2026-07-03)
-Build by **reimplementing patterns from understanding**. Ideas, methods, and system designs are not
-copyrightable, so reimplemented components are our original work and owe **no attribution**. Copy verbatim
-only when a snippet is too trivial to bother reimplementing - and minimize even that. Order of preference
-per source: **reimplement > adapt > verbatim**.
-- `NOTICE` credits **only** expression actually copied (today: the vendored `browse/` and `ios-qa/`
-  daemons plus bd-guard's adapted pattern set - the D14 exception); pattern inspiration is courtesy, not required.
+Build by **reimplementing patterns from understanding**. Ideas, methods, and system designs are
+not copyrightable, so reimplemented components are our original work and owe **no attribution**.
+Copy verbatim only when a snippet is too trivial to bother reimplementing - and minimize even
+that. Order of preference per source: **reimplement > adapt > verbatim** - REVERSED IN PART by D31
+(2026-08-07): for an **MIT-licensed skill source** the order is now to keep the author's wording
+where the wording carries the value and credit it in `NOTICE`. Everything else in this ruling,
+including both carve-outs below, still stands; read D31 before applying this line.
+- `NOTICE` credits **only** expression actually copied; pattern inspiration is courtesy, not
+  required. (This line used to enumerate the copied set inline. It was eight entries behind by
+  2026-08-07 and read as a cap on what the section may hold at exactly the moment D31 started
+  adding to it, so the enumeration lives in `NOTICE` alone now.)
 - Rewriting someone's file with an AI ≠ making it ours - that's a derivative work. We reimplement from the
   *idea*, not by paraphrasing their file.
 - **Never redistribute** `karpathy:LOOPS.md` (personal-use) - reimplement, never quote.
@@ -942,3 +947,93 @@ corroboration of D23's sidecar rejection; #481/Cursor asks carry no transfer und
 second-consumer predicate; upstream's marketplace.json deprecated-in-prose has no transfer (ours is
 load-bearing); the v1.2.1 lesson is behavioural, not structural, for us (one version surface by
 construction; the propagation receipt now names its channels).
+
+## D30 - conversation-layer north star (2026-08-06 ratified; 2026-08-07 built)
+
+Source: the operator's north-star alignment over the mattpocock v1.2 conversation layer, one day
+after D29. The four contested calls were themselves put as one guarded round; all four came back
+considered - two overrode the session's recommendation - which is the second live receipt for
+ruling 1 below. Rulings:
+
+1. **Ruling 12 (D23, re-grounded D27) reversed: the grill works the frontier in rounds, guarded.**
+The recorded revisit condition was met - the rounds mechanic graduated upstream into the main
+grilling skill and survived their own use - and the form-answering ground the rejection stood on is
+answered inside the mechanic: a round caps at four, every question carries options plus a
+recommended pick, a one-way door is always its own round of one, and a blanket accept-all reply
+gets the two most consequential picks reflected back before locking. Evidence on the reversal side:
+two live batched rounds in this repo's own sessions (2026-08-05 harvest scope round, 2026-08-06
+north-star round) produced considered answers including overrides of the recommendation - the
+observed failure did not reproduce under the guards. Traps 150-151 rig both guards.
+2. **The D29 wait-what rejection is reopened by operator call: the corrective ships as a tiny
+model-invoked skill.** The rejection's ground (the comms block carries the preventive half) stands,
+but the corrective half had no home - the record's own "I just wanted 'here's what I'll build,
+ok?'" moment is the evidence it was needed. The operator chose the skill form over a comms-block
+clause. The ratified ledger line said user-invoked; it ships model-invoked - a build-time upgrade
+disclosed at the PR, not silently ratified - so it fires on the natural signal ("wait", "you lost
+me"), not only by name: a corrective needed at the moment of frustration cannot depend on
+remembering a command, and the authoring standard reserves user-invocation for deliberate-command
+skills. The body stays a few lines by design; the authoring standard's fails-by-growing rule has
+its working example, and trap 152 rigs the growth ask.
+3. **The questionnaire unblock gains a front door.** The grill-the-send machinery (landed at D27)
+is reachable from any flow the moment the operator says a decision is someone else's - a routing
+row plus an arrival paragraph in plan-grill, trap 153. No new machinery: a name and a door.
+4. **D29 ruling 6 widened: the payload fork is the library's canonical walkthrough form.**
+deploy-capability rung 2 keeps the full form and is named the canonical home; observability-install
+and guardrails-install point at it from their own operator steps. Still no vendored template file -
+bash-light, reimplement-first.
+5. Two uncontested widenings ride along: the third-party logic prototype gains one tab per worked
+case (each spelled out in plain words, its clicks numbered, the state rewound on open); the
+writing-skills bar explicitly binds the sibling files a skill sends the agent off to read. Trap 155
+rigs that second one: the sweep that stops at the `SKILL.md` files is a miss this very branch came
+one review away from shipping, when ruling 1's repeal left `brief-decode.md` arguing from the
+repealed rhythm and the reviewer, not the sweep, was what caught it.
+
+Rejected-with-reasons:
+- Full upstream-shape frontier rounds (whole frontier at once, no guards) - the form-answering
+  observation was real; the two guards are the reversal's price, not decoration.
+- A comms-block wait-what clause, or clause plus skill - the operator chose the single skill form;
+  two homes for one corrective is drift.
+- A standalone questionnaire skill - the machinery already lives in plan-grill; a name and a door
+  was all that was missing (the laziness test).
+- A full general wizard skill - the install-class seams are the observed need; a generator for any
+  manual procedure anywhere is surface with no second user yet.
+- Renaming writing-skills (writing-for-agents style) - a breaking rename buys a broken invocation
+  path (upstream's own #748 is the field report) to gain a name; the scope sentence does the work.
+
+## D31 - verbatim is allowed where the wording is the value (operator ruling, 2026-08-07)
+
+Reverses the preference order in the 2026-07-03 licensing ruling above for **MIT-licensed skill
+sources**. That ruling read `reimplement > adapt > verbatim`, with verbatim reserved for snippets
+"too trivial to bother reimplementing". The grounds for the reversal are this branch's own receipts:
+all four Blocking findings across four review rounds were one defect - upstream expression surviving
+where `NOTICE` claimed none - and three of the four were dispositioned by rewording the line, each
+trading precision for the claim. Round 4 measured one of them ("set your pick apart beneath each
+one" against "your recommendation on its own line") as vaguer about the mechanism it specifies. The
+operator's call: a skill's wording is part of what makes it work, so paraphrasing a well-made line
+to avoid an attribution line is the wrong trade.
+
+New order for an MIT-licensed skill source: **keep the wording where the wording carries the value,
+and credit it**; reimplement where our shape genuinely differs. What does not change:
+
+- **Credit by file, not by sentence.** A source's entry names the files of ours that carry its
+  expression, the upstream files they draw on, examples of what was kept, and what stays ours. Six
+  review rounds on this branch established why: a sentence-level entry names a file, naming a file
+  puts it in an auditor's scope, the audit finds one more passage in it, and the entry that was
+  written to be accurate is now false. A file-scoped entry survives the next passage found in a file
+  it already names. `NOTICE` says so in the entry itself, so the scope is a stated choice rather
+  than an omission.
+- Every kept passage sits under a named entry in `NOTICE`'s "Copied verbatim / substantially"
+  section, carrying the file, the upstream file, the licence and the copyright holder. The courtesy
+  section's "reimplemented, no shipped text" claim closes with a pointer to that section, so the two
+  can no longer disagree.
+- **The licence still gates it.** No-licence and personal-use sources are unaffected:
+  `karpathy:LOOPS.md` is never redistributed, and a gist with no licence stays ideas-only.
+- Taste still gates it. Superpowers' maximalist MUST/STOP tone stays out, licence or not, and a kept
+  line still gets house-rule treatment (dash-free, our own vocabulary in the surrounding prose).
+- Rewriting someone's file wholesale with an AI is still not how we make something ours; this ruling
+  is about keeping a line that is right, not about lifting a file and calling it reimplemented.
+
+Applied in this branch: the four passages the earlier rounds reworded are restored to their author's
+wording and credited (wait-what's leading framing on both surfaces, the grill's question format,
+trap 153's send-not-subject antithesis and its questionnaire phrasing). The three F1 rewordings that
+lost nothing stay as they are - the ruling permits verbatim, it does not require it.

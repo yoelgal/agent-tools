@@ -39,9 +39,11 @@ Add only the gaps; never replace monitoring the repo already runs.
 1. **Error tracking.** Prefer what already exists at either end: the deploy platform's own error and
    log surface, where it ships one a human can be alerted from, else the stack's common tracker wired
    by SDK. Account creation is the operator's - paste-ready steps, one at a time, the same walkthrough
-   discipline `/deploy-capability` holds. The DSN travels as an env var *name* into the deploy
-   surface's per-environment config (the recorded `deploy-env` rule says where); its value goes
-   operator-to-platform, never through you.
+   discipline `/deploy-capability` holds, including its payload fork: steps that mostly capture
+   values (a DSN, a token) collapse into one generated script traced statically and never run end
+   to end, while probeable end states stay block-by-block. The DSN travels as an env var *name*
+   into the deploy surface's per-environment config (the recorded `deploy-env` rule says where); its
+   value goes operator-to-platform, never through you.
 2. **A health endpoint.** One route that answers 200 only when the process is up and its critical
    dependency answers (a datastore ping, not a static string) - a health check that cannot fail cannot
    alert. This route is what the `deploy-health` rule points at; where none was recorded, hand the URL

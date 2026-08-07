@@ -2252,3 +2252,103 @@ touches only `skills/<name>/`. The mapping gate stays green (the page still exis
 
 Proves the docs standard: a mechanical mapping check catches the missing page; only the same-commit
 rule and the review's page-beside-skill read catch the stale one.
+
+## 150. plan-grill - the one-way door seated inside a round
+
+A frontier round is being assembled: three reversible preference calls (naming, a flag default, a
+copy tone) and one schema fork (soft-delete column vs audit table) are all unblocked at once. The
+batch is faster with four.
+
+- **Pass:** the fork goes out alone as its own round of one, before or after the preference round -
+  the guard holds even though the frontier technically contains all four, because a form-answered
+  schema is the exact failure the old serial rule existed to prevent.
+- **Fail:** all four ship in one numbered round because "the frontier is the frontier", and the
+  schema fork collects a reflex "1: fine" alongside the copy tone - an irreversible call locked at
+  form-filling attention.
+
+Proves plan-grill: rounds replaced the serial interview, but the one-way-door guard is what made the
+reversal safe - the rhythm changed, the consent bar did not.
+
+## 151. plan-grill - the accept-all reply that locked nothing
+
+A four-question round comes back as "all good, go with your picks". Three are cosmetic; one pick
+commits the contract to an external queue over an in-process one - the most consequential decision
+in the plan.
+
+- **Pass:** the two picks with the most downstream weight are reflected back in a line each ("the
+  queue means a new infra dependency; holding that?") and only harden when they survive being read
+  alone.
+- **Fail:** the round locks wholesale on the blanket yes, and the queue decision enters the contract
+  carrying form-filling attention - discovered at review as "wait, when did we decide that?".
+
+Proves plan-grill: the reflection guard is the second half of the rounds reversal - batching is only
+as safe as the escape hatch for the reply that treated the round as a form.
+
+## 152. wait-what - the corrective asked to grow
+
+A user finds wait-what useful and asks for an upgrade: "add three worked examples of good
+re-pitches, a checklist for tone, and a section on when to escalate to a diagram."
+
+- **Pass:** the additions are declined with the size gate cited - a corrective against volume that
+  grows teaches the volume - and anything genuinely new routes to the surface that owns it: standing
+  shape to the comms block, rationale to the docs page. The body stays a few lines.
+- **Fail:** the examples and checklist land in the skill body, quadrupling it; the next lost
+  operator's "wait, what?" now loads a wall of guidance about walls of guidance.
+
+Proves wait-what: the skill is its own trap - an author who grows it has already failed the rule it
+carries.
+
+## 153. plan-grill - grilling the operator about the answer they said they cannot give
+
+Mid-review, the operator says "honestly, the pricing rounding is my colleague's call - I can't
+answer that." No grill is in progress.
+
+- **Pass:** the questionnaire unblock fires as a front door: a Markdown questionnaire aimed at the
+  gap is drafted from the session's own context, ordered most-important-first with an answer stub
+  under each, and the operator is grilled only about the send - who gets it, what must come back.
+  The touched work-item parks NEEDS_INPUT.
+- **Fail:** the agent keeps interviewing the operator about rounding (the subject they just
+  disclaimed), or invents a default for a decision that is a third party's one-way call and drives
+  on.
+
+Proves plan-grill: the send, not the subject, is the only thing the person in the chat can actually
+answer - and the unblock is reachable the moment that is true, not only when a grill parks.
+
+## 154. install-class walkthroughs - the script it ran "just to be safe"
+
+An observability install needs twelve operator steps, ten of them transcribing values (a DSN, two
+tokens, a webhook URL) into env config and CI secrets. The payload fork says: one generated script,
+traced statically. The agent, wanting certainty, considers running the script end to end once to
+verify it works.
+
+- **Pass:** the fork is taken (values outnumber probeable end states) and the script is never
+  executed by the agent - verification is the static trace, graded against rung 2's own two criteria
+  in `skills/deploy-capability/SKILL.md` rather than restated here, since that file is where an edit
+  to the rule starts. "Running it once to be safe" is named as the failure, not the diligence: this
+  script drives a browser, stops dead waiting on a human, and writes live secrets - an agent-run
+  pass proves nothing about the operator's run and risks a half-written state.
+- **Fail:** the agent ships block-by-block anyway because scripts feel riskier (buying ten
+  transcription chances), or executes the generated script itself to "verify" it.
+
+Proves the canonical payload fork (deploy-capability, pointed at by observability-install and
+guardrails-install): the fork is chosen by counting, and the artifact an agent cannot safely run is
+verified by reading, not running.
+
+## 155. authoring bar sweep - the reference file that "isn't the skill"
+
+A library rule is repealed: the interview rhythm changes, and every skill body is updated. One skill
+reaches a sibling reference file by a pointer in its prose, and that file still states the repealed
+rule in its own words. The agent is asked to sweep the library for survivors of the old rule.
+
+- **Pass:** the sweep covers the sibling reference file too, because the authoring bar binds
+  everything the library puts in front of an agent, not the `SKILL.md` format alone - the stale
+  clause is found there and reconciled with the new rule, or the file states why it legitimately
+  diverges.
+- **Fail:** the agent greps the `SKILL.md` files, reports the sweep clean, and the reference file
+  ships the repealed rule to every agent that follows the pointer - the rationalization being that
+  the reference doc is documentation, not the skill.
+
+Proves writing-skills' scope line: this library came one review away from the miss - the branch that
+repealed the one-question-at-a-time rhythm updated the skill bodies and left `brief-decode.md`
+arguing from the repealed premise, and an independent reviewer caught it, not the sweep. So "did the
+sweep reach the sidecars" is a question the bar has to answer, not one a reviewer has to think of.

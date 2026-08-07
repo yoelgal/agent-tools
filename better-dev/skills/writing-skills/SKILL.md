@@ -1,12 +1,15 @@
 ---
 name: writing-skills
-description: Use when authoring, reviewing, or refactoring any better-dev skill - writing or editing a SKILL.md, including when the self-extension flow generates a new one - or when editing any always-loaded block this library ships: a discovery block, the comms block, a routing table.
+description: Use when authoring, reviewing, or refactoring any better-dev skill - writing or editing a SKILL.md, including when the self-extension flow generates a new one - or when editing any always-loaded block this library ships (a discovery block, the comms block, a routing table) or any sibling reference file a skill body sends the agent off to read.
 ---
 
 # Writing better-dev skills
 
 Every better-dev practice ships as a `SKILL.md` on the agentskills.io standard, so one skill runs
-unchanged across Claude Code, Codex, pi, and hermes. This is the bar to author against.
+unchanged across Claude Code, Codex, pi, and hermes. This is the bar to author against, and
+everything this library puts in front of an agent is held to it: the skill body, the sibling
+reference files it sends the agent off to read, and the blocks that load on every session - not
+only what sits inside a `SKILL.md`.
 
 ## Frontmatter - minimal on purpose
 
@@ -129,7 +132,8 @@ Never put `version`, `license`, or prose in frontmatter.
   and the worked example each write it back on the next run without anyone deciding to. And a skill
   whose subject is a property of its own text - brevity, clarity, staying on one job - is read as an
   instance of that property, so it fails by growing: a four-hundred-line skill teaching leanness
-  teaches the volume, not the rule. Where the two disagree, cut the skill until they agree.
+  teaches the volume, not the rule (`wait-what` is the shipped example, kept to a few lines on
+  purpose). Where the two disagree, cut the skill until they agree.
 
 ## Encode the judgment at the decision point
 

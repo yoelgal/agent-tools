@@ -83,16 +83,17 @@ the glossary and any hard-to-reverse decision as it crystallizes. A clear gap on
 a `/tool-sourcing` candidate - never a blocker.
 
 Otherwise run a lean built-in grill, reusing `/plan-grill`'s discipline - including its
-brief-decode step when the epic arrives as somebody else's words: one question at a time, each
-carrying the answer you'd pick and why, exploring the codebase before spending the user's attention, and
-confirming each decision as it locks. The lean grill stays human-in-the-loop - a grill that answers
-its own questions inside groundwork has stopped being one (plan-grill's must-ask guard,
-`skills/plan-grill/SKILL.md` step 3). A rich pasted brief doesn't waive that: the brief may *seed*
-answers, but each seeded answer is recorded as decoded, quoting the brief line it decodes from, and
-what no line supports stays a must-ask. The record never claims "stated knowingly" for what the user
-said neither this session nor in the material - a knowing call is one the user made, not one made
-quietly on their behalf. The aim is a shared understanding of the idea's shape - the
-per-feature grilling happens later, in `/plan-grill`.
+brief-decode step when the epic arrives as somebody else's words: questions batched by settled
+prerequisites into small rounds, each carrying the answer you'd pick and why, exploring the
+codebase before spending the user's attention, and confirming each decision as it locks. The lean
+grill stays human-in-the-loop - a grill that answers its own questions inside groundwork has
+stopped being one (plan-grill's must-ask guard, `skills/plan-grill/SKILL.md` step 3). A rich pasted
+brief doesn't waive that: the brief may *seed* answers, but each seeded answer is recorded as
+decoded, quoting the brief line it decodes from, and what no line supports stays a must-ask. The
+record never claims "stated knowingly" for what the user said neither this session nor in the
+material - a knowing call is one the user made, not one made quietly on their behalf. The aim is a
+shared understanding of the idea's shape - the per-feature grilling happens later, in
+`/plan-grill`.
 
 Shaping an epic can outgrow one sitting, and one blocked question must not halt the rest. When a
 question blocks and others don't, park it as a `NEEDS_INPUT` record - plan-grill's four-field handoff

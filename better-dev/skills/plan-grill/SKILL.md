@@ -132,36 +132,50 @@ not, by itself, a reason to raise it.
 If the feature has UI surface and its visual direction isn't settled, run `/design-brief` before the
 grill closes - the design read and system choice belong in the plan, not discovered mid-implementation.
 
-## 3. Grill - one question at a time
+## 3. Grill - work the frontier in rounds
 
-Interview the design down every branch of its decision tree, resolving dependencies between
-decisions one by one. At **full** depth (the default) you walk every branch; at **light** depth -
-passed as `[depth]` for a small, well-understood feature - you grill only the decisions the
-done-criteria will turn on and skip exhaustive branch-walking.
+Interview the design down every branch of its decision tree. At any moment some decisions are
+askable because nothing they depend on is still open - call that set the **frontier**; every other
+decision is blocked behind an answer that has not arrived. At **full** depth (the default) you walk
+every branch; at **light** depth - passed as `[depth]` for a small, well-understood feature - you
+grill only the decisions the done-criteria will turn on and skip exhaustive branch-walking.
 
-- **One question, then wait.** A wall of questions is bewildering; ask, get the answer, ask the
-  next. Order them so a decision that unblocks others comes first. One at a time is the interactive
-  rule with the user present; questions surfacing from parallel workers batch through the
-  orchestrator's question budget instead (`/orchestrating-agents`).
+- **Ask the frontier as a round, then wait.** Put the open frontier to the user as one round of at
+  most four questions, then recompute: their answers settle prerequisites, the frontier moves
+  outward, and the next round asks what just unblocked - the same decisions land in a few rounds
+  instead of a serial interview. More than four unblocked at once is normal, not a conflict: the
+  four carrying the most downstream weight go in this round (one-way doors excepted - they get
+  their own round, below) and the rest stay on the frontier for the next one, so the cap defers a
+  decision rather than dropping it. Never seat a question beside one it depends on - the dependent
+  stays out until a recompute clears it. Where the host has a native ask tool that presents each
+  question with options and a marked recommendation, the round rides it; elsewhere emit a numbered
+  list - each question, then your recommendation on its own line - so the user answers by number.
+  Two guards keep a round from being answered as a form. A one-way door (the class below) is
+  always its own round of one, never seated beside preference calls. And a blanket accept-all
+  reply ("all fine", "your picks") does not lock the round: reflect the two picks with the most
+  downstream weight back in a line each and let them hold before they harden. Questions surfacing
+  from parallel workers still batch through the orchestrator's question budget
+  (`/orchestrating-agents`); the frontier round is the rule with the user present.
 - **Carry a recommended answer.** Every question ships with the answer you'd pick and why - the user
   corrects a default faster than they fill a blank. If the user answers "whatever you think," they
   lack confidence too - don't take it as a blank cheque; re-ask as a choice between two concrete options.
 - **Ask only what you can't discover.** A fact about this repo or system is yours to find, not the
   user's to answer - go read it (this is where premise-checking pays off again). A lookup slow enough
-  to stall the interview goes to a background worker while the questions continue - only questions
-  downstream of that fact wait for it, and the dispatched worker reads, never writes: an unfenced
-  background errand fills its silence with side effects. Type each remaining
-  ambiguity by one key: would its readings change a done-criterion? If yes, it is a must-ask, asked
-  before the gate closes - two readings that grade differently are two different contracts. If no,
-  pick one and record the pick as a named assumption in the contract. On a must-ask, offer
-  two to four mutually exclusive options with the one you'd pick marked; with five or more real
-  options, chain a second question rather than dropping or merging options to fit. If a preference
-  question goes unanswered, proceed on your default and record it as a named assumption in the
-  contract rather than stalling or guessing silently. That path is for two-way doors only -
-  decisions a later edit reverses. A one-way door - a schema or data-model fork, a destructive or
-  irreversible action, a security or trust-boundary choice, an addition to the committed goal set -
-  is asked regardless of the key above and never proceeds on an invented default: with no answer from the user and no recorded override
-  answering that question, the state is `NEEDS_INPUT`. An override can carry the user's standing
+  to stall the interview goes to a background worker while the rounds continue - a lookup still in
+  flight blocks nothing except its own dependents, which sit out of the rounds until the worker
+  reports; the dispatched worker reads, never writes: an unfenced background errand fills its
+  silence with side effects. Type each remaining ambiguity by one key: would its readings change a
+  done-criterion? If yes, it is a must-ask, asked before the gate closes - two readings that grade
+  differently are two different contracts. If no, pick one and record the pick as a named
+  assumption in the contract. On a must-ask, offer two to four mutually exclusive options with the
+  one you'd pick marked; with five or more real options, chain a second question rather than
+  dropping or merging options to fit. If a preference question goes unanswered, proceed on your
+  default and record it as a named assumption in the contract rather than stalling or guessing
+  silently. That path is for two-way doors only - decisions a later edit reverses. A one-way door -
+  a schema or data-model fork, a destructive or irreversible action, a security or trust-boundary
+  choice, an addition to the committed goal set - is asked regardless of the key above and never
+  proceeds on an invented default: with no answer from the user and no recorded override answering
+  that question, the state is `NEEDS_INPUT`. An override can carry the user's standing
   answer to a one-way question - that is an answer, deliberately given once - but no override makes
   one-way doors auto-decidable in general. The grill is human-in-the-loop by construction: the user's
   answers come only from the user, and a must-ask answered by the same session that asked it is a
@@ -196,7 +210,7 @@ done-criteria will turn on and skip exhaustive branch-walking.
   |---|---|
   | Look-question | Several radically different variants rendered on one route and toggled by a URL param, so the user reacts to each in place rather than one mockup at a time |
   | Logic question, answerer reads code | A filled example |
-  | Logic question, answerer is the third party the async-questionnaire unblock below serves | One self-contained HTML file that renders the whole relevant state after every click, with a button per action so they can drive the model in any order |
+  | Logic question, answerer is the third party the async-questionnaire unblock below serves | One self-contained HTML file that renders the whole relevant state after every click, with a button per action for free play plus one tab per worked case - a tab spells its case out in plain words and numbers the clicks that drive it, and opening a tab rewinds the state so the case behaves identically however often it is replayed |
 
   Keep the logic itself a pure module the page only calls into, so the answer survives the page
   being thrown away. The artifact is throwaway from its first line and marked so, runs with one
@@ -218,11 +232,11 @@ done-criteria will turn on and skip exhaustive branch-walking.
   the design well enough to have attacked it; keep grilling. The contract records at least one attempted
   refutation with its disposition (died-against-evidence / promoted-to-open-concern /
   promoted-to-out-of-scope) - an empty Open-concerns section with no recorded refutation fails this.
-- **Know when the grill is done.** Before closing it, run one honesty check: *can you predict the
-  user's reaction to the next three questions you would ask?* If yes, the decisions are settled and
-  the plan is decision-complete - the implementer will make none. If no, you still have open
-  questions; keep going. Shared understanding is that prediction coming true, not a feeling that
-  you're finished.
+- **Know when the grill is done.** An empty frontier is the structural sign; before closing, run
+  one honesty check on top: *can you predict the user's reaction to the next three questions you
+  would ask?* If yes, the decisions are settled and the plan is decision-complete - the implementer
+  will make none. If no, you still have open questions; keep going. Shared understanding is that
+  prediction coming true, not a feeling that you're finished.
 
 ## 4. Capture the done-contract
 
@@ -310,6 +324,12 @@ the unblock artifact is an async questionnaire drafted now: questions ordered mo
 (async may get one pass), one idea per question, an answer stub under each. Grill the user only
 about the send - who it goes to and what must come back - never about answers that are the
 recipient's to give.
+
+That unblock is also a front door in its own right: an operator who says a decision is someone
+else's to answer - "I need to ask my colleague", "the client owns this" - enters here directly from
+any flow, no grill in progress required. Draft the questionnaire from whatever context exists,
+grill only the send, and park the owning work-item (when there is one) as `NEEDS_INPUT` until the
+answers come back.
 
 Write the contract to the **primary checkout's** shared ledger so every worktree sees it. Resolve the
 item's ledger directory with `.better-dev/bin/bd-mem ledger dir <work-item>` - it returns the

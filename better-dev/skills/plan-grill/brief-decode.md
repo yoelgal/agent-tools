@@ -29,11 +29,12 @@ contract or the receipts - it keeps no side ledger.
   invented baseline becomes a planning fact the moment someone quotes it. Check: no bare number in
   the Problem section without a trailing source or a `TBD(` marker; the pre-seal checklist enforces
   it (`done-contract.md`).
-- **The capped question batch.** A requester who is not at the keyboard breaks the
-  one-question-at-a-time rule: batch instead - at most five questions, each tied by name to a
-  specific TBD or a must-ask fork, delivered beside the draft problem sentence so the requester
-  reacts to a draft instead of filling a blank page. Check: the outbound batch has five or fewer
-  questions and each names its TBD or fork; a question tied to neither is cut.
+- **The capped question batch.** A requester who is not at the keyboard gets no recompute between
+  rounds, so the interactive rhythm does not apply: send one batch - at most five questions (a
+  notch past the interactive round's four, since async may only get this one pass), each tied by
+  name to a specific TBD or a must-ask fork, delivered beside the draft problem sentence so the
+  requester reacts to a draft instead of filling a blank page. Check: the outbound batch has five
+  or fewer questions and each names its TBD or fork; a question tied to neither is cut.
 
 ## The artifact
 
