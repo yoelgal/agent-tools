@@ -109,7 +109,7 @@ shared skills are never rewritten to encode your preference.
 | **Ship** | `pr-and-verify` · `release-promotion` |
 | **Self-improve** | `tool-sourcing` · `self-extension` · `source-harvest` (raw material -> library improvements) |
 | **Sourced capabilities** | `codebase-map` (structural orientation) · `graphify-wrapper-{setup,map,index,sync,query,status}` (knowledge-graph indexing over the graphify CLI, ported from orrgal1 - see `NOTICE`) · `browser-capability` (UI proof, owned daemon in `browse/`) · `ios-capability` (on-device proof, daemon in `ios-qa/`) |
-| **Foundations** | `writing-skills` · `packaging` · `bootstrap-hooks` · `overrides` · `update` · `uninstall` |
+| **Foundations** | `writing-skills` · `packaging` · `bootstrap-hooks` · `overrides` · `wait-what` (re-pitch a message that didn't land) · `update` · `uninstall` |
 
 ## How it installs
 

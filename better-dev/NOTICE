@@ -26,7 +26,9 @@ we actually copied verbatim/substantially, which MIT requires us to attribute, a
     (c) 2026 Matt Pocock); the surrounding review machinery is ours.
 
 ── Pattern inspiration (courtesy credit, not legally required) ──
-  mattpocock/skills - Matt Pocock       (MIT)
+  mattpocock/skills - Matt Pocock       (MIT) (also: the wait-what listener-state corrective,
+    frontier-rounds grill rhythm, guided-walkthrough logic demos, walkthrough payload fork -
+    reimplemented, no shipped text)
   Whamp (Will Hampson) - wayfinder-to-spec gist (no license; ideas only, reimplemented:
     the stage-boundary audit/hydrate/stop handoff pattern in plan-grill's carved-item
     entry rule)

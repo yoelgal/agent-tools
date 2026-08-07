@@ -98,5 +98,5 @@ Capabilities: [browser-capability](browser-capability.md) · [ios-capability](io
 [source-harvest](source-harvest.md)
 
 Meta and upkeep: [writing-skills](writing-skills.md) · [overrides](overrides.md) ·
-[bootstrap-hooks](bootstrap-hooks.md) · [packaging](packaging.md) · [update](update.md) ·
-[uninstall](uninstall.md)
+[wait-what](wait-what.md) · [bootstrap-hooks](bootstrap-hooks.md) · [packaging](packaging.md) ·
+[update](update.md) · [uninstall](uninstall.md)
