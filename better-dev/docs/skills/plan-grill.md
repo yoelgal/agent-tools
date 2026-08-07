@@ -17,6 +17,7 @@ the file on disk does not count as presenting it.
 | Someone else's relayed words - a ticket, stakeholder feedback, "users say X feels slow" | here (step 0 decodes it first) |
 | A dependency upgrade, a CVE the audit gate flagged, a behavior-preserving refactor | here, contract-lite path |
 | A trivial one-to-two-step change | skip the grill, still its own worktree branch |
+| A decision only a colleague or client can answer, hit from any flow | here (questionnaire unblock - drafts the doc, grills only the send) |
 | "X is broken / failing / slow" | `/diagnose` |
 | A whole new app or epic needing a shared foundation first | `/groundwork` |
 | A work-item spanning two separate repositories | named on arrival, routed through `/orchestrating-agents`'s cross-repo coordination |

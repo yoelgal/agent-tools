@@ -323,6 +323,12 @@ the unblock artifact is an async questionnaire drafted now: questions ordered mo
 about the send - who it goes to and what must come back - never about answers that are the
 recipient's to give.
 
+That unblock is also a front door in its own right: an operator who says a decision is someone
+else's to answer - "I need to ask my colleague", "the client owns this" - enters here directly from
+any flow, no grill in progress required. Draft the questionnaire from whatever context exists,
+grill only the send, and park the owning work-item (when there is one) as `NEEDS_INPUT` until the
+answers come back.
+
 Write the contract to the **primary checkout's** shared ledger so every worktree sees it. Resolve the
 item's ledger directory with `.better-dev/bin/bd-mem ledger dir <work-item>` - it returns the
 primary-checkout path even when you run it from a feature worktree - and write `contract.md` there.

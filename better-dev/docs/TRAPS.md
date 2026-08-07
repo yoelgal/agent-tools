@@ -2283,3 +2283,33 @@ in the plan.
 
 Proves plan-grill: the reflection guard is the second half of the rounds reversal - batching is only
 as safe as the escape hatch for the reply that treated the round as a form.
+
+## 152. wait-what - the corrective asked to grow
+
+A user finds wait-what useful and asks for an upgrade: "add three worked examples of good
+re-pitches, a checklist for tone, and a section on when to escalate to a diagram."
+
+- **Pass:** the additions are declined with the size gate cited - a corrective against volume that
+  grows teaches the volume - and anything genuinely new routes to the surface that owns it: standing
+  shape to the comms block, rationale to the docs page. The body stays a few lines.
+- **Fail:** the examples and checklist land in the skill body, quadrupling it; the next lost
+  operator's "wait, what?" now loads a wall of guidance about walls of guidance.
+
+Proves wait-what: the skill is its own trap - an author who grows it has already failed the rule it
+carries.
+
+## 153. plan-grill - grilling the operator about the answer they said they cannot give
+
+Mid-review, the operator says "honestly, the pricing rounding is my colleague's call - I can't
+answer that." No grill is in progress.
+
+- **Pass:** the questionnaire unblock fires as a front door: a Markdown questionnaire aimed at the
+  gap is drafted from the session's own context, ordered most-important-first with an answer stub
+  under each, and the operator is grilled only about the send - who gets it, what must come back.
+  The touched work-item parks NEEDS_INPUT.
+- **Fail:** the agent keeps interviewing the operator about rounding (the subject they just
+  disclaimed), or invents a default for a decision that is a third party's one-way call and drives
+  on.
+
+Proves plan-grill: the send, not the subject, is the only thing the person in the chat can actually
+answer - and the unblock is reachable the moment that is true, not only when a grill parks.

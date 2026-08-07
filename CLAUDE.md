@@ -27,6 +27,8 @@ itself - a tool you name wins over a row:
 | "what's worth doing here", "audit this codebase" | `/codebase-audit` | ranked findings; you pick -> front-ends |
 | "here are some links / ingest these / harvest this", a link or dump of source material for the library - even one framed as "implement this" | `/source-harvest` | captures verbatim -> critical synthesis; a build ask then -> `/plan-grill` |
 | "just push to the PR / use feat/ / skip the grill" | `/overrides` | records the standing default |
+| "wait, you lost me", "what does that mean?" - a reply that didn't land | `/wait-what` | re-pitches it plainly in this repo's own vocabulary |
+| "I can't answer this - my colleague / the client owns it" | `/plan-grill` (questionnaire unblock) | drafts the doc, grills only the send; the item parks NEEDS_INPUT |
 | "remove better-dev" | `/uninstall` (or `.better-dev/bin/bd-uninstall repo`) | unwires this repo, keeps your data |
 | a one-to-two-step change | no front-end - just make it | inline in the work-item's worktree; verify before done |
 
