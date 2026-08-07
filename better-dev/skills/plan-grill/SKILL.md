@@ -207,7 +207,7 @@ done-criteria will turn on and skip exhaustive branch-walking.
   |---|---|
   | Look-question | Several radically different variants rendered on one route and toggled by a URL param, so the user reacts to each in place rather than one mockup at a time |
   | Logic question, answerer reads code | A filled example |
-  | Logic question, answerer is the third party the async-questionnaire unblock below serves | One self-contained HTML file that renders the whole relevant state after every click, with a button per action so they can drive the model in any order |
+  | Logic question, answerer is the third party the async-questionnaire unblock below serves | One self-contained HTML file that renders the whole relevant state after every click, with a button per action for free play plus tabbed guided walkthroughs - each tab one scenario in plain words with the ordered buttons to press, reset to a known start so it replays the same every time |
 
   Keep the logic itself a pure module the page only calls into, so the answer survives the page
   being thrown away. The artifact is throwaway from its first line and marked so, runs with one

@@ -15,7 +15,8 @@ prevent.
 Reach for it when writing, reviewing, or refactoring any `SKILL.md` in this library - a new skill,
 an edit to an existing one, or the moment `/self-extension` drafts one on a capability gap. It also
 covers editing any always-loaded block the library ships outside a skill folder: a discovery block,
-the comms block, a routing table - the same leanness and deletion-test rules bind there too.
+the comms block, a routing table - the same leanness and deletion-test rules bind there too, and
+the sibling reference files a skill reaches by prose pointer sit under the same bar.
 
 It is not where you go to run a workflow. If the task is "build the thing," the front-end for that
 work (`/plan-grill`, `/diagnose`, and the rest) is the entry point; this skill only governs the text

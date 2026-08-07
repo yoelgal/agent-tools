@@ -1,12 +1,14 @@
 ---
 name: writing-skills
-description: Use when authoring, reviewing, or refactoring any better-dev skill - writing or editing a SKILL.md, including when the self-extension flow generates a new one - or when editing any always-loaded block this library ships: a discovery block, the comms block, a routing table.
+description: Use when authoring, reviewing, or refactoring any better-dev skill - writing or editing a SKILL.md, including when the self-extension flow generates a new one - or when editing any always-loaded block this library ships (a discovery block, the comms block, a routing table) or any sibling reference file a skill reaches by prose pointer.
 ---
 
 # Writing better-dev skills
 
 Every better-dev practice ships as a `SKILL.md` on the agentskills.io standard, so one skill runs
-unchanged across Claude Code, Codex, pi, and hermes. This is the bar to author against.
+unchanged across Claude Code, Codex, pi, and hermes. This is the bar to author against, and it
+binds every document an agent consumes from this library - the skill body, its sibling reference
+files, the always-loaded blocks - not the `SKILL.md` format alone.
 
 ## Frontmatter - minimal on purpose
 
