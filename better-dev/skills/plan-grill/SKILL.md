@@ -132,24 +132,35 @@ not, by itself, a reason to raise it.
 If the feature has UI surface and its visual direction isn't settled, run `/design-brief` before the
 grill closes - the design read and system choice belong in the plan, not discovered mid-implementation.
 
-## 3. Grill - one question at a time
+## 3. Grill - work the frontier in rounds
 
-Interview the design down every branch of its decision tree, resolving dependencies between
-decisions one by one. At **full** depth (the default) you walk every branch; at **light** depth -
+Interview the design down every branch of its decision tree. The **frontier** is every decision
+whose prerequisites are already settled - the questions you can ask now without guessing at answers
+you have not heard yet. At **full** depth (the default) you walk every branch; at **light** depth -
 passed as `[depth]` for a small, well-understood feature - you grill only the decisions the
 done-criteria will turn on and skip exhaustive branch-walking.
 
-- **One question, then wait.** A wall of questions is bewildering; ask, get the answer, ask the
-  next. Order them so a decision that unblocks others comes first. One at a time is the interactive
-  rule with the user present; questions surfacing from parallel workers batch through the
-  orchestrator's question budget instead (`/orchestrating-agents`).
+- **Ask the frontier as a round, then wait.** Put the open frontier to the user as one round of at
+  most four questions, then recompute: their answers settle prerequisites, the frontier moves
+  outward, and the next round asks what just unblocked - the same decisions land in a few rounds
+  instead of a serial interview. A question whose answer depends on another question still open in
+  this round belongs to the next round, not this one. Where the host has a native ask tool that
+  presents each question with options and a marked recommendation, the round rides it; elsewhere
+  emit a numbered list - each question, then your recommendation on its own line - so the user
+  answers by number. Two guards keep a round from being answered as a form. A one-way door (the
+  class below) is always its own round of one, never seated beside preference calls. And a blanket
+  accept-all reply ("all fine", "your picks") does not lock the round: reflect the two picks with
+  the most downstream weight back in a line each and let them hold before they harden. Questions
+  surfacing from parallel workers still batch through the orchestrator's question budget
+  (`/orchestrating-agents`); the frontier round is the rule with the user present.
 - **Carry a recommended answer.** Every question ships with the answer you'd pick and why - the user
   corrects a default faster than they fill a blank. If the user answers "whatever you think," they
   lack confidence too - don't take it as a blank cheque; re-ask as a choice between two concrete options.
 - **Ask only what you can't discover.** A fact about this repo or system is yours to find, not the
   user's to answer - go read it (this is where premise-checking pays off again). A lookup slow enough
-  to stall the interview goes to a background worker while the questions continue - only questions
-  downstream of that fact wait for it, and the dispatched worker reads, never writes: an unfenced
+  to stall the interview goes to a background worker while the rounds continue - a running lookup
+  is an unsettled prerequisite, so only the questions downstream of it wait, joining a later round;
+  the dispatched worker reads, never writes: an unfenced
   background errand fills its silence with side effects. Type each remaining
   ambiguity by one key: would its readings change a done-criterion? If yes, it is a must-ask, asked
   before the gate closes - two readings that grade differently are two different contracts. If no,
@@ -218,7 +229,8 @@ done-criteria will turn on and skip exhaustive branch-walking.
   the design well enough to have attacked it; keep grilling. The contract records at least one attempted
   refutation with its disposition (died-against-evidence / promoted-to-open-concern /
   promoted-to-out-of-scope) - an empty Open-concerns section with no recorded refutation fails this.
-- **Know when the grill is done.** Before closing it, run one honesty check: *can you predict the
+- **Know when the grill is done.** An empty frontier is the structural sign; before closing, run
+  one honesty check on top: *can you predict the
   user's reaction to the next three questions you would ask?* If yes, the decisions are settled and
   the plan is decision-complete - the implementer will make none. If no, you still have open
   questions; keep going. Shared understanding is that prediction coming true, not a feeling that

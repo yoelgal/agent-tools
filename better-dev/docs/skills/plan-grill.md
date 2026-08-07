@@ -46,6 +46,14 @@ field names intact (scripts read `merge:` by that exact key) but glosses each on
 on the line where the user meets it, so a small feature earns a short, readable contract rather
 than a full-dress one wearing vocabulary built for the loop.
 
+**Why did I get four questions at once instead of one at a time?**
+The grill asks the open frontier - every question whose prerequisites are already settled - as one
+small round with a recommended pick per question, recomputing after your answers; the serial
+interview it replaces spent a full round-trip per question. Two guards keep a round from turning
+into a form: an irreversible decision (a schema fork, a trust-boundary call) always arrives alone,
+and a blanket "all fine" reply gets the two most consequential picks reflected back before they
+lock.
+
 **What happens if I don't have an answer to a question mid-grill?**
 Depends on whether the decision is reversible. A two-way door (a later edit can undo it) proceeds
 on the skill's own recommended default, recorded in the contract as a named assumption - nothing
@@ -88,6 +96,8 @@ missing line today.
   summary line, not a pointer to a file on disk.
 - Every done-criterion in the contract reads as a command or test with a concrete expected result,
   never a phrase like "make sure it works."
+- Questions arrive in small rounds with a recommended pick each, and an irreversible decision
+  arrives alone - never seated inside a batch of preference calls.
 - A question you left unanswered shows up in the contract as a named assumption (two-way door) or
   a `NEEDS_INPUT` entry with a who, a what, and a re-entry point (one-way door) - never silently
   dropped.

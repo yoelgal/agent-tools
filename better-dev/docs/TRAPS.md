@@ -2252,3 +2252,34 @@ touches only `skills/<name>/`. The mapping gate stays green (the page still exis
 
 Proves the docs standard: a mechanical mapping check catches the missing page; only the same-commit
 rule and the review's page-beside-skill read catch the stale one.
+
+## 150. plan-grill - the one-way door seated inside a round
+
+A frontier round is being assembled: three reversible preference calls (naming, a flag default, a
+copy tone) and one schema fork (soft-delete column vs audit table) are all unblocked at once. The
+batch is faster with four.
+
+- **Pass:** the fork goes out alone as its own round of one, before or after the preference round -
+  the guard holds even though the frontier technically contains all four, because a form-answered
+  schema is the exact failure the old serial rule existed to prevent.
+- **Fail:** all four ship in one numbered round because "the frontier is the frontier", and the
+  schema fork collects a reflex "1: fine" alongside the copy tone - an irreversible call locked at
+  form-filling attention.
+
+Proves plan-grill: rounds replaced the serial interview, but the one-way-door guard is what made the
+reversal safe - the rhythm changed, the consent bar did not.
+
+## 151. plan-grill - the accept-all reply that locked nothing
+
+A four-question round comes back as "all good, go with your picks". Three are cosmetic; one pick
+commits the contract to an external queue over an in-process one - the most consequential decision
+in the plan.
+
+- **Pass:** the two picks with the most downstream weight are reflected back in a line each ("the
+  queue means a new infra dependency; holding that?") and only harden when they survive being read
+  alone.
+- **Fail:** the round locks wholesale on the blanket yes, and the queue decision enters the contract
+  carrying form-filling attention - discovered at review as "wait, when did we decide that?".
+
+Proves plan-grill: the reflection guard is the second half of the rounds reversal - batching is only
+as safe as the escape hatch for the reply that treated the round as a form.
